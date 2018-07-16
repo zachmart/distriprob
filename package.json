@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/zachmart/distriprob/issues"
   },
-  "homepage": "https://github.com/zachmart/distriprob#readme"
+  "homepage": "https://github.com/zachmart/distriprob#readme",
+  "devDependencies": {
+    "typescript": "^2.9.2"
+  }
 }
