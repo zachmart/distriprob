@@ -1,8 +1,9 @@
 .idea/
 distriprob.iml
-lib/
+src/
 literature/
 node_modules/
 **/typings
-src/practice/
-bundle.js
+.gitignore
+tsconfig.json
+typings.json
