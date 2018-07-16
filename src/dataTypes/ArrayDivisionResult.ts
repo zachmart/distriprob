@@ -29,6 +29,7 @@
  *
  */
 
+
 export class ArrayDivisionResult {
   public q: Uint32Array;
   public r: Uint32Array;
