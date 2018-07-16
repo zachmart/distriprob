@@ -29,15 +29,14 @@
  *
  */
 
-import {int} from "../interfaces/int";
+export class ArrayDivisionResult {
+  public q: Uint32Array;
+  public r: Uint32Array;
 
-
-export class IntegerSplit {
-  public readonly hi: int;
-  public readonly lo: int;
-
-  constructor(hi: int, lo: int) {
-    this.hi = hi;
-    this.lo = lo;
+  constructor(quotient: Uint32Array, remainder: Uint32Array) {
+    this.q = quotient;
+    this.r = remainder
   }
 }
+
+

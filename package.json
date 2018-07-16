@@ -18,5 +18,8 @@
   "homepage": "https://github.com/zachmart/distriprob#readme",
   "devDependencies": {
     "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "@types/node": "^10.5.2"
   }
 }
