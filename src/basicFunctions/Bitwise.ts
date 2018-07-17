@@ -36,6 +36,7 @@ import {Integer} from "../dataTypes/Integer";
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
+
 export class Bitwise {
   private static SINGLE_BITMASKS: Uint32Array;
   private static VALID_BITS_MASK: number;
