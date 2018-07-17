@@ -29,13 +29,8 @@
  *
  */
 
+import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "./Sign";
-const Sign = SignAlias;
 
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
@@ -43,44 +38,46 @@ const Comparison = ComparisonAlias;
 import {Basic as BasicAlias} from "./Basic";
 const Basic = BasicAlias;
 
-import {P as PAlias} from "../core/P";
-const P = PAlias;
-export type P = PAlias;
 
-
-export class Diff {
-  public static absoluteFF(x: float, y: float, prec: P): float {
-    return Sign.absF(Basic.subtractFF(x, y, prec));
+export class Parity {
+  public static isEvenI(a: int): boolean {
+    return (a.digits[a.digits.length - 1] & 1) === 0;
   }
 
-  public static relativeFF(x: float, y: float, prec: P): float {
-    const xIsZero = Comparison.isZero(x);
-    const yIsZero = Comparison.isZero(y);
+  public static isEven(x: float): boolean {
+    if (Comparison.isFinite(x)) {
+      const leastSigDigPlace = Basic.leastSigDigPlaceF(x);
 
-    if (xIsZero || yIsZero) {
-      if (xIsZero && yIsZero) {
-        return C.F_0;
+      if (Comparison.isPositiveI(leastSigDigPlace)) {
+        return true;
+      } else if (Comparison.isZeroI(leastSigDigPlace)) {
+        return (x.coef.digits[x.coef.digits.length - 1] & 1) === 0;
       } else {
-        return C.F_1;
+        return false; // x is not an integer
       }
-    } else if ((Comparison.isPOSITIVE_INFINITY(x)
-      && Comparison.isPOSITIVE_INFINITY(y))
-      || (Comparison.isNEGATIVE_INFINITY(x)
-        && Comparison.isNEGATIVE_INFINITY(y))) {
-      return C.F_0;
-    } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
-      return C.F_1;
     } else {
-      const absDiff = Diff.absoluteFF(x, y, prec);
-      const re1 = Basic.divideFF(absDiff, Sign.absF(x), prec);
-      const re2 = Basic.divideFF(absDiff, Sign.absF(y), prec);
-      return Comparison.gt(re1, re2) ? re1 : re2;
+      return false;
     }
   }
 
+  public static isOddI(a: int): boolean {
+    return (a.digits[a.digits.length - 1] & 1) === 1;
+  }
 
-  public static relInEpsFF(x: float, y: float, prec: P): float {
-    return Basic.divideFF(Diff.relativeFF(x, y, prec), prec.epsilon, prec);
+  public static isOdd(x: float): boolean {
+    if (Comparison.isFinite(x)) {
+      const leastSigDigPlace = Basic.leastSigDigPlaceF(x);
+
+      if (Comparison.isPositiveI(leastSigDigPlace)) {
+        return false;
+      } else if (Comparison.isZeroI(leastSigDigPlace)) {
+        return (x.coef.digits[x.coef.digits.length - 1] & 1) === 1;
+      } else {
+        return false; // x is not an integer
+      }
+    } else {
+      return false;
+    }
   }
 }
 
