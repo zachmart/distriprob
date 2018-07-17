@@ -76,7 +76,14 @@ export class Toms748 {
   private fu: float;
   private prec: P;
 
-  private constructor(f: (x: float) => float, a: float, b: float, fa: float, fb: float, prec: P) {
+  private constructor(
+    f: (x: float) => float,
+    a: float,
+    b: float,
+    fa: float,
+    fb: float,
+    prec: P
+  ) {
     this.f = f;
     this.a = a;
     this.b = b;
@@ -630,8 +637,8 @@ export class Toms748 {
       //
       while (Sign.f(fb) === Sign.f(fa)) {
         if (count === 0) {
-          throw new Error(`Evaluation error: Unable to bracket root, last nearest${""
-            } value was ${b}`);
+          throw new Error(`Evaluation error: Unable to bracket root, last${""
+          } nearest value was ${b}`);
         }
         //
         // Heuristic: normally it's best not to increase the step sizes as we'll just end
