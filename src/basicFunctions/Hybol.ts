@@ -37,23 +37,11 @@ const C = CAlias;
 import {Sign as SignAlias} from "./Sign";
 const Sign = SignAlias;
 
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
 
 import {Basic as BasicAlias} from "./Basic";
 const Basic = BasicAlias;
-
-import {Mod as ModAlias} from "./Mod";
-const Mod = ModAlias;
-
-import {Conversion as ConversionAlias} from "../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {PI as PIAlias} from "../constants/PI";
-const PI = PIAlias;
 
 import {FactorialTable as FactorialTableAlias} from "../constants/FactorialTable";
 const FactorialTable = FactorialTableAlias;
@@ -61,20 +49,17 @@ const FactorialTable = FactorialTableAlias;
 import {Exp as ExpAlias} from "./Exp";
 const Exp = ExpAlias;
 
-import {Root as RootAlias} from "./Root";
-const Root = RootAlias;
-
-import {Roots as RootsAlias} from "../boostPorts/tools/roots";
-const Roots = RootsAlias;
-
-import {WHOLE as WHOLEAlias} from "../constants/WHOLE";
-const WHOLE = WHOLEAlias;
-
 import {RATIO as RATIOAlias} from "../constants/RATIO";
 const RATIO = RATIOAlias;
 
-import {Powm1 as Powm1Alias} from "../boostPorts/special_functions/powm1";
-const Powm1 = Powm1Alias;
+import {Acosh as AcoshAlias} from "../boostPorts/special_functions/acosh";
+const Acosh = AcoshAlias;
+
+import {Asinh as AsinhAlias} from "../boostPorts/special_functions/asinh";
+const Asinh = AsinhAlias;
+
+import {Atanh as AtanhAlias} from "../boostPorts/special_functions/atanh";
+const Atanh = AtanhAlias;
 
 import {P as PAlias} from "../core/P";
 const P = PAlias;
@@ -130,7 +115,7 @@ export class Hybol {
    * sinh(x) =  ------------------
    *                    2
    */
-  private static sinhFromExpV(x: float, prec: P): float {
+  private static sinhFromExp(x: float, prec: P): float {
     const expX = Exp.f(x, prec);
     const expNegX = Basic.reciprocalF(expX, prec);
 
@@ -144,7 +129,7 @@ export class Hybol {
    * cosh(x) = ------------------
    *                   2
    */
-  private static coshFromExpV(x: float, prec: P): float {
+  private static coshFromExp(x: float, prec: P): float {
     const expX = Exp.f(x, prec);
     const expNegX = Basic.reciprocalF(expX, prec);
 
@@ -158,7 +143,7 @@ export class Hybol {
    * tanh(x) = --------------
    *            1 + exp(-2x)
    */
-  private static tanhFromExpV(x: float, prec: P): float {
+  private static tanhFromExp(x: float, prec: P): float {
     const expNeg2X = Exp.f(Basic.multiplyFF(C.F_NEG_2, x, prec), prec);
 
     if (Comparison.lt(expNeg2X, prec.epsilon)) {
@@ -174,7 +159,7 @@ export class Hybol {
     }
   }
 
-  public static sinhV(x: float, prec: P): float {
+  public static sinh(x: float, prec: P): float {
     if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else if (Comparison.isNEGATIVE_INFINITY(x)) {
@@ -182,38 +167,38 @@ export class Hybol {
     } else if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
       return Hybol.taylorSeriesSinh(x, prec);
     } else {
-      return Hybol.sinhFromExpV(x, prec);
+      return Hybol.sinhFromExp(x, prec);
     }
   }
 
-  public static coshV(x: float, prec: P): float {
+  public static cosh(x: float, prec: P): float {
     if (Comparison.isPOSITIVE_INFINITY(x) || Comparison.isNEGATIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else {
-      return Hybol.coshFromExpV(x, prec);
+      return Hybol.coshFromExp(x, prec);
     }
   }
 
-  public static tanhV(x: float, prec: P): float {
+  public static tanh(x: float, prec: P): float {
     if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
       const sinh = Hybol.taylorSeriesSinh(x, prec);
-      const cosh = Hybol.coshFromExpV(x, prec);
+      const cosh = Hybol.coshFromExp(x, prec);
       return Basic.divideFF(sinh, cosh, prec);
     } else {
-      return Hybol.tanhFromExpV(x, prec);
+      return Hybol.tanhFromExp(x, prec);
     }
   }
 
-  public static acoshV(x: float, prec: P): float {
-    return Hybol.Acosh.vImp(x);
+  public static acosh(x: float, prec: P): float {
+    return Acosh.imp(x, prec);
   }
 
-  public static asinhV(x: float, prec: P): float {
-    return Hybol.Asinh.vImp(x);
+  public static asinh(x: float, prec: P): float {
+    return Asinh.imp(x, prec);
   }
 
-  public static atanhV(x: float, prec: P): float {
-    return Hybol.Atanh.vImp(x);
+  public static atanh(x: float, prec: P): float {
+    return Atanh.imp(x, prec);
   }
 }
 
