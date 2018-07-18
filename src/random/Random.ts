@@ -34,14 +34,8 @@ import {float} from "../interfaces/float";
 import {RandomNumGen} from "../interfaces/RandomNumGen";
 import {IRandomState} from "../interfaces/IRandomState";
 
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
 
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
@@ -54,9 +48,6 @@ const Bitwise = BitwiseAlias;
 
 import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
-
-import {Pow as PowAlias} from "../basicFunctions/Pow";
-const Pow = PowAlias;
 
 import {WELL512A as WELL512AAlias, WELL512AState} from "./WELL512A";
 const WELL512A = WELL512AAlias;
