@@ -55,14 +55,14 @@ const Comparison = ComparisonAlias;
 
 export class Core {
 
-  // constants for adjusting the expornents of numbers
+  // constants for adjusting the exponents of numbers
   public static ABS_CHUNK_LIMIT: number;
   public static TWO_TO_ABS_CHUNK_LIMIT: number;
   public static TWO_TO_NEG_ABS_CHUNK_LIMIT: number;
 
 
   public static setStaticProperties(): void {
-    // constants for adjusting the expornents of numbers
+    // constants for adjusting the exponents of numbers
     Core.ABS_CHUNK_LIMIT = 1021;
     Core.TWO_TO_ABS_CHUNK_LIMIT = 2 ** Core.ABS_CHUNK_LIMIT;
     Core.TWO_TO_NEG_ABS_CHUNK_LIMIT = 2 ** (-Core.ABS_CHUNK_LIMIT);
