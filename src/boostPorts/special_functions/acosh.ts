@@ -42,11 +42,23 @@ const Basic = BasicAlias;
 import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
 
+import {EPSILON as EPSILONAlias} from "../../constants/EPSILON";
+const EPSILON = EPSILONAlias;
+
 import {WHOLE as WHOLEAlias} from "../../constants/WHOLE";
 const WHOLE = WHOLEAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
+
+import {Root as RootAlias} from "../../basicFunctions/Root";
+const Root = RootAlias;
+
+import {Log as LogAlias} from "../../basicFunctions/Log";
+const Log = LogAlias;
+
+import {LN2 as LN2Alias} from "../../constants/LN2";
+const LN2 = LN2Alias;
 
 import {StringWriter as StringWriterAlias} from "../../core/StringWriter";
 const StringWriter = StringWriterAlias;
@@ -66,36 +78,46 @@ export class Acosh {
     const y = Basic.subtractFF(x, C.F_1, prec);
 
     if (Comparison.gte(y, prec.epsilon)) {
-      if (Comparison.gt(x, Acosh.EMD.C.ONE_DIV_ROOT_EPSILON)) {
+      if (Comparison.gt(x, EPSILON.reciprocalSqrt(prec))) {
         // approximation by laurent series in 1/x at 0+ order from -1 to 0
-        return  Acosh.EMD.addVV(Acosh.EMD.logV(x), Acosh.EMD.C.LN2);
-      } else if (Acosh.EMD.ltVV(x, Acosh.EMD.C.THREE_HALVES)) {
+        return  Basic.addFF(Log.f(x, prec), LN2.value(prec), prec);
+      } else if (Comparison.lt(x, RATIO.value(3, 2, prec))) {
         // This is just a rearrangement of the standard form below
-        // devised to minimse loss of precision when x ~ 1:
+        // devised to minimize loss of precision when x ~ 1:
         // return log1p(y + sqrt(y * y + 2 * y))
-        return Acosh.EMD.log1pV(Acosh.EMD.addVV(y, Acosh.EMD.sqrtV(
-          Acosh.EMD.addVV(Acosh.EMD.squareV(y), Acosh.EMD.mulVV(Acosh.EMD.TWO, y))
-        )));
+
+        return Log.onePlusF(Basic.addFF(
+          y,
+          Root.squareF(Basic.addFF(
+            Basic.squareF(y, prec),
+            Basic.multiplyFF(C.F_2, y, prec),
+            prec
+          ), prec),
+          prec
+        ), prec);
       } else {
         // return log( x + sqrt(x * x - 1) )
 
-        return Acosh.EMD.logV(Acosh.EMD.addVV(
+        return Log.f(Basic.addFF(
           x,
-          Acosh.EMD.sqrtV(Acosh.EMD.subtractVV(Acosh.EMD.squareV(x), Acosh.EMD.ONE))
-        ));
+          Root.squareF(Basic.subtractFF(Basic.squareF(x, prec), C.F_1, prec), prec),
+          prec
+        ), prec);
       }
     } else {
       // approximation by taylor series in y at 0 up to order 2
       // return sqrt(2 * y) * (1 - y /12 + 3 * y * y / 160)
-      const sqrt2y = Acosh.EMD.sqrtV(Acosh.EMD.mulVV(Acosh.EMD.TWO, y));
-      const yDiv12 = Acosh.EMD.divVV(y, Acosh.EMD.C.I_12);
-      const threeYSquaredDiv160 = Acosh.EMD.divVV(
-        Acosh.EMD.mulVV(Acosh.EMD.C.THREE, Acosh.EMD.squareV(y)),
-        Acosh.EMD160
+      const sqrt2y = Root.squareF(Basic.multiplyFF(C.F_2, y, prec), prec);
+      const yDiv12 = Basic.divideFF(y, WHOLE.float(12), prec);
+      const threeYSquaredDiv160 = Basic.divideFF(
+        Basic.multiplyFF(C.F_3, Basic.squareF(y, prec), prec),
+        WHOLE.float(160),
+        prec
       );
-      const b = Acosh.EMD.subtractVV(Acosh.EMD.ONE, yDiv12);
-      const c = Acosh.EMD.addVV(b, threeYSquaredDiv160);
-      return Acosh.EMD.mulVV(sqrt2y, c);
+      const b = Basic.subtractFF(C.F_1, yDiv12, prec);
+      const c = Basic.addFF(b, threeYSquaredDiv160, prec);
+
+      return Basic.multiplyFF(sqrt2y, c, prec);
     }
   }
 }
