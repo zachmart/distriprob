@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * (C) Copyright Eric Ford & Hubert Holin 2001.
+ * (C) Copyright Hubert Holin 2001.
  * (C) Copyright John Maddock 2008.
  * (C) Copyright Zachary Martin 2018 (port to javascript).
  * Use, modification and distribution are subject to the
@@ -36,6 +36,9 @@ import {float} from "../../interfaces/float";
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
+import {Sign as SignAlias} from "../../basicFunctions/Sign";
+const Sign = SignAlias;
+
 import {Basic as BasicAlias} from "../../basicFunctions/Basic";
 const Basic = BasicAlias;
 
@@ -45,20 +48,11 @@ const Comparison = ComparisonAlias;
 import {EPSILON as EPSILONAlias} from "../../constants/EPSILON";
 const EPSILON = EPSILONAlias;
 
-import {WHOLE as WHOLEAlias} from "../../constants/WHOLE";
-const WHOLE = WHOLEAlias;
-
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
 
-import {Root as RootAlias} from "../../basicFunctions/Root";
-const Root = RootAlias;
-
 import {Log as LogAlias} from "../../basicFunctions/Log";
 const Log = LogAlias;
-
-import {LN2 as LN2Alias} from "../../constants/LN2";
-const LN2 = LN2Alias;
 
 import {StringWriter as StringWriterAlias} from "../../core/StringWriter";
 const StringWriter = StringWriterAlias;
@@ -67,57 +61,56 @@ import {P as PAlias} from "../../core/P";
 const P = PAlias;
 export type P = PAlias;
 
-export class Acosh {
+
+export class Atanh {
 
   public static imp(x: float, prec: P): float {
-    if (Comparison.lt(x, C.F_1)) {
-      throw new Error(`acosh function requires argument >= 1, got: ${
+    if (Comparison.lt(x, C.F_NEG_1) || Comparison.gt(x, C.F_1)) {
+      throw new Error(`atanh argument must be in range [-1, 1], got ${
         StringWriter.toStr(x)}`);
     }
 
-    const y = Basic.subtractFF(x, C.F_1, prec);
+    const absX = Sign.absF(x);
 
-    if (Comparison.gte(y, prec.epsilon)) {
-      if (Comparison.gt(x, EPSILON.reciprocalSqrt(prec))) {
-        // approximation by laurent series in 1/x at 0+ order from -1 to 0
-        return  Basic.addFF(Log.f(x, prec), LN2.value(prec), prec);
-      } else if (Comparison.lt(x, RATIO.value(3, 2, prec))) {
-        // This is just a rearrangement of the standard form below
-        // devised to minimize loss of precision when x ~ 1:
-        // return log1p(y + sqrt(y * y + 2 * y))
-
-        return Log.onePlusF(Basic.addFF(
-          y,
-          Root.squareF(Basic.addFF(
-            Basic.squareF(y, prec),
-            Basic.multiplyFF(C.F_2, y, prec),
+    if (Comparison.lt(x, Sign.negateF(EPSILON.oneMinusEPS(prec)))) {
+      return C.F_POSITIVE_INFINITY;
+    } else if (Comparison.gt(x, EPSILON.oneMinusEPS(prec))) {
+      return C.F_POSITIVE_INFINITY;
+    } else if (Comparison.gte(absX, EPSILON.fourthRoot(prec))) {
+      if (Comparison.lt(absX, C.F_ONE_HALF)) {
+        return Basic.multiplyFF(
+          C.F_ONE_HALF,
+          Basic.subtractFF(
+            Log.onePlusF(x, prec),
+            Log.onePlusF(Sign.negateF(x), prec),
+            prec
+          ),
+          prec
+        );
+      } else {
+        return Basic.multiplyFF(
+          C.F_ONE_HALF,
+          Log.f(Basic.divideFF(
+            Basic.addFF(C.F_1, x, prec),
+            Basic.subtractFF(C.F_1, x, prec),
             prec
           ), prec),
           prec
-        ), prec);
-      } else {
-        // return log( x + sqrt(x * x - 1) )
-
-        return Log.f(Basic.addFF(
-          x,
-          Root.squareF(Basic.subtractFF(Basic.squareF(x, prec), C.F_1, prec), prec),
-          prec
-        ), prec);
+        );
       }
     } else {
-      // approximation by taylor series in y at 0 up to order 2
-      // return sqrt(2 * y) * (1 - y /12 + 3 * y * y / 160)
-      const sqrt2y = Root.squareF(Basic.multiplyFF(C.F_2, y, prec), prec);
-      const yDiv12 = Basic.divideFF(y, WHOLE.float(12), prec);
-      const threeYSquaredDiv160 = Basic.divideFF(
-        Basic.multiplyFF(C.F_3, Basic.squareF(y, prec), prec),
-        WHOLE.float(160),
-        prec
-      );
-      const b = Basic.subtractFF(C.F_1, yDiv12, prec);
-      const c = Basic.addFF(b, threeYSquaredDiv160, prec);
+      let result = x;
 
-      return Basic.multiplyFF(sqrt2y, c, prec);
+      if (Comparison.gte(absX, EPSILON.sqrt(prec))) {
+        const x3 = Basic.multiplyFF(Basic.squareF(x, prec), x, prec);
+        result = Basic.addFF(
+          result,
+          Basic.multiplyFF(x3, RATIO.value(1, 3, prec), prec),
+          prec
+        );
+      }
+
+      return result;
     }
   }
 }
