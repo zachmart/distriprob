@@ -29,11 +29,13 @@
  *
  */
 
+
 export enum intType {
   finite = 0,
   infinite = 1,
   NaN = 2
 }
+
 
 export interface int {
   neg: boolean;

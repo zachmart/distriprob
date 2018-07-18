@@ -151,14 +151,9 @@ export class Bitwise {
 
     const fullCellPlaces = Math.trunc(places/C.POWER_OF_TWO_FOR_BASE);
     const remainderPlaces = places % C.POWER_OF_TWO_FOR_BASE;
-    // console.log("remainder places:", remainderPlaces);
     const topToBottomShift = C.POWER_OF_TWO_FOR_BASE - remainderPlaces;
     const topMask = Bitwise.topMask(remainderPlaces);
-    // console.log("topMask:", topMask.toString(2));
     let topBits = a.digits[0] & topMask;
-    // console.log("topBits:", topBits.toString(2));
-    // console.log("topToBottomShift:", topToBottomShift);
-    // console.log("topBits >>> topToBottomShift:", (topBits >>> topToBottomShift).toString(2));
     let nonZeroTopBits = topBits !== 0;
     const adjustment = nonZeroTopBits ? 1 : 0;
     const resultDigits = new Uint32Array(
@@ -177,7 +172,6 @@ export class Bitwise {
 
       if (aIndex < a.digits.length) {
         topBits = a.digits[aIndex] & topMask;
-        // console.log("topBits:", topBits.toString(2));
         resultDigits[resultIndex] ^= topBits >>> topToBottomShift;
         resultIndex++;
       } else {
@@ -198,13 +192,11 @@ export class Bitwise {
     const bottomToTopShift = C.POWER_OF_TWO_FOR_BASE - remainderPlaces;
     const bottomMask = Bitwise.bottomMask(remainderPlaces);
     let topBits = a.digits[0] >>> remainderPlaces;
-    // console.log("topBits:", topBits);
     const resultDigitsLength = a.digits.length - fullCellPlaces - (topBits !== 0 ? 0 : 1);
 
     if (resultDigitsLength === 0) { return C.I_0; }
 
     const resultDigits = new Uint32Array(resultDigitsLength);
-    // console.log("resultDigits.length:", resultDigits.length);
     let resultIndex: number;
     if (topBits !== 0) {
       resultDigits[0] ^= topBits;

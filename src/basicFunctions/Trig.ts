@@ -403,22 +403,8 @@ export class Trig {
     ));
 
     const y = Basic.multiplyFF(x, PI.reciprocalMul(2, modPrec), modPrec);
-
-    // const ySB = AltValue.of(x).divBy(AltValue.acos(-1).divBy(2));
-    // console.log("y: ", AltValue.of(y).toString());
-    // console.log("sb:", ySB.toString());
-
     const k = Conversion.floatToInt(y, "round");
-
-
-    // console.log("k: ", AltValue.of(k).toString());
-    // console.log("sb:", ySB.round().toString());
-
     const n = Core.intToNumber(Basic.divideII(k, C.I_4, "euclidean").r);
-
-    // console.log("n: ", n);
-    // console.log("sb:", ySB.round().mod(4).toString());
-
     const f = Basic.subtractFF(
       y,
       Conversion.intToFloat(
@@ -427,14 +413,7 @@ export class Trig {
         true),
       modPrec
     );
-
-    // console.log("f: ", AltValue.of(f).toString());
-    // console.log("sb:", ySB.minus(ySB.round()).toString());
-
     const r = Basic.multiplyFF(f, PI.div(2, prec), prec);
-
-    // console.log("r: ", AltValue.of(r).toString());
-    // console.log("sb:", AltValue.of(f).times(AltValue.acos(-1).divBy(2)).toString());
 
     return {r: r, n: n};
   }
@@ -457,8 +436,6 @@ export class Trig {
       n = xModPIDiv2Result.n;
     }
 
-    // console.log("cosY:", AltValue.of(y).cos().toString());
-
     const yPIDivTABLE_SIZE_TIMES_4Mod = Mod.qAndR(
       y,
       PI.div(Trig.TABLE_SIZE_TIMES_4, prec),
@@ -469,21 +446,10 @@ export class Trig {
     const m = Core.floatToNumber(yPIDivTABLE_SIZE_TIMES_4Mod.q);  // |m| <= TABLE_SIZE
     const z = yPIDivTABLE_SIZE_TIMES_4Mod.r;              // |z| <= PI/TABLE_SIZE_TIMES_4
 
-    // console.log("m:", m);
-
     const sinZ = Trig.taylorSeriesSin(z, prec);
     const cosZ = Trig.taylorSeriesCos(z, prec);
     const sinV = Trig.sinTable(m, prec);
     const cosV = Trig.cosTable(m, prec);
-
-    // console.log("sinZ:", AltValue.of(sinZ).toString());
-    // console.log("sb:  ", AltValue.of(z).sin().toString());
-    // console.log("cosZ:", AltValue.of(cosZ).toString());
-    // console.log("sb:  ", AltValue.of(z).cos().toString());
-    // console.log("sinV:", AltValue.of(sinV).toString());
-    // console.log("sb:  ", AltValue.acos(-1).divBy(Trig.TABLE_SIZE_TIMES_4).times(m).sin().toString());
-    // console.log("cosV:", AltValue.of(cosV).toString());
-    // console.log("sb:  ", AltValue.acos(-1).divBy(Trig.TABLE_SIZE_TIMES_4).times(m).cos().toString());
 
     const sinY = Basic.addFF(
       Basic.multiplyFF(sinZ, cosV, prec),

@@ -65,7 +65,7 @@ export type P = PAlias;
 export class Atanh {
 
   public static imp(x: float, prec: P): float {
-    if (Comparison.lt(x, C.F_NEG_1) || Comparison.gt(x, C.F_1)) {
+    if (Comparison.lt(x, C.F_NEG_1) || Comparison.gtOne(x)) {
       throw new Error(`atanh argument must be in range [-1, 1], got ${
         StringWriter.toStr(x)}`);
     }

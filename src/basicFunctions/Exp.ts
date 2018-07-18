@@ -101,24 +101,10 @@ export class Exp {
     let rk: float;
 
     if (Comparison.gte(Sign.absF(x), LN2.value(prec))) {
-      // if (Comparison.gtI(x.exp, C.NUMBER_MAX_SAFE_INTEGER)) {
-      //   throw Error(
-      //     "cannot take exp of val x with x.exp > Number.MAX_SAFE_INTEGER"
-      //   );
-      // }
-
       const modLN2 = Exp.modLN2(x, prec);
       const m = modLN2.q;
-
-      // console.log("\nm:      ", AltValue.of(m).toString());
-      // console.log("sb:     ", AltValue.of(x).divBy(AltValue.of(2).ln()).round().toString());
-
       twoToM = Pow.fi(C.F_2, m, prec);
-      // console.log("\ntwoToM: ", AltValue.of(twoToM).toString());
-      // console.log("sb:     ", AltValue.of(2).toPow(AltValue.of(m)).toString());
       rk = modLN2.r;
-      // console.log("\nrk:     ", AltValue.of(rk).toString());
-      // console.log("sb:     ", AltValue.of(x).minus(AltValue.of(m).times(AltValue.of(2).ln())).toString())
     } else {
       if (Comparison.lt(Basic.squareF(x, prec), prec.epsilon)) {
         return Basic.addFF(C.F_1, x, prec);
@@ -130,14 +116,7 @@ export class Exp {
     }
 
     const k = Exp.getKTableEntry(prec);
-    // console.log("\nk:      ", AltValue.of(k.intVal).toString());
-    // console.log("\nkRecipr:", AltValue.of(k.reciprocal).toString());
-    // console.log("sb:     ", AltValue.of(k.intVal).reciprocal().toString());
-
     const r = Basic.multiplyFF(rk, k.reciprocal, prec);
-
-    // console.log("\nr:      ", AltValue.of(r).toString());
-    // console.log("sb:     ", AltValue.of(rk).times(AltValue.of(k.reciprocal)).toString());
 
     // When k is large (high precisions), we need to extract out as much precision as
     // possible from the taylor series result before taking the k power. Adding 1 to the
@@ -150,22 +129,7 @@ export class Exp {
       C.F_1,
       P.createRelativeP(prec, k.intVal.digits.length)
     );
-
-    // console.log("\nexpR:   ", AltValue.of(expR).toString());
-    // console.log("sb:     ", AltValue.of(r).exp().toString());
-
     const expRToK = Pow.fi(expR, k.intVal, prec);
-
-    // console.log("\nexpRToK:", AltValue.of(expRToK).toString());
-    // console.log("sb:     ", AltValue.of(r).exp().toPow(AltValue.of(k.intVal)).toString());
-
-    // console.log("twoToM:", twoToM);
-    // console.log("expRTok:", expRToK);
-
-    const result = Basic.multiplyFF(twoToM, expRToK, prec);
-
-    // console.log("\nresult: ", AltValue.of(result).toString(), result);
-    // console.log("sb:     ", AltValue.of(twoToM).times(AltValue.of(expRToK)).toString());
 
     return Basic.multiplyFF(twoToM, expRToK, prec);
   }
@@ -260,33 +224,13 @@ export class Exp {
       3,
       (prec.numDigits - 1) * 2 + xExponentNum
     ));
-
-    // console.log(prec);
-    // console.log(modPrec);
-
-    // console.log("1/LN2:     ", AltValue.of(LN2.reciprocal(modPrec)).toString());
-    // console.log("sb:        ", AltValue.of(2).ln().reciprocal().toString());
-
     const qUnrounded = Basic.multiplyFF(x, LN2.reciprocal(modPrec), modPrec);
-    // console.log("qUnrounded:", AltValue.of(qUnrounded).toString());
-    // console.log("sb:        ", AltValue.of(x).times(AltValue.of(2).ln().reciprocal()).toString());
-
     const q = Conversion.floatToInt(qUnrounded, "round");
-
-    // console.log("q: ", AltValue.of(q).toString());
-    // console.log("sb:", AltValue.of(qUnrounded).round().toString());
-    // console.log("al:", AltValue.of(Conversion.intToFloat(q, modPrec, true)).toString(), Conversion.intToFloat(q, modPrec, true));
     const rDivLN2 = Basic.subtractFF(
       qUnrounded,
       Conversion.intToFloat(q, modPrec, true),
       modPrec
     );
-
-    // console.log("rDivLN2:", AltValue.of(rDivLN2).toString());
-    // console.log("sb:     ", AltValue.of(qUnrounded).minus(AltValue.of(q)).toString());
-
-    // console.log("r: ", AltValue.of(Basic.multiplyFF(rDivLN2, LN2.value(prec), prec)).toString());
-    // console.log("sb:", AltValue.of(rDivLN2).times(AltValue.of(2).ln()).toString());
 
     return {q: q, r: Basic.multiplyFF(rDivLN2, LN2.value(prec), prec)};
   }

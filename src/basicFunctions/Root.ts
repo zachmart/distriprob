@@ -35,12 +35,6 @@ import {float} from "../interfaces/float";
 
 
 // functional imports
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {Float as FloatAlias} from "../dataTypes/Float";
-const Float = FloatAlias;
-
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
@@ -66,26 +60,9 @@ const Basic = BasicAlias;
 import {RATIO as RATIOAlias} from "../constants/RATIO";
 const RATIO = RATIOAlias;
 
-import {Conversion as ConversionAlias} from "../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {AltValue} from "../../../test/value/AltValue";
-import {on} from "cluster";
 
 export class Root {
   private static _table: {[n: number]: {[x: number]: {value: float, numDigits: number}}};
-
-  // // class constants
-  // public static LARGE_EXP_CUTOFF: number;
-  // public static TWO_POW_13: float;
-  //
-  // public static setStaticProperties(): void {
-  //   //Root.LARGE_EXP_CUTOFF = Number.MAX_SAFE_INTEGER - (5 * Root.EMD.COEF_EXP_OFFSET);
-  //   Root.TWO_POW_13 = new Float(
-  //     new Integer(false, Uint32Array.of(8192)),
-  //     C.I_0
-  //   );
-  // }
 
   /**
    * @param {float} x - a non-negative float
@@ -97,15 +74,7 @@ export class Root {
       return C.F_0;
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
-    } /*else if (Math.abs(x.exp) > Root.LARGE_EXP_CUTOFF) {
-      const sciNoteX = Root.EMD.sciNote(x, 2);
-      const rootCoef = Root.squareV(sciNoteX.coefficient);
-
-      return Root.EMD.mulVV(
-        rootCoef,
-        Root.EMD.powVN(Root.EMD.C.SQRT2, sciNoteX.exponent)
-      );
-    }*/ else {
+    } else {
 
       return Root.newtonsMethodSqrt(x, prec)
     }
@@ -114,23 +83,7 @@ export class Root {
   public static fn(x: float, n: number, prec: P) {
     if (Comparison.isZero(x)) {
       return n < 0 ? C.F_POSITIVE_INFINITY : C.F_0;
-    } /*else if (Math.abs(x.exp) > Root.LARGE_EXP_CUTOFF) {
-      const sciNoteX = Root.EMD.sciNote(x, 2);
-
-      const rootCoef = Root.vn(sciNoteX.coefficient, n);
-      let rootOfTwo: EMD;
-
-      if (n === 2) {
-        rootOfTwo = Root.EMD.C.SQRT2;
-      } else if (n === 3) {
-        rootOfTwo = Root.EMD.C.CBRT2;
-      } else {
-        rootOfTwo = Root.vn(Root.EMD.TWO, n);
-      }
-
-      return Root.EMD.mulVV(rootCoef, Root.EMD.powVN(rootOfTwo, sciNoteX.exponent));
-
-    }*/ else {
+    } else {
       const negativeX = Comparison.isNegative(x);
       if (negativeX) {
         if (n % 2 === 0) {
@@ -180,32 +133,6 @@ export class Root {
     }
 
     return negative ? Sign.negateF(entry.value) : entry.value;
-  }
-
-  /**
-   * TODO: get rid of this function, can use sciNote function in Basic.ts instead
-   *
-   * This function takes a finite int a and decomposes its absolute value into an
-   * finite integer number c and a finite integer number e such that:
-   *
-   *      c =(approx)= |a| * (2^(-e))  i.e.  |a| =(approx)= c * (2^e)
-   *
-   * @param {int} a
-   * @returns {{z: number; a: number}}
-   */
-  public static sciNoteBase2Approx(a: int): {c: number, e: number} {
-    const maxIter = Math.min(3, a.digits.length);
-    const maxIterMinus1 = maxIter - 1;
-    let c = 0;
-
-    for (let i = 0; i < maxIter; i++) {
-      c += a.digits[i];
-      if (i !== maxIterMinus1) {
-        c *= C.BASE;
-      }
-    }
-
-    return {c: c, e: (a.digits.length - maxIter) * C.POWER_OF_TWO_FOR_BASE};
   }
 
   public static approx(x: float, n: number): float {

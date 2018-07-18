@@ -37,9 +37,6 @@ const Sign = SignAlias;
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
 
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
 import {P as PAlias} from "../core/P";
 const P = PAlias;
 export type P = PAlias;

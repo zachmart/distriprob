@@ -70,7 +70,7 @@ export type P = PAlias;
 export class Acosh {
 
   public static imp(x: float, prec: P): float {
-    if (Comparison.lt(x, C.F_1)) {
+    if (Comparison.ltOne(x)) {
       throw new Error(`acosh function requires argument >= 1, got: ${
         StringWriter.toStr(x)}`);
     }
@@ -81,11 +81,11 @@ export class Acosh {
       if (Comparison.gt(x, EPSILON.reciprocalSqrt(prec))) {
         // approximation by laurent series in 1/x at 0+ order from -1 to 0
         return  Basic.addFF(Log.f(x, prec), LN2.value(prec), prec);
+
       } else if (Comparison.lt(x, RATIO.value(3, 2, prec))) {
         // This is just a rearrangement of the standard form below
         // devised to minimize loss of precision when x ~ 1:
         // return log1p(y + sqrt(y * y + 2 * y))
-
         return Log.onePlusF(Basic.addFF(
           y,
           Root.squareF(Basic.addFF(
@@ -97,12 +97,12 @@ export class Acosh {
         ), prec);
       } else {
         // return log( x + sqrt(x * x - 1) )
-
         return Log.f(Basic.addFF(
           x,
           Root.squareF(Basic.subtractFF(Basic.squareF(x, prec), C.F_1, prec), prec),
           prec
         ), prec);
+
       }
     } else {
       // approximation by taylor series in y at 0 up to order 2

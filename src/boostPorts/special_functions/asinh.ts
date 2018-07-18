@@ -100,6 +100,7 @@ export class Asinh {
           Root.squareF(xSquaredPlus1, prec),
           prec
         ), prec);
+
       }
     } else if (Comparison.lte(x,  Sign.negateF(EPSILON.fourthRoot(prec)))) {
       return Sign.negateF(Asinh.imp(Sign.negateF(x), prec));

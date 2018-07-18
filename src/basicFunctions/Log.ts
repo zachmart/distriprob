@@ -92,32 +92,7 @@ export class Log {
 
   public static f(x: float, prec: P): float {
     if (Comparison.isPositive(x)) {
-      // // if x is sufficiently close to 1, no need for approximations
-      // const distBetweenXAnd1 = Sign.absF(Basic.subtractFF(x, C.F_1, prec));
-      // if (Comparison.lte(distBetweenXAnd1, C.F_NUMBER_EPSILON)) {
-      //   return Log.near1(x, prec);
-      // }
-      // console.log("x:", x);
-      // const y = Log.approx(x);
-      // console.log("approx:", AltValue.of(y).toString());
-      // const a = Basic.divideFF(x, Exp.f(y, prec), prec);
-      // console.log("Exp(approx):", Exp.f(y, prec));
-      // console.log("done dividing, a:", AltValue.of(a).toString());
-      //
-      // if (Comparison.isOne(a)) {
-      //   return y;
-      // } else {
-      //   const logA = Log.near1(a, prec);
-      //   return Basic.addFF(y, logA, prec);
-      // }
-
       const sciNoteX = SciNote.base2Exact(x);
-
-      // console.log("Here is x: ", AltValue.of(x).toString());
-      // console.log("SciNoteVal:", AltValue.of(sciNoteX.c).times(AltValue.of(2).toPow(AltValue.of(sciNoteX.e))).toString());
-      // console.log("sciNote.c:", AltValue.of(sciNoteX.c).toString());
-      // console.log("sciNote.e:", AltValue.of(sciNoteX.e).toString());
-      // console.log("x.exp:", AltValue.of(x.exp).toString());
 
       return Basic.addFF(
         Log.newtonsMethod(sciNoteX.c, prec),
@@ -348,31 +323,22 @@ export class Log {
     let expXi: float;
     let xTimesExpXi: float;
     let xTimesExpXiMinus1: float;
-    // console.log("steps:", steps, "numDoubles:", prec.numDigits, ", x:", AltValue.of(x).toString());
 
     for(let i = 1; i <= steps; i++) {
-      // console.log("\nstart loop, xi:", AltValue.of(xi).toString());
       expXi = Exp.f(Sign.negateF(xi), prec);
-      // console.log("expXi:", AltValue.of(expXi).toString());
-      // console.log("sb:   ", AltValue.of(xi).neg().exp().toString());
       xTimesExpXi = Basic.multiplyFF(x, expXi, prec);
-      // console.log("got xTimesExpXi:", AltValue.of(xTimesExpXi).toString());
-      // console.log("sb:             ", AltValue.of(x).times(AltValue.of(expXi)).toString());
       xTimesExpXiMinus1 = Basic.addFF(
         xTimesExpXi,
         C.F_NEG_1,
         prec
       );
-      // console.log("x* e^-xi -1", AltValue.of(xTimesExpXiMinus1).toString());
       xi = Basic.addFF(
         xi,
         xTimesExpXiMinus1,
         prec
       );
-      // console.log("end loop");
     }
 
-    // console.log("exiting");
     return xi;
   }
 }

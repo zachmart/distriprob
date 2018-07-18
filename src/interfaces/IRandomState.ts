@@ -29,6 +29,7 @@
  *
  */
 
+
 export interface IRandomState {
   readonly type: "WELL512A" | "WELL1024A" | "ARC4";
   readonly s: number[];

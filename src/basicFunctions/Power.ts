@@ -52,9 +52,6 @@ const Conversion = ConversionAlias;
 import {Basic as BasicAlias} from "./Basic";
 const Basic = BasicAlias;
 
-import {Root as RootAlias} from "./Root";
-const Root = RootAlias;
-
 import {Exp as ExpAlias} from "./Exp";
 const Exp = ExpAlias;
 

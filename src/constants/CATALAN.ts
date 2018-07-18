@@ -46,9 +46,6 @@ const Comparison = ComparisonAlias;
 import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
 
-import {Pow as PowAlias} from "../basicFunctions/Pow";
-const Pow = PowAlias;
-
 import {WHOLE as WHOLEAlias} from "./WHOLE";
 const WHOLE = WHOLEAlias;
 

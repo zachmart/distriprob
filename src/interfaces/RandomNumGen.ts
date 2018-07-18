@@ -31,6 +31,7 @@
 
 import {IRandomState} from "./IRandomState";
 
+
 export interface RandomNumGen {
   outputWidth: number;
   next(): number;

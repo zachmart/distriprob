@@ -62,6 +62,7 @@ const Longhand = LonghandAlias;
 import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
 
+
 export class Conversion {
 
   public static intToFloat(a: int, prec: P, sameUint32Array: boolean = false): float {
@@ -205,8 +206,6 @@ export class Conversion {
     x: float,
     type: "trunc" | "round" | "ceil" | "floor" = "trunc"
   ): int {
-    const absX = Sign.absF(x);
-
     if (Comparison.isNaN(x)) {
       return C.NaN;
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {

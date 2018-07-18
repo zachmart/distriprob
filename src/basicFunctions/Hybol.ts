@@ -160,6 +160,8 @@ export class Hybol {
   }
 
   public static sinh(x: float, prec: P): float {
+    if (typeof Hybol.SMALL_ARG_CUTOFF === "undefined") { Hybol.setup(); }
+
     if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else if (Comparison.isNEGATIVE_INFINITY(x)) {
@@ -180,6 +182,8 @@ export class Hybol {
   }
 
   public static tanh(x: float, prec: P): float {
+    if (typeof Hybol.SMALL_ARG_CUTOFF === "undefined") { Hybol.setup(); }
+
     if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
       const sinh = Hybol.taylorSeriesSinh(x, prec);
       const cosh = Hybol.coshFromExp(x, prec);

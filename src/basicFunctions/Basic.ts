@@ -430,27 +430,6 @@ export class Basic {
       } else if (Comparison.equals(Sign.absF(x), Sign.absF(y))) {
         return x.coef.neg === y.coef.neg ? C.F_1 : C.F_NEG_1;
       } else {
-        // const cX = new Float(
-        //   x.coef,
-        //   Core.numberToIntUnchecked(x.coef.digits.length - 1)
-        // );
-        // const cY = new Float(
-        //   y.coef,
-        //   Core.numberToIntUnchecked(y.coef.digits.length - 1)
-        // );
-        // const eX = Basic.addII(
-        //   x.exp,
-        //   Core.numberToIntUnchecked(1 - x.coef.digits.length)
-        // );
-        // const eY = Basic.addII(
-        //   y.exp,
-        //   Core.numberToIntUnchecked(1 - y.coef.digits.length)
-        // );
-        // const cResult = Basic.multiplyFF(cX, Basic.newtonInversion(cY, prec), prec);
-        // const eResult = Basic.subtractII(Basic.addII(cResult.exp, eX), eY);
-        //
-        // return new Float(cResult.coef, eResult);
-
         return Basic.multiplyFF(x, Basic.newtonInversion(y, prec), prec)
       }
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
@@ -537,50 +516,6 @@ export class Basic {
         ),
         z0
       );
-
-      // const z2SB = AltValue.of(aSplit.hi).times(AltValue.of(bSplit.hi));
-      // const z0SB = AltValue.of(aSplit.lo).times(AltValue.of(bSplit.lo));
-      // const z1SB = AltValue.of(z0).plus(AltValue.of(z2)).plus(AltValue.mul(
-      //   AltValue.sub(AltValue.of(aSplit.lo), AltValue.of(aSplit.hi)),
-      //   AltValue.sub(AltValue.of(bSplit.hi), AltValue.of(bSplit.lo))
-      // ));
-      //
-      // if (!z2SB.equals(AltValue.of(z2))) {
-      //   console.log("z2 issue");
-      // }
-      //
-      // if (!z0SB.equals(AltValue.of(z0))) {
-      //   console.log("z0 issue");
-      // }
-      //
-      // if (!z1SB.equals(AltValue.of(z1))) {
-      //   console.log("z1 issue");
-      //
-      //   const sub1 = Subtract.ii(aSplit.lo, aSplit.hi);
-      //   const sub2 = Subtract.ii(bSplit.hi, bSplit.lo);
-      //   const sub1SB = AltValue.sub(AltValue.of(aSplit.lo), AltValue.of(aSplit.hi));
-      //   const sub2SB = AltValue.sub(AltValue.of(bSplit.hi), AltValue.of(bSplit.lo));
-      //
-      //   let aLoDigStr = "";
-      //
-      //   for (let i = 0; i<aSplit.lo.digits.length; i++) {
-      //     aLoDigStr += `${aSplit.lo.digits[i]}, `;
-      //   }
-      //
-      //   let aHiDigStr = "";
-      //
-      //   for (let i = 0; i<aSplit.hi.digits.length; i++) {
-      //     aHiDigStr += `${bSplit.hi.digits[i]}, `;
-      //   }
-      //
-      //   console.log("sub1:", sub1SB.equals(AltValue.of(sub1)));
-      //   console.log("sub2:", sub2SB.equals(AltValue.of(sub2)));
-      //
-      //
-      //   console.log(`aLo: {neg: ${aSplit.lo.neg}, digits: [${aLoDigStr}]`);
-      //   console.log(`aHi: {neg: ${aSplit.hi.neg}, digits: [${aHiDigStr}]`);
-      //
-      // }
 
       const summand2 = Core.scaleIntByBase(z2, 2*m);
       const summand1 = Core.scaleIntByBase(z1, m);

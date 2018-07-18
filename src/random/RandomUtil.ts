@@ -46,7 +46,6 @@ export class RandomUtil {
     let typedArrayConstructor = RandomUtil.getTypedArrayConstructor(units);
 
     if (Core.environmentIsNode()) {
-      console.log("using node crypto!");
       const crypto = require("crypto");
       const nodeBuf = crypto.randomBytes(
         typedArrayConstructor.BYTES_PER_ELEMENT * length

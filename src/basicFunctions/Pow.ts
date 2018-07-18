@@ -29,21 +29,13 @@
  *
  */
 
+// interface imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
 
 // functional imports
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {Float as FloatAlias} from "../dataTypes/Float";
-const Float = FloatAlias;
-
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
 
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
@@ -60,6 +52,7 @@ const Basic = BasicAlias;
 
 import {Parity as ParityAlias} from "./Parity";
 const Parity = ParityAlias;
+
 
 export class Pow {
 
@@ -150,7 +143,7 @@ export class Pow {
         s = Basic.multiplyII(s, r);
       }
 
-      n = Basic.divideII(n, C.I_2).q; // make sure to trunc this in float version
+      n = Basic.divideII(n, C.I_2).q;
 
       if (Comparison.isPositiveI(n)) {
         r = Basic.squareI(r);
@@ -184,7 +177,7 @@ export class Pow {
         s = Basic.multiplyFF(s, r, precToUse);
       }
 
-      n = Basic.divideII(n, C.I_2).q; // make sure to trunc this in float version
+      n = Basic.divideII(n, C.I_2).q;
 
       if (Comparison.isPositiveI(n)) {
         r = Basic.squareF(r, precToUse);

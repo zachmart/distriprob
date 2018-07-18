@@ -315,9 +315,6 @@ export class StringWriter {
   }
 
   public toScientificNotation(removeTrailingFractionalZeros: boolean): string {
-    // const negative: boolean = StringWriter.EMD.isNegativeV(x);
-    // const sign = negative ? "-" : "";
-
     if (this.type === "infinite") {
       return this.sign === "-" ?
         StringWriter.NEGATIVE_INFINITY_STRING

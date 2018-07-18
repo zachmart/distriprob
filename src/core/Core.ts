@@ -422,7 +422,6 @@ export class Core {
 
   public static environmentIsNode(): boolean {
     return typeof module !== 'undefined' && module.exports;
-    //typeof process === "object" && process + "" === "[object process]";
   }
 }
 

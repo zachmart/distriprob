@@ -38,9 +38,6 @@ const C = CAlias;
 import {Sign as SignAlias} from "../../basicFunctions/Sign";
 const Sign = SignAlias;
 
-import {Core as CoreAlias} from "../../core/Core";
-const Core = CoreAlias;
-
 import {Parity as ParityAlias} from "../../basicFunctions/Parity";
 const Parity = ParityAlias;
 
@@ -61,9 +58,6 @@ const Log = LogAlias;
 
 import {Exp as ExpAlias} from "../../basicFunctions/Exp";
 const Exp = ExpAlias;
-
-import {WHOLE as WHOLEAlias} from "../../constants/WHOLE";
-const WHOLE = WHOLEAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;

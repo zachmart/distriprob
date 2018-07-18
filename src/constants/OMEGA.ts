@@ -69,8 +69,6 @@ export class OMEGA {
     const iterations = prec.quadraticConvergenceSteps;
     let val = OMEGA._initialGuess;
 
-    console.log("iterations:", iterations);
-
     for(let i = 1; i <= iterations; i++) {
       val = Basic.divideFF(
         Basic.addFF(C.F_1, val, prec),

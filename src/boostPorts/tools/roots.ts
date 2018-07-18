@@ -50,15 +50,6 @@ const Comparison = ComparisonAlias;
 import {Basic as BasicAlias} from "../../basicFunctions/Basic";
 const Basic = BasicAlias;
 
-import {Conversion as ConversionAlias} from "../../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {Pow as PowAlias} from "../../basicFunctions/Pow";
-const Pow = PowAlias;
-
-import {WHOLE as WHOLEAlias} from "../../constants/WHOLE";
-const WHOLE = WHOLEAlias;
-
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
 
@@ -145,7 +136,6 @@ export class Roots {
   }
 
   private newtonRaphsonIterate(
-    f: (x: float) => { f0: float, f1: float },
     maxIter: number
   ): { result: float, iterations: number } {
     let delta1 = this.delta;
@@ -154,7 +144,6 @@ export class Roots {
     let fResult: { f0: float, f1: float };
 
     do {
-      // console.log("\nresult:", AltValue.of(this.result).toString());
       this.lastF0 = this.f0;
       delta2 = delta1;
       delta1 = this.delta;
@@ -172,8 +161,6 @@ export class Roots {
       } else {
         this.delta = Basic.divideFF(this.f0, this.f1, this.prec);
       }
-
-      // console.log("delta:", AltValue.of(this.delta).toString());
 
       if (Comparison.gt(
         Sign.absF(Basic.multiplyFF(this.delta, C.F_2, this.prec)),
@@ -196,9 +183,6 @@ export class Roots {
 
       this.guess = this.result;
       this.result = Basic.subtractFF(this.result, this.delta, this.prec);
-      // console.log("newResult:", AltValue.of(this.result).toString(), ", min:", AltValue.of(this.min).toString());
-      // console.log(this.result);
-      // console.log(this.min);
 
       if (Comparison.lte(this.result, this.min)) {
         this.delta = Basic.multiplyFF(
@@ -244,7 +228,6 @@ export class Roots {
   }
 
   private secondOrderRootFinder(
-    f: (x: float) => { f0: float, f1: float, f2: float },
     maxIter: number,
     step: (x: float, f0: float, f1: float, f2: float) => float
   ): { result: float, iterations: number } {
@@ -259,7 +242,7 @@ export class Roots {
       this.lastF0 = this.f0;
       delta2 = delta1;
       delta1 = this.delta;
-      fResult = f(this.result);
+      fResult = <{f0: float, f1: float, f2: float}>this.f(this.result);
       this.f0 = fResult.f0;
       this.f1 = fResult.f1;
       this.f2 = fResult.f2;
@@ -546,7 +529,7 @@ export class Roots {
     prec: P
   ): { result: float, iterations: number } {
     const r = new Roots(f, guess, min, max, prec);
-    return r.newtonRaphsonIterate(f, maxIter);
+    return r.newtonRaphsonIterate(maxIter);
   }
 
   public static halleyIterate(
@@ -558,7 +541,7 @@ export class Roots {
     prec: P
   ): { result: float, iterations: number } {
     const r = new Roots(f, guess, min, max, prec);
-    return r.secondOrderRootFinder(f, maxIter, r.halleyStep);
+    return r.secondOrderRootFinder(maxIter, r.halleyStep);
   }
 
   public static schroderIterate(
@@ -570,7 +553,7 @@ export class Roots {
     prec: P
   ): { result: float, iterations: number } {
     const r = new Roots(f, guess, min, max, prec);
-    return r.secondOrderRootFinder(f, maxIter, r.schroderStep);
+    return r.secondOrderRootFinder(maxIter, r.schroderStep);
   }
 }
 

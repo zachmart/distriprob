@@ -59,6 +59,7 @@ export type P = PAlias;
 
 export type Tol = (a: float, b: float) => boolean;
 
+
 export class Toms748 {
 
   private readonly f: (x: float) => float;
@@ -98,7 +99,6 @@ export class Toms748 {
     this.fe = C.F_NaN;
     this.fu = C.F_NaN;
     this.prec = prec;
-    //this.minDiff = Toms748.EMD.mulVN(Toms748.EMD.C.MIN_VALUE, 32);
   }
 
 

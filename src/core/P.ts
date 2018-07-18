@@ -44,15 +44,9 @@ const C = CAlias;
 import {Core as CoreAlias} from "./Core";
 const Core = CoreAlias;
 
+
 export class P {
   public static p: P;
-  public static updateNumDoubleConstantListener: (newPrec: P) => void;
-  public static updateNumDoublesListeners:
-    Array<(newPrec: P, oldPrec?: P) => void>;
-
-  public static setStaticProperties(): void {
-    P.updateNumDoublesListeners = [];
-  }
 
   public readonly numDigits: number;
   public readonly numDigitsInt: int;
@@ -71,18 +65,6 @@ export class P {
     this.quadraticConvergenceSteps = P.quadraticConvergenceSteps(numDoublesMinus1);
     this.epsilon = P.epsilonFromNumDubs(numDoublesMinus1);
     this.maxSafeInt = P.maxSafeInteger(numDoublesMinus1);
-  }
-
-  public static registerConstantNumDoubleListener(
-    listener: (newPrec: P) => void
-  ): void {
-    P.updateNumDoubleConstantListener = listener;
-  }
-
-  public static registerNumDoublesListener(
-    listener: (newP: P, oldP?: P) => void
-  ): void {
-    P.updateNumDoublesListeners.push(listener)
   }
 
   public static setDecimalDigits(digits: number): void {
@@ -126,16 +108,7 @@ export class P {
   }
 
   private static changeP(newP: P): void {
-    const oldP = P.p;
     P.p = newP;
-
-    if (P.updateNumDoubleConstantListener) {
-      P.updateNumDoubleConstantListener(newP);
-    }
-
-    for (let listener of P.updateNumDoublesListeners) {
-      listener(newP, oldP);
-    }
   }
 
   private static quadraticConvergenceSteps(numDoubles: number): number {
@@ -158,6 +131,5 @@ export class P {
       Core.numberToIntUnchecked(numDigits - 1)
     );
   }
-
 }
 

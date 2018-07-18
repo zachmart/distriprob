@@ -47,6 +47,7 @@ import {P as PAlias} from "./P";
 const P = PAlias;
 export type P = PAlias;
 
+
 export class SciNote {
   public static base2Exact(x: float): {c: float, e: float, precC: P, precE: P} {
     const precC = P.createPFromNumDigits(x.coef.digits.length - 1);
