@@ -48,9 +48,6 @@ const Comparison = ComparisonAlias;
 import {EPSILON as EPSILONAlias} from "../../constants/EPSILON";
 const EPSILON = EPSILONAlias;
 
-import {WHOLE as WHOLEAlias} from "../../constants/WHOLE";
-const WHOLE = WHOLEAlias;
-
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
 
@@ -65,9 +62,6 @@ const LN2 = LN2Alias;
 
 import {Sqrt1pm1 as Sqrt1pm1Alias} from "./sqrt1pm1";
 const Sqrt1pm1 = Sqrt1pm1Alias;
-
-import {StringWriter as StringWriterAlias} from "../../core/StringWriter";
-const StringWriter = StringWriterAlias;
 
 import {P as PAlias} from "../../core/P";
 const P = PAlias;
