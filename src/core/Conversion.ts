@@ -66,8 +66,6 @@ const Basic = BasicAlias;
 export class Conversion {
 
   public static intToFloat(a: int, prec: P, sameUint32Array: boolean = false): float {
-    if (!prec) { prec = P.p; }
-
     const exp: int = Core.numberToInt((a.digits.length - 1));
     let coef: int;
     let sliceEndIndex = Math.min(prec.numDigits, a.digits.length);
@@ -90,6 +88,11 @@ export class Conversion {
     }
 
     return new Float(coef, exp);
+  }
+
+  public static intToFloatFullPrecision(a: int, sameUint32Array: boolean): float {
+    const prec = P.createPFromNumDigits(a.digits.length - 1);
+    return Conversion.intToFloat(a, prec, sameUint32Array);
   }
 
   public static intArrayToFloat(intArray: int[], prec: P): float[] {
