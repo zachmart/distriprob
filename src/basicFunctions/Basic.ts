@@ -182,7 +182,7 @@ export class Basic {
   public static divideII(
     a: int,
     b: int,
-    type: "euclidean"| "trunc" | "ceil" | "floor" | "round" = "euclidean"
+    type: "euclidean"| "trunc" | "ceil" | "floor" | "round"
   ): {q: int, r: int} {
     if (Comparison.isZeroI(b)) {
       throw new Error("Division by zero error");

@@ -29,31 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Conversion as ConversionAlias} from "../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {StringParser as StringParserAlias} from "../core/StringParser";
-const StringParser = StringParserAlias;
-
-import {StringWriter as StringWriterAlias} from "../core/StringWriter";
-const StringWriter = StringWriterAlias;
-
-import {P as PAlias} from "../core/P";
-const P = PAlias;
-export type P = PAlias;
-
 export type DefaultSpec = {
   canBeNull: boolean,
   canBeUndefined: boolean,
@@ -149,7 +124,11 @@ export class ArgHandler {
   ): float {
     const paramSpec = this.paramSpecs[parameterName];
 
-    if (Core.instance(value)) {
+    if (Flt.instance(value)) {
+      return Flt.getFloat(value);
+    } else if (Int.instance(value)) {
+      return Conversion.intToFloat(Int.getInt(value), prec, false);
+    } else if (Core.instance(value)) {
       return value;
     } else if (typeof value === "number") {
       return Core.numberToFloat(value);
@@ -179,7 +158,19 @@ export class ArgHandler {
   ): int {
     const paramSpec = this.paramSpecs[parameterName];
 
-    if (Core.instance(value)) {
+    if (Flt.instance(value)) {
+      const floatValue = Flt.getFloat(value);
+
+      if (!Conversion.isInteger(floatValue)) {
+        this.conversionErrors[parameterName] =
+          `Argument must be an integer, given: ${StringWriter.toStr(floatValue)}`;
+        return C.NaN;
+      } else {
+        return Conversion.floatToInt(floatValue, "trunc");
+      }
+    } else if (Int.instance(value)) {
+      return Int.getInt(value);
+    } else if (Core.instance(value)) {
       if (!Conversion.isInteger(value)) {
         this.conversionErrors[parameterName] =
           `Argument must be an integer, given: ${StringWriter.toStr(value)}`;
@@ -221,7 +212,11 @@ export class ArgHandler {
   ): number {
     const paramSpec = this.paramSpecs[parameterName];
 
-    if (Core.instance(value)) {
+    if (Flt.instance(value)) {
+      return Core.floatToNumber(Flt.getFloat(value));
+    } else if (Int.instance(value)) {
+      return Core.intToNumber(Int.getInt(value));
+    } else if (Core.instance(value)) {
       return Core.floatToNumber(value);
     } else if (typeof value === "number") {
       return value;
@@ -437,84 +432,84 @@ export class ArgHandler {
   private checkForDomainDescriptionMatchN(
     parameterName: string,
     value: number
-  ): boolean{
+  ): void {
     const dd = (<DomainSpec>this.paramSpecs[parameterName].domain).description;
 
     // no description, implies a domain description match
-    if (dd.length === 0) { return true; }
+    if (dd.length === 0) { return; }
 
     for (let subdomain of dd) {
       if (subdomain === "real") {
         if (Number.isFinite(value)) {
-          return true;
+          return;
         }
       } else if (subdomain === "positive real") {
         if (value > 0 && Number.isFinite(value)) {
-          return true;
+          return;
         }
       } else if (subdomain === "nonnegative real") {
         if (value >= 0 && Number.isFinite(value)){
-          return true;
+          return;
         }
       } else if (subdomain === "negative real") {
         if (value < 0 && Number.isFinite(value)) {
-          return true;
+          return;
         }
       } else if (subdomain === "nonpositive real") {
         if (value <= 0 && Number.isFinite(value)){
-          return true;
+          return;
         }
       } else if (subdomain === "integer") {
         if (Number.isInteger(value)) {
-          return true;
+          return;
         }
       } else if (subdomain === "positive integer") {
         if (Number.isInteger(value) && value > 0) {
-          return true;
+          return;
         }
       } else if (subdomain === "nonnegative integer") {
         if (Number.isInteger(value) && value >= 0){
-          return true;
+          return;
         }
       } else if (subdomain === "negative integer") {
         if (Number.isInteger(value) && value < 0) {
-          return true;
+          return;
         }
       } else if (subdomain === "nonpositive integer") {
         if (Number.isInteger(value) && value <= 0){
-          return true;
+          return;
         }
       } else if (subdomain === "positive noninteger real") {
         if (!Number.isInteger(value) && value > 0 && Number.isFinite(value)) {
-          return true;
+          return;
         }
       } else if (subdomain === "nonnegative noninteger real") {
         if (!Number.isInteger(value) && value >= 0 && Number.isFinite(value)){
-          return true;
+          return;
         }
       } else if (subdomain === "negative noninteger real") {
         if (!Number.isInteger(value) && value < 0 && Number.isFinite(value)) {
-          return true;
+          return;
         }
       } else if (subdomain === "nonpositive noninteger real") {
         if (!Number.isInteger(value) && value <= 0 && Number.isFinite(value)){
-          return true;
+          return;
         }
       } else if (subdomain === "probability") {
         if (value >= 0 && value <= 1) {
-          return true;
+          return;
         }
       } else if (subdomain === "positive infinity") {
         if (value === Number.POSITIVE_INFINITY) {
-          return true;
+          return;
         }
       } else if (subdomain === "negative infinity") {
         if (value === Number.NEGATIVE_INFINITY) {
-          return true;
+          return;
         }
       } else if (subdomain === "NaN"){
         if (Number.isNaN(value)) {
-          return true;
+          return;
         }
       } else {
         throw new Error(`Unrecognized domain description: ${subdomain}`);
@@ -526,6 +521,66 @@ export class ArgHandler {
       `The argument must be ${this.domainDescriptionStrings[parameterName]
         }. Given ${value}`
     );
+  }
+
+  private checkBoundConstraintsF(
+    parameterName: string,
+    value: float
+  ): void {
+    const domainSpec = (<DomainSpec>this.paramSpecs[parameterName].domain);
+
+    if (domainSpec.upperBound) {
+      const ub = <float>domainSpec.upperBound.value;
+      const ubDescriptor = domainSpec.upperBound.descriptor ?
+        `${domainSpec.upperBound.descriptor} = ${StringWriter.toStr(ub)}`
+        :
+        StringWriter.toStr(ub);
+
+      if (domainSpec.upperBound.type === "open") {
+        if (Comparison.gte(value, ub)) {
+          this.domainErrors[parameterName].push(
+            `The argument must be less than ${ubDescriptor}. Given ${value}`
+          );
+        }
+      } else if (domainSpec.upperBound.type === "closed") {
+        if (Comparison.gt(value, ub)) {
+          this.domainErrors[parameterName].push(
+            `The argument must be less than or equal to ${ubDescriptor}. Given: ${value}`
+          );
+        }
+      } else {
+        throw new Error(
+          `Unrecognized domain upper bound type: ${domainSpec.upperBound.type}`
+        );
+      }
+    }
+
+    if (domainSpec.lowerBound) {
+      const lb = <float>domainSpec.lowerBound.value;
+      const lbDescriptor = domainSpec.lowerBound.descriptor ?
+        `${domainSpec.lowerBound.descriptor} = ${StringWriter.toStr(lb)})`
+        :
+        StringWriter.toStr(lb);
+
+      if (domainSpec.lowerBound.type === "open") {
+        if (Comparison.lte(value, lb)) {
+          this.domainErrors[parameterName].push(
+            `The argument must be greater than ${lbDescriptor}. Given ${value}`
+          );
+        }
+      } else if (domainSpec.lowerBound.type === "closed") {
+        if (Comparison.lt(value, lb)) {
+          this.domainErrors[parameterName].push(
+            `The argument must be greater than or equal to ${lbDescriptor}. Given: ${value
+            }`
+          );
+        }
+      } else {
+        throw new Error(
+          `Unrecognized domain lower bound type: ${domainSpec.lowerBound.type}`
+        );
+      }
+    }
   }
 
   private static domainDescriptionStr(dd: DomainDescription[]): string {
@@ -559,3 +614,36 @@ export class ArgHandler {
     return result;
   }
 }
+
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+import {Int as IntAlias} from "./Int";
+const Int = IntAlias;
+export type Int = IntAlias;
+
+import {Flt as FltAlias} from "./Flt";
+const Flt = FltAlias;
+export type Flt = FltAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;
+
+import {StringParser as StringParserAlias} from "../core/StringParser";
+const StringParser = StringParserAlias;
+
+import {StringWriter as StringWriterAlias} from "../core/StringWriter";
+const StringWriter = StringWriterAlias;
+
+import {P as PAlias} from "../core/P";
+const P = PAlias;
+export type P = PAlias;

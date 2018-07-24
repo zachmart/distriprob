@@ -51,7 +51,7 @@ export class Mod {
   public static qAndR(
     x: float,
     y: float,
-    type: "euclidean" | "trunc" | "ceil" | "floor" | "round" = "trunc",
+    type: "euclidean" | "trunc" | "ceil" | "floor" | "round",
     prec: P
   ): {q: float, r: float} {
     const xDivY = Basic.divideFF(x, y, prec);
