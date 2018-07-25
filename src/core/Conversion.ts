@@ -66,6 +66,10 @@ const Basic = BasicAlias;
 export class Conversion {
 
   public static intToFloat(a: int, prec: P, sameUint32Array: boolean = false): float {
+    if (Comparison.isNaN_I(a)) { return C.F_NaN; }
+    if (Comparison.isPOSITIVE_INFINITY_I(a)) { return C.F_POSITIVE_INFINITY; }
+    if (Comparison.isNEGATIVE_INFINITY_I(a)) { return C.F_NEGATIVE_INFINITY; }
+
     const exp: int = Core.numberToInt((a.digits.length - 1));
     let coef: int;
     let sliceEndIndex = Math.min(prec.numDigits, a.digits.length);
@@ -119,13 +123,13 @@ export class Conversion {
 
     if (!Comparison.isNegativeI(leastSigDigPlace)) { // fractional part of x === 0
       return x;
-    } else if (Comparison.equalsI(x.exp, C.I_NEG_1)) {
+    } else if (Comparison.equalsI(x.exp, C.I_NEG_1)) { // 1/BASE =< |x| < 1
       if (x.coef.digits[0] >= C.BASE_DIV_2) {
         return x.coef.neg ? C.F_NEG_1 : C.F_1;
       } else {
         return C.F_0;
       }
-    } else if (Comparison.isNegativeI(x.exp)) {
+    } else if (Comparison.isNegativeI(x.exp)) { // |x| < 1/BASE
       return C.F_0;
     } else { // integer part of x !== 0 and fractional part of x !== 0
       const placesBelowZero = -Core.intToNumber(leastSigDigPlace);
@@ -149,7 +153,7 @@ export class Conversion {
 
     if (!Comparison.isNegativeI(leastSigDigPlace)) { // fractional part of x === 0
       return x;
-    } else if (Comparison.isNegativeI(x.exp)) { // x < 1
+    } else if (Comparison.isNegativeI(x.exp)) { // |x| < 1
       return C.F_0;
     } else { // integer part of x !== 0 and fractional part of x !== 0
       const placesBelowZero = -Core.intToNumber(leastSigDigPlace);
@@ -167,7 +171,7 @@ export class Conversion {
 
     if (!Comparison.isNegativeI(leastSigDigPlace)) { // fractional part of x === 0
       return x;
-    } else if (Comparison.isNegativeI(x.exp)) { // x < 1
+    } else if (Comparison.isNegativeI(x.exp)) { // |x| < 1
       return x.coef.neg ? C.F_NEG_1 : C.F_0;
     } else { // integer part of x !== 0 and fractional part of x !== 0
       const placesBelowZero = -Core.intToNumber(leastSigDigPlace);
@@ -189,7 +193,7 @@ export class Conversion {
 
     if (!Comparison.isNegativeI(leastSigDigPlace)) { // fractional part of x === 0
       return x;
-    } else if (Comparison.isNegativeI(x.exp)) { // x < 1
+    } else if (Comparison.isNegativeI(x.exp)) { // |x| < 1
       return x.coef.neg ? C.F_0 : C.F_1;
     } else { // integer part of x !== 0 and fractional part of x !== 0
       const placesBelowZero = -Core.intToNumber(leastSigDigPlace);

@@ -34,16 +34,27 @@
 
 export class Flt {
 
-  private f: float;
+  private readonly f: float;
 
   constructor(f: float) {
     this.f = f;
   }
 
   public abs(): Flt {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    if (!Comparison.isNegative(this.f)) {
+      return this;
+    } else {
+      return new Flt(Sign.negateF(this.f));
+    }
   }
+
+  public static getFloat(x: Flt): float { return x.f; }
+
+  public static instance(x: any): x is Flt {
+    return typeof x === "object" && x !== null && Core.instance(x.f) &&
+      typeof x.abs === "function" && typeof x.isPOSITIVE_INFINITY === "function";
+  }
+
 
   public acos(prec?: P | null | undefined): Flt {
     // TODO: implement this function
@@ -145,60 +156,27 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 
-  public isEven(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isEven(): boolean { return Parity.isEven(this.f); }
 
-  public isFinite(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isFinite(): boolean { return Comparison.isFinite(this.f); }
 
-  public isInteger(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isInteger(): boolean { return Conversion.isInteger(this.f); }
 
-  public isNaN(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isNaN(): boolean { return Comparison.isNaN(this.f); }
 
-  public isNegative(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isNegative(): boolean { return Comparison.isNegative(this.f); }
 
-  public isNEGATIVE_INFINITY(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isNEGATIVE_INFINITY(): boolean { return Comparison.isNEGATIVE_INFINITY(this.f); }
 
-  public isOdd(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isOdd(): boolean { return Parity.isOdd(this.f); }
 
-  public isOne(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isOne(): boolean { return Comparison.isOne(this.f); }
 
-  public isPositive(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isPositive(): boolean { return Comparison.isPositive(this.f); }
 
-  public isPOSITIVE_INFINITY(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isPOSITIVE_INFINITY(): boolean { return Comparison.isPOSITIVE_INFINITY(this.f); }
 
-  public isZero(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isZero(): boolean { return Comparison.isZero(this.f); }
 
   public ln(prec?: P | null | undefined): Flt {
     // TODO: implement this function
@@ -254,10 +232,7 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 
-  public neg(): Flt {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public neg(): Flt { return new Flt(Sign.negateF(this.f)); }
 
   public plus(y: Flt | Int | number | string, prec?: P | null | undefined): Flt {
     // TODO: implement this function
@@ -348,14 +323,6 @@ export class Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
-
-
-  public static getFloat(x: Flt): float { return x.f; }
-
-  public static instance(x: any): x is Flt {
-    return typeof x === "object" && x !== null && Core.instance(x.f) &&
-      typeof x.abs === "function" && typeof x.isPOSITIVE_INFINITY === "function";
-  }
 }
 
 import {float} from "../interfaces/float";
@@ -363,8 +330,23 @@ import {float} from "../interfaces/float";
 import {Int as IntAlias} from "./Int";
 export type Int = IntAlias;
 
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Sign as SignAlias} from "../basicFunctions/Sign";
+const Sign = SignAlias;
+
+import {Parity as ParityAlias} from "../basicFunctions/Parity";
+const Parity = ParityAlias;
+
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
+
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;
 
 import {P as PAlias} from "../core/P";
 export type P = PAlias;

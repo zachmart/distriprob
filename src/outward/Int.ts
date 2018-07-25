@@ -31,20 +31,31 @@
 
 
 export class Int {
-  private i: int;
+  private readonly i: int;
+  private readonly f: float;
 
   constructor(i: int) {
     this.i = i;
+    this.f = Conversion.intToFloatFullPrecision(i, true);
+  }
+
+  public static getInt(a: Int): int { return a.i; }
+
+  public static instance(a: any): a is Int {
+    return typeof a === "object" && a !== null && Core.instanceI(a.i) &&
+      typeof a.abs === "function" && typeof a.isPOSITIVE_INFINITY === "function";
   }
 
   public abs(): Int {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    if (!this.i.neg) {
+      return this;
+    } else {
+      return new Int(Sign.negateI(this.i));
+    }
   }
 
   public dec(): Int {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    return new Int(Basic.addII(this.i, C.I_NEG_1));
   }
 
   public divBy(
@@ -64,13 +75,32 @@ export class Int {
   }
 
   public equals(y: Flt | Int | number): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    if (Core.instanceI(y)) {
+      return Comparison.equalsI(this.i, y)
+    } else if (Flt.instance(y)) {
+      return Comparison.equals(this.f, Flt.getFloat(y));
+    } else if (typeof y === "number") {
+      return Comparison.equals(this.f, Core.numberToFloat(y))
+    } else {
+      throw new Error(
+        `The Int class equals method cannot parse the argument ${y.toString()}`
+      );
+    }
   }
 
   public gt(y: Flt | Int | number): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    if (Core.instanceI(y)) {
+      return Comparison.gtI(this.i, y)
+    } else if (Flt.instance(y)) {
+      return Comparison.gt(this.f, Flt.getFloat(y));
+    } else if (typeof y === "number") {
+      return Comparison.gt(this.f, Core.numberToFloat(y))
+    } else {
+      throw new Error(
+        `The Int class gt (greater than) method cannot parse the argument ${
+          y.toString()}`
+      );
+    }
   }
 
   public gte(y: Flt | Int | number): boolean {
@@ -78,65 +108,31 @@ export class Int {
     throw new Error("this method is not implemented yet");
   }
 
-  public inc(): Int {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public inc(): Int { return new Int(Basic.addII(this.i, C.I_1)); }
 
-  public isEven(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isEven(): boolean { return Parity.isEvenI(this.i); }
 
-  public isFinite(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isFinite(): boolean { return Comparison.isFiniteI(this.i); }
 
-  public isInteger(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isNaN(): boolean { return Comparison.isNaN_I(this.i); }
 
-  public isNaN(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
-
-  public isNegative(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isNegative(): boolean { return Comparison.isNegativeI(this.i); }
 
   public isNEGATIVE_INFINITY(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    return Comparison.isNEGATIVE_INFINITY_I(this.i);
   }
 
-  public isOdd(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isOdd(): boolean { return Parity.isOddI(this.i); }
 
-  public isOne(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isOne(): boolean { return Comparison.isOneI(this.i); }
 
-  public isPositive(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isPositive(): boolean { return Comparison.isPositiveI(this.i); }
 
   public isPOSITIVE_INFINITY(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    return Comparison.isPOSITIVE_INFINITY_I(this.i);
   }
 
-  public isZero(): boolean {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
-  }
+  public isZero(): boolean { return Comparison.isZeroI(this.i); }
 
   public lt(y: Flt | Int | number): boolean {
     // TODO: implement this function
@@ -154,8 +150,7 @@ export class Int {
   }
 
   public neg(): Int {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    return new Int(Sign.negateI(this.i));
   }
 
   public plus(b: Flt | Int | number | string): Int {
@@ -164,8 +159,15 @@ export class Int {
   }
 
   public squared(): Int {
-    // TODO: implement this function
-    throw new Error("this method is not implemented yet");
+    return new Int(Basic.squareI(this.i));
+  }
+
+  public toFloat(prec?: P | null | undefined): Flt {
+    if (prec) {
+      return new Flt(Conversion.intToFloat(this.i, prec, false));
+    } else {
+      return new Flt(this.f);
+    }
   }
 
   public toJSON(): string {
@@ -187,28 +189,42 @@ export class Int {
   ): string {
     return StringWriter.toStr(this.i, radix, maxPrecision);
   }
-
-
-
-  public static getInt(a: Int): int { return a.i; }
-
-  public static instance(a: any): a is Int {
-    return typeof a === "object" && a !== null && Core.instanceI(a.i) &&
-      typeof a.abs === "function" && typeof a.isPOSITIVE_INFINITY === "function";
-  }
 }
 
 import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
 
 import {Flt as FltAlias} from "./Flt";
+const Flt = FltAlias;
 export type Flt = FltAlias;
 
 import {JSONInt as JSONIntAlias} from "./JSONInt";
 const JSONInt = JSONIntAlias;
 
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Sign as SignAlias} from "../basicFunctions/Sign";
+const Sign = SignAlias;
+
+import {Parity as ParityAlias} from "../basicFunctions/Parity";
+const Parity = ParityAlias;
+
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
+
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;
 
 import {StringWriter as StringWriterAlias} from "../core/StringWriter";
 const StringWriter = StringWriterAlias;
 
+import {P as PAlias} from "../core/P";
+const P = PAlias;
+export type P = PAlias;

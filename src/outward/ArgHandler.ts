@@ -58,8 +58,7 @@ export type DomainDescription =
   "nonpositive noninteger real" |
   "probability" |
   "positive infinity" |
-  "negative infinity" |
-  "NaN";
+  "negative infinity";
 
 export type DomainSpec = {
   upperBound?: BoundSpec,
@@ -75,12 +74,6 @@ export type ParameterSpec = {
   finiteAcceptableValues?: Array<any>,
   domain: DomainSpec | "boolean" | "string" | "seed" | "prec",
 };
-
-export type functionSpec = {
-  name: string,
-  params: {[parameterName: string]: ParameterSpec};
-  paramOrder: string[];
-}
 
 
 export class ArgHandler {
@@ -147,7 +140,7 @@ export class ArgHandler {
       }
     } else {
       this.conversionErrors[parameterName] =
-        `Unable to parse argument value as a Float, given: ${value}`;
+        `Unable to parse argument value as a Float, given: ${value.toString()}`;
       return C.F_NaN;
     }
   }
@@ -201,7 +194,7 @@ export class ArgHandler {
       }
     } else {
       this.conversionErrors[parameterName] =
-        `Unable to parse argument value as an Integer, given: ${value}`;
+        `Unable to parse argument value as an Integer, given: ${value.toString()}`;
       return C.NaN;
     }
   }
@@ -238,7 +231,7 @@ export class ArgHandler {
       }
     } else {
       this.conversionErrors[parameterName] =
-        `Unable to parse argument value as a Number given: ${value}`;
+        `Unable to parse argument value as a Number given: ${value.toString()}`;
       return NaN;
     }
   }
