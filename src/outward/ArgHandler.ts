@@ -60,13 +60,16 @@ export type DomainDescription =
   "positive infinity" |
   "negative infinity";
 
+export type input = "Int" | "Float" | "number" | "string"
+
 export type DomainSpec = {
   upperBound?: BoundSpec,
   lowerBound?: BoundSpec,
   unacceptableValues?: Array<number | string | float | int>,
   finiteAcceptableValues?: Array<number | string | float | int>,
   description: Array<DomainDescription>,
-  out: "number" | "int" | "float"
+  in: Array<input>,
+  out: "number" | "Int" | "Float"
 }
 
 export type ParameterSpec = {
