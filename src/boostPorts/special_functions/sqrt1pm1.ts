@@ -56,7 +56,7 @@ const Log = LogAlias;
 import {Exp as ExpAlias} from "../../basicFunctions/Exp";
 const Exp = ExpAlias;
 
-import {P as PAlias} from "../../core/P";
+import {P as PAlias} from "../../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

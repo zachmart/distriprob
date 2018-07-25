@@ -43,7 +43,7 @@ const Basic = BasicAlias;
 import {WHOLE as WHOLEAlias} from "./WHOLE";
 const WHOLE = WHOLEAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

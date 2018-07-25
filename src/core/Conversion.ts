@@ -52,7 +52,7 @@ const Comparison = ComparisonAlias;
 import {Sign as SignAlias} from "../basicFunctions/Sign";
 const Sign = SignAlias;
 
-import {P as PAlias} from "./P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

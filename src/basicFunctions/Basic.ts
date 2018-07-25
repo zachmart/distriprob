@@ -58,7 +58,7 @@ const Comparison = ComparisonAlias;
 import {Longhand as LonghandAlias} from "../core/Longhand";
 const Longhand = LonghandAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

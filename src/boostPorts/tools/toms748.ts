@@ -53,7 +53,7 @@ const Conversion = ConversionAlias;
 import {Pow as PowAlias} from "../../basicFunctions/Pow";
 const Pow = PowAlias;
 
-import {P as PAlias} from "../../core/P";
+import {P as PAlias} from "../../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

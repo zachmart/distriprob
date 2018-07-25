@@ -59,7 +59,7 @@ const FactorialTable = FactorialTableAlias;
 import {LN2 as LN2Alias} from "../constants/LN2";
 const LN2 = LN2Alias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

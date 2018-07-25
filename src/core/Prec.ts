@@ -29,23 +29,91 @@
  *
  */
 
-import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
-
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {Float as FloatAlias} from "../dataTypes/Float";
-const Float = FloatAlias;
 
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
-import {Core as CoreAlias} from "./Core";
-const Core = CoreAlias;
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {Conversion as ConversionAlias} from "./Conversion";
+const Conversion = ConversionAlias;
+
+import {Root as RootAlias} from "../basicFunctions/Root";
+const Root = RootAlias;
+
+import {Log as LogAlias} from "../basicFunctions/Log";
+const Log = LogAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+import {int} from "../interfaces/int";
+const P = PAlias;
+export type P = PAlias;
 
 
-export class P {
+type Entry = {
+  sqrt: float,
+  cbrt: float,
+  fourthRoot: float,
+  truncLogEPSDiv2: float,
+  reciprocalSqrt: float,
+  oneMinusEPS: float
+};
+
+
+export class Prec {
+  private static _table: {[numDigits: number]: Entry};
+
+  private static createEntry(prec: P): Entry {
+    const sqrtEps = Root.squareF(prec.epsilon, prec);
+    const entry: Entry = {
+      sqrt: sqrtEps,
+      cbrt: Root.fn(prec.epsilon, 3, prec),
+      fourthRoot: Root.fn(prec.epsilon, 4, prec),
+      truncLogEPSDiv2: Conversion.trunc(Basic.divideFF(
+        Log.f(prec.epsilon, prec),
+        C.F_NEG_2,
+        prec
+      )),
+      reciprocalSqrt: Basic.reciprocalF(sqrtEps, prec),
+      oneMinusEPS: Basic.subtractFF(C.F_1, prec.epsilon, prec)
+    };
+    Prec._table[prec.numDigits] = entry;
+
+    return entry;
+  }
+
+  private static getEntry(prec: P): Entry {
+    if (typeof Prec._table === "undefined") { Prec._table = {}; }
+
+    let entry: Entry = Prec._table[prec.numDigits];
+
+    if (typeof entry === "undefined") { entry = Prec.createEntry(prec);}
+
+    return entry;
+  }
+
+  public static sqrt(prec: P): float { return Prec.getEntry(prec).sqrt; }
+
+  public static cbrt(prec: P): float { return Prec.getEntry(prec).cbrt; }
+
+  public static fourthRoot(prec: P): float { return Prec.getEntry(prec).fourthRoot; }
+
+  public static truncLogEPSDiv2(prec: P): float {
+    return Prec.getEntry(prec).truncLogEPSDiv2;
+  }
+
+  public static reciprocalSqrt(prec: P): float {
+    return Prec.getEntry(prec).reciprocalSqrt;
+  }
+
+  public static oneMinusEPS(prec: P): float {
+    return Prec.getEntry(prec).oneMinusEPS;
+  }
+}
+
+export class POld {
   public static p: P;
 
   public readonly numDigits: number;

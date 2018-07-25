@@ -295,7 +295,7 @@ export class Flt {
   }
 
   public toJSON(): string {
-    return JSONFlt.stringify(this.f);
+    return JSONFloat.stringify(this.f);
   }
 
   public toNumber(): number {
@@ -348,14 +348,14 @@ const Core = CoreAlias;
 import {Conversion as ConversionAlias} from "../core/Conversion";
 const Conversion = ConversionAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
 
 import {ArgHandler as ArgHandlerAlias} from "./ArgHandler";
 const ArgHandler = ArgHandlerAlias;
 
-import {JSONFlt as JSONFltAlias} from "./JSONFlt";
-const JSONFlt = JSONFltAlias;
+import {JSONFloat as JSONFloatAlias} from "../dataTypes/JSONFloat";
+const JSONFloat = JSONFloatAlias;
 
 import {StringWriter as StringWriterAlias} from "../core/StringWriter";
 const StringWriter = StringWriterAlias;

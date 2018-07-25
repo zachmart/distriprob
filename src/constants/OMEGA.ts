@@ -43,7 +43,7 @@ const Basic = BasicAlias;
 import {Exp as ExpAlias} from "../basicFunctions/Exp";
 const Exp = ExpAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
 
 

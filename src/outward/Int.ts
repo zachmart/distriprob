@@ -198,7 +198,7 @@ import {Flt as FltAlias} from "./Flt";
 const Flt = FltAlias;
 export type Flt = FltAlias;
 
-import {JSONInt as JSONIntAlias} from "./JSONInt";
+import {JSONInt as JSONIntAlias} from "../dataTypes/JSONInt";
 const JSONInt = JSONIntAlias;
 
 import {C as CAlias} from "../constants/C";
@@ -225,6 +225,6 @@ const Conversion = ConversionAlias;
 import {StringWriter as StringWriterAlias} from "../core/StringWriter";
 const StringWriter = StringWriterAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;

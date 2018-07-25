@@ -61,7 +61,7 @@ const Asinh = AsinhAlias;
 import {Atanh as AtanhAlias} from "../boostPorts/special_functions/atanh";
 const Atanh = AtanhAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

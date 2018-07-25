@@ -40,7 +40,7 @@ const C = CAlias;
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

@@ -45,7 +45,7 @@ const Basic = BasicAlias;
 import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
 
-import {EPSILON as EPSILONAlias} from "../../constants/EPSILON";
+import {Prec as EPSILONAlias} from "../../core/Prec";
 const EPSILON = EPSILONAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
@@ -63,7 +63,7 @@ const LN2 = LN2Alias;
 import {Sqrt1pm1 as Sqrt1pm1Alias} from "./sqrt1pm1";
 const Sqrt1pm1 = Sqrt1pm1Alias;
 
-import {P as PAlias} from "../../core/P";
+import {P as PAlias} from "../../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

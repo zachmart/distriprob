@@ -41,7 +41,7 @@ const Basic = BasicAlias;
 import {Root as RootAlias} from "../basicFunctions/Root";
 const Root = RootAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
 
 

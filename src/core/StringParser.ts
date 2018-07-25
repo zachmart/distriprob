@@ -57,7 +57,7 @@ const Conversion = ConversionAlias;
 import {Diff as DiffAlias} from "../basicFunctions/Diff";
 const Diff = DiffAlias;
 
-import {P as PAlias} from "./P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

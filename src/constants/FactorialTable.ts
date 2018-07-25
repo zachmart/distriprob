@@ -53,7 +53,7 @@ const Comparison = ComparisonAlias;
 import {Conversion as ConversionAlias} from "../core/Conversion";
 const Conversion = ConversionAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

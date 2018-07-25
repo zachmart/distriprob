@@ -62,7 +62,7 @@ const Exp = ExpAlias;
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
 
-import {P as PAlias} from "../../core/P";
+import {P as PAlias} from "../../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

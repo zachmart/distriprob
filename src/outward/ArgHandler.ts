@@ -66,7 +66,6 @@ export type DomainSpec = {
   upperBound?: BoundSpec,
   lowerBound?: BoundSpec,
   unacceptableValues?: Array<number | string | float | int>,
-  finiteAcceptableValues?: Array<number | string | float | int>,
   description: Array<DomainDescription>,
   in: Array<input>,
   out: "number" | "Int" | "Float"
@@ -75,14 +74,19 @@ export type DomainSpec = {
 export type ParameterSpec = {
   default?: DefaultSpec,
   finiteAcceptableValues?: Array<any>,
-  domain: DomainSpec | "boolean" | "string" | "seed" | "prec",
+  domain: DomainSpec |
+    "boolean" |
+    "string" |
+    "seed" |
+    "prec" |
+    "JSONInt" |
+    "JSONFloat",
 };
 
 
 export class ArgHandler {
   private readonly functionName: string;
   private readonly domainDescriptionStrings: {[parameterName: string]: string};
-  private readonly funct: Function;
   private readonly paramSpecs: {[parameterName: string]: ParameterSpec};
   private readonly paramOrder: Array<String>;
   private readonly conversionErrors: {[parameterName: string]: string};
@@ -91,7 +95,6 @@ export class ArgHandler {
 
   constructor(
     functionName: string,
-    funct: Function,
     paramSpecs: {[parameterName: string]: ParameterSpec},
     paramOrder: Array<String>
   ) {
@@ -640,6 +643,6 @@ const StringParser = StringParserAlias;
 import {StringWriter as StringWriterAlias} from "../core/StringWriter";
 const StringWriter = StringWriterAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;

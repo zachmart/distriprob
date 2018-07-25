@@ -29,29 +29,43 @@
  *
  */
 
-import {float} from "../interfaces/float";
+export type TypeDescriptor = "string" |
+  "number" |
+  "float" |
+  "int" |
+  "JSONFloat" |
+  "JSONInt";
 
-import {C as CAlias} from "./C";
-const C = CAlias;
-
-import {Exp as ExpAlias} from "../basicFunctions/Exp";
-const Exp = ExpAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-
-export class E {
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (!E._numDigits || E._numDigits < prec.numDigits) {
-      E._value = Exp.f(C.F_1, prec);
-      E._numDigits = prec.numDigits;
+export class ErrorUtil {
+  public static typeDescription(x: any): string {
+    if (Core.instance(x)) {
+      return "float";
+    } else if (Core.instanceI(x)) {
+      return "int";
+    } else if (JSONFloat.instance(x)) {
+      return "JSONFloat";
+    } else if (JSONInt.instance(x)) {
+      return "JSONInt";
+    } else if (typeof x === "object") {
+      return `object(constructor: ${x.constructor.name}`;
+    } else {
+      return typeof x;
     }
+  }
 
-    return E._value;
+  public static isTypeDescriptor(x: any): x is TypeDescriptor {
+    return typeof x === "string" && (
+      x === "string" || x === "number" || x === "float" || x === "int" ||
+      x === "JSONFloat" || x === "JSONInt"
+    );
   }
 }
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {JSONInt as JSONIntAlias} from "../dataTypes/JSONInt";
+const JSONInt = JSONIntAlias;
+
+import {JSONFloat as JSONFloatAlias} from "../dataTypes/JSONFloat";
+const JSONFloat = JSONFloatAlias;

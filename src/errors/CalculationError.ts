@@ -29,29 +29,29 @@
  *
  */
 
-import {float} from "../interfaces/float";
 
-import {C as CAlias} from "./C";
-const C = CAlias;
+/**
+ * This class's instances are meant to be thrown when a calculation fails for some reason.
+ */
+export class CalculationError {
+  public readonly name: "CalculationError";
+  public readonly message: string;
+  public readonly className: string;
+  public readonly functionName: string;
+  public readonly stack: string | undefined;
 
-import {Exp as ExpAlias} from "../basicFunctions/Exp";
-const Exp = ExpAlias;
+  constructor(className: string, functionName: string, message: string) {
+    this.name = "CalculationError";
+    this.message = message;
+    this.className = className;
+    this.functionName = functionName;
+    this.stack = (new Error("")).stack;
+  }
 
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-
-export class E {
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (!E._numDigits || E._numDigits < prec.numDigits) {
-      E._value = Exp.f(C.F_1, prec);
-      E._numDigits = prec.numDigits;
-    }
-
-    return E._value;
+  public static instance(x: any): x is CalculationError {
+    return typeof x === "object" && x !== null && x.name === "CalculationError" &&
+      typeof x.message === "string" && typeof x.className === "string" &&
+      typeof x.functionName === "string" &&
+      (typeof x.stack === "undefined" || typeof x.stack === "string");
   }
 }

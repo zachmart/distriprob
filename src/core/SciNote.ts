@@ -43,7 +43,7 @@ const Basic = BasicAlias;
 import {Conversion as ConversionAlias} from "./Conversion";
 const Conversion = ConversionAlias;
 
-import {P as PAlias} from "./P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

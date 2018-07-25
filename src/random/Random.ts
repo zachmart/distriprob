@@ -58,7 +58,7 @@ const WELL1024A = WELL1024AAlias;
 import {ARC4 as ARC4Alias, ARC4State} from "./ARC4";
 const ARC4 = ARC4Alias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

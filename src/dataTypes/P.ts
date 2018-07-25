@@ -29,29 +29,54 @@
  *
  */
 
+import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
 
-import {C as CAlias} from "./C";
+import {Integer as IntegerAlias} from "./Integer";
+const Integer = IntegerAlias;
+
+import {Float as FloatAlias} from "./Float";
+const Float = FloatAlias;
+
+import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
-import {Exp as ExpAlias} from "../basicFunctions/Exp";
-const Exp = ExpAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
 
 
-export class E {
-  private static _value: float;
-  private static _numDigits: number;
+export class P {
+  public static DECIMAL_DIGITS_PER_BINARY_DIGIT: number;
+  public static BINARY_DIGITS_PER_DECIMAL_DIGIT: number;
 
-  public static value(prec: P): float {
-    if (!E._numDigits || E._numDigits < prec.numDigits) {
-      E._value = Exp.f(C.F_1, prec);
-      E._numDigits = prec.numDigits;
+  public static init0(): void {
+    P.DECIMAL_DIGITS_PER_BINARY_DIGIT = 0.3010299956639812;
+    P.BINARY_DIGITS_PER_DECIMAL_DIGIT = 3.321928094887362;
+  }
+
+
+  public readonly baseDigits: number;
+  public readonly baseDigitsInt: int;
+  public readonly binDigits: number;
+  public readonly decDigits: number;
+  public readonly type: "base" | "dec" | "bin";
+
+  constructor(digits: number, type: "base" | "dec" | "bin") {
+    if (type === "base") {
+      this.binDigits = digits * C.POWER_OF_TWO_FOR_BASE;
+      this.decDigits = Math.floor(P.DECIMAL_DIGITS_PER_BINARY_DIGIT * this.binDigits);
+      this.baseDigits = digits + 1;
+    } else if (type === "dec") {
+      this.binDigits = Math.ceil(P.BINARY_DIGITS_PER_DECIMAL_DIGIT * digits);
+      this.decDigits = digits;
+      this.baseDigits = Math.ceil(this.binDigits / C.POWER_OF_TWO_FOR_BASE) + 1;
+    } else if (type === "bin") {
+      this.binDigits = digits;
+      this.decDigits = Math.floor(P.DECIMAL_DIGITS_PER_BINARY_DIGIT * digits);
+      this.baseDigits = Math.ceil(digits / C.POWER_OF_TWO_FOR_BASE) + 1;
+    } else {
+
     }
-
-    return E._value;
   }
 }
+

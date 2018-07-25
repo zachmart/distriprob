@@ -64,7 +64,7 @@ const Power = PowerAlias;
 import {Log as LogAlias} from "../basicFunctions/Log";
 const Log = LogAlias;
 
-import {P as PAlias} from "./P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

@@ -45,7 +45,7 @@ const Basic = BasicAlias;
 import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
 
-import {EPSILON as EPSILONAlias} from "../../constants/EPSILON";
+import {Prec as EPSILONAlias} from "../../core/Prec";
 const EPSILON = EPSILONAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
@@ -57,7 +57,7 @@ const Log = LogAlias;
 import {StringWriter as StringWriterAlias} from "../../core/StringWriter";
 const StringWriter = StringWriterAlias;
 
-import {P as PAlias} from "../../core/P";
+import {P as PAlias} from "../../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

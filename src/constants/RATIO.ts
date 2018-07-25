@@ -40,7 +40,7 @@ const Core = CoreAlias;
 import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 

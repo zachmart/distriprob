@@ -29,70 +29,39 @@
  *
  */
 
-
-export class JSONInt {
-  public static stringify(a: int): string {
-    if (a.type === intType.finite) {
-      let result = `JSONInt${a.neg ? "-" : "+"}`;
-
-      for (let i = 0 ; i < a.digits.length; i++) {
-        const digitStr =  a.digits[i].toString(36);
-
-        if (digitStr.length === 6) {
-          result += digitStr;
-        } else if (digitStr.length === 5) {
-          result += `0${digitStr}`;
-        } else if (digitStr.length === 4) {
-          result += `00${digitStr}`;
-        } else if (digitStr.length === 3) {
-          result += `000${digitStr}`;
-        } else if (digitStr.length === 2) {
-          result += `0000${digitStr}`;
-        } else if (digitStr.length === 1) {
-          result += `00000${digitStr}`;
-        } else {
-          throw new Error(
-            `digitStr length must be between 6 and 1, got: ${digitStr.length}`
-          );
-        }
-      }
-
-      return result;
-    } else if (a.type === intType.infinite) {
-      return `JSONInt${a.neg ? "-" : "+"}Infinity`;
+export class JSONFloat {
+  public static stringify(x: float): string {
+    if (Comparison.isNaN(x)) {
+      return "JSONFltNaN";
+    } else if (Comparison.isPOSITIVE_INFINITY(x)) {
+      return "JSONFloat+Infinity";
+    } else if (Comparison.isNEGATIVE_INFINITY(x)) {
+      return "JSONFloat-Infinity";
     } else {
-      return `JSONIntNaN`;
+      return `JSONFlt${JSONInt.stringify(x.coef)}#${JSONInt.stringify(x.exp)}`;
     }
   }
 
-  public static parse(str: string): int {
+  public static parse(str: string): float {
     if (str.substring(7, 10) === "NaN") {
-      return C.NaN;
+      return C.F_NaN;
     } else if (str.substring(8, 16) === "Infinity") {
       if (str.substring(7, 8) === "+") {
-        return C.POSITIVE_INFINITY;
+        return C.F_POSITIVE_INFINITY;
       } else {
-        return C.NEGATIVE_INFINITY;
+        return C.F_NEGATIVE_INFINITY;
       }
     } else {
-      const neg = str.substring(7, 8) === "-";
-      const digitsLength = (str.length - 8) / 6;
-      const digits = new Uint32Array(digitsLength);
-      let start = 8;
-      let end = 14;
+      const indexToBreakOn = str.indexOf("#", 19);
+      const coefStr = str.substring(7, indexToBreakOn);
+      const expStr = str.substring(indexToBreakOn + 1);
 
-      for (let i = 0; i < digitsLength; i++) {
-        digits[i] = parseInt(str.substring(start, end), 36);
-        start += 6;
-        end += 6;
-      }
-
-      return new Integer(neg, digits);
+      return new Float(JSONInt.parse(coefStr), JSONInt.parse(expStr));
     }
   }
 
   public static instance(x: any): boolean {
-    if (typeof x === "string" && x.length >= 10 && x.substring(0, 7) === "JSONInt") {
+    if (typeof x === "string" && x.length >= 10 && x.substring(0, 7) === "JSONFloat") {
       if (x.length === 10 && x.substring(7, 10) === "NaN") {
         return true;
       } else if (x.length === 16 && x.substring(8, 16) === "Infinity") {
@@ -105,20 +74,16 @@ export class JSONInt {
           return false;
         }
 
-        if ((x.length - 8) % 6 !== 0) {
+        const indexToBreakOn = x.indexOf("#", 19);
+
+        if (indexToBreakOn === -1) {
           return false;
         }
 
-        let charCode: number;
+        const coefStr = x.substring(7, indexToBreakOn);
+        const expStr = x.substring(indexToBreakOn + 1);
 
-        for (let i = 8; i < x.length; i++) {
-          charCode = x.charCodeAt(i);
-          if (charCode < 48 || charCode > 122 || (charCode > 57 && charCode < 97)) {
-            return false
-          }
-        }
-
-        return true;
+        return JSONInt.instance(coefStr) && JSONInt.instance(expStr);
       }
     } else {
       return false;
@@ -126,14 +91,16 @@ export class JSONInt {
   }
 }
 
-import {int, intType} from "../interfaces/int";
+import {float} from "../interfaces/float";
 
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
+import {Float as FloatAlias} from "./Float";
+const Float = FloatAlias;
 
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
-import {Int as IntAlias} from "./Int";
-const Int = IntAlias;
-export type Int = IntAlias;
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {JSONInt as JSONIntAlias} from "./JSONInt";
+const JSONInt = JSONIntAlias;

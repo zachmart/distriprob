@@ -73,7 +73,7 @@ const RATIO = RATIOAlias;
 import {Powm1 as Powm1Alias} from "../boostPorts/special_functions/powm1";
 const Powm1 = Powm1Alias;
 
-import {P as PAlias} from "../core/P";
+import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
 
