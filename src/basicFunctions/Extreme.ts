@@ -29,21 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Conversion as ConversionAlias} from "../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
 
 export class Extreme {
 
@@ -107,12 +92,6 @@ export class Extreme {
     maxIndex: number,
     prec: P
   ): float {
-    if (typeof maxIndex === "undefined") {
-      maxIndex = Number.POSITIVE_INFINITY;
-    } else if (maxIndex < 0) {
-      return C.F_NaN;
-    }
-
     let i = 0;
     let extreme = C.F_NaN;
     let valFloat: float;
@@ -138,3 +117,22 @@ export class Extreme {
     return extreme;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+const P = PAlias;
+export type P = PAlias;

@@ -40,7 +40,7 @@ const C = CAlias;
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 
-import {Float as FloatAlias} from "../dataTypes/Float";
+import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
 const Float = FloatAlias;
 
 

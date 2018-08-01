@@ -30,65 +30,17 @@
  */
 
 
-export class Parity {
-  public static isEvenI(a: int): boolean {
-    if (Comparison.isFiniteI(a)) {
-      return (a.digits[a.digits.length - 1] & 1) === 0;
-    } else {
-      return false;
-    }
-  }
+export class FloatDivisionResult {
+  public quotient: float;
+  public remainder: float;
 
-  public static isEven(x: float): boolean {
-    if (Comparison.isFinite(x)) {
-      const leastSigDigPlace = Basic.leastSigDigPlaceF(x);
-
-      if (Comparison.isPositiveI(leastSigDigPlace)) {
-        return true;
-      } else if (Comparison.isZeroI(leastSigDigPlace)) {
-        return (x.coef.digits[x.coef.digits.length - 1] & 1) === 0;
-      } else {
-        return false; // x is not an integer
-      }
-    } else {
-      return false;
-    }
-  }
-
-  public static isOddI(a: int): boolean {
-    if (Comparison.isFiniteI(a)) {
-      return (a.digits[a.digits.length - 1] & 1) === 1;
-    } else {
-      return false;
-    }
-  }
-
-  public static isOdd(x: float): boolean {
-    if (Comparison.isFinite(x)) {
-      const leastSigDigPlace = Basic.leastSigDigPlaceF(x);
-
-      if (Comparison.isPositiveI(leastSigDigPlace)) {
-        return false;
-      } else if (Comparison.isZeroI(leastSigDigPlace)) {
-        return (x.coef.digits[x.coef.digits.length - 1] & 1) === 1;
-      } else {
-        return false; // x is not an integer
-      }
-    } else {
-      return false;
-    }
+  constructor(quotient: float, remainder: float) {
+    this.quotient = quotient;
+    this.remainder = remainder
   }
 }
 
-
 // *** imports come at end to avoid circular dependency ***
 
-import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
-
-import {Comparison as ComparisonAlias} from "./Comparison";
-const Comparison = ComparisonAlias;
-
-import {Basic as BasicAlias} from "./Basic";
-const Basic = BasicAlias;
 

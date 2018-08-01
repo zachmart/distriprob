@@ -37,30 +37,34 @@
 export class DomainError {
   public readonly name: "DomainError";
   public readonly message: string;
-  public readonly valueStr: string;
-  public readonly expectedType: TypeDescriptor;
-  public readonly actualType: string;
+  public readonly parameterInfo: {[parameterName: string]: {
+      valueStr: string,
+      expectedType: TypeDescriptor,
+      actualType: string
+  }};
   public readonly className: string;
   public readonly functionName: string;
-  public readonly parameterName: string;
   public readonly stack: string | undefined;
 
   constructor(
     className: string,
     functionName: string,
-    parameterName: string,
-    expectedType: TypeDescriptor,
-    value: any,
+    parameters: {[parameterName: string]: {value: any, expectedType: TypeDescriptor}},
     message: string
   ) {
     this.name = "DomainError";
-    this.valueStr = value.toString();
-    this.expectedType = expectedType;
-    this.parameterName = parameterName;
     this.className = className;
     this.functionName = functionName;
     this.stack = (new Error("")).stack;
-    this.actualType = ErrorUtil.typeDescription(value);
+    this.parameterInfo = {};
+
+    for (let paramName in parameters) {
+      this.parameterInfo[paramName] = {
+        valueStr: parameters[paramName].value.toString(),
+        expectedType: parameters[paramName].expectedType,
+        actualType: ErrorUtil.typeDescription(parameters[paramName].value)
+      }
+    }
 
     this.message = message;
   }
@@ -68,11 +72,8 @@ export class DomainError {
   public static instance(x: any): x is DomainError {
     return typeof x === "object" && x !== null && x.name === "DomainError" &&
       typeof x.message === "string" && typeof x.className === "string" &&
-      typeof x.functionName === "string" && typeof x.parameterName === "string" &&
-      (typeof x.stack === "undefined" || typeof x.stack === "string") &&
-      typeof x.valueStr === "string" &&
-      ErrorUtil.isTypeDescriptor(x.expectedType) &&
-      typeof x.actualType === "string";
+      typeof x.functionName === "string" && typeof x.parameterInfo === "object" &&
+      (typeof x.stack === "undefined" || typeof x.stack === "string");
   }
 }
 

@@ -35,8 +35,8 @@ import {float} from "../interfaces/float";
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 
-import {Float as FloatAlias} from "../dataTypes/Float";
-const Float = FloatAlias;
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
 
 
 export class C {
@@ -141,7 +141,7 @@ export class C {
   public static F_BASE_RECIPROCAL: float;
 
 
-  public static setStaticProperties(): void {
+  public static init0(): void {
     // BASE constants
     C.POWER_OF_TWO_FOR_BASE = 26;
     C.POWER_OF_TWO_FOR_BASE_INT = new Integer(
@@ -205,62 +205,62 @@ export class C {
     C.NUMBER_MIN_SAFE_INTEGER = new Integer(true, C.ARR_NUMBER_MAX_SAFE_INTEGER);
 
     // floating point constants
-    C.F_NaN = new Float(C.NaN, C.NaN);
-    C.F_POSITIVE_INFINITY = new Float(C.POSITIVE_INFINITY, C.POSITIVE_INFINITY);
-    C.F_NEGATIVE_INFINITY = new Float(C.NEGATIVE_INFINITY, C.POSITIVE_INFINITY);
-    C.F_NEG_10 = new Float(C.I_NEG_10, C.I_0);
-    C.F_NEG_9 = new Float(C.I_NEG_9, C.I_0);
-    C.F_NEG_8 = new Float(C.I_NEG_8, C.I_0);
-    C.F_NEG_7 = new Float(C.I_NEG_7, C.I_0);
-    C.F_NEG_6 = new Float(C.I_NEG_6, C.I_0);
-    C.F_NEG_5 = new Float(C.I_NEG_5, C.I_0);
-    C.F_NEG_4 = new Float(C.I_NEG_4, C.I_0);
-    C.F_NEG_3 = new Float(C.I_NEG_3, C.I_0);
-    C.F_NEG_2 = new Float(C.I_NEG_2, C.I_0);
-    C.F_NEG_1 = new Float(C.I_NEG_1, C.I_0);
-    C.F_0 = new Float(C.I_0, C.I_0);
-    C.F_1 = new Float(C.I_1, C.I_0);
-    C.F_2 = new Float(C.I_2, C.I_0);
-    C.F_3 = new Float(C.I_3, C.I_0);
-    C.F_4 = new Float(C.I_4, C.I_0);
-    C.F_5 = new Float(C.I_5, C.I_0);
-    C.F_6 = new Float(C.I_6, C.I_0);
-    C.F_7 = new Float(C.I_7, C.I_0);
-    C.F_8 = new Float(C.I_8, C.I_0);
-    C.F_9 = new Float(C.I_9, C.I_0);
-    C.F_10 = new Float(C.I_10, C.I_0);
-    C.F_16 = new Float(C.I_16, C.I_0);
-    C.F_64 = new Float(C.I_64, C.I_0);
-    C.F_256 = new Float(C.I_256, C.I_0);
-    C.F_NEG_ONE_EIGHTH = new Float(
+    C.F_NaN = new FloatingPoint(C.NaN, C.NaN);
+    C.F_POSITIVE_INFINITY = new FloatingPoint(C.POSITIVE_INFINITY, C.POSITIVE_INFINITY);
+    C.F_NEGATIVE_INFINITY = new FloatingPoint(C.NEGATIVE_INFINITY, C.POSITIVE_INFINITY);
+    C.F_NEG_10 = new FloatingPoint(C.I_NEG_10, C.I_0);
+    C.F_NEG_9 = new FloatingPoint(C.I_NEG_9, C.I_0);
+    C.F_NEG_8 = new FloatingPoint(C.I_NEG_8, C.I_0);
+    C.F_NEG_7 = new FloatingPoint(C.I_NEG_7, C.I_0);
+    C.F_NEG_6 = new FloatingPoint(C.I_NEG_6, C.I_0);
+    C.F_NEG_5 = new FloatingPoint(C.I_NEG_5, C.I_0);
+    C.F_NEG_4 = new FloatingPoint(C.I_NEG_4, C.I_0);
+    C.F_NEG_3 = new FloatingPoint(C.I_NEG_3, C.I_0);
+    C.F_NEG_2 = new FloatingPoint(C.I_NEG_2, C.I_0);
+    C.F_NEG_1 = new FloatingPoint(C.I_NEG_1, C.I_0);
+    C.F_0 = new FloatingPoint(C.I_0, C.I_0);
+    C.F_1 = new FloatingPoint(C.I_1, C.I_0);
+    C.F_2 = new FloatingPoint(C.I_2, C.I_0);
+    C.F_3 = new FloatingPoint(C.I_3, C.I_0);
+    C.F_4 = new FloatingPoint(C.I_4, C.I_0);
+    C.F_5 = new FloatingPoint(C.I_5, C.I_0);
+    C.F_6 = new FloatingPoint(C.I_6, C.I_0);
+    C.F_7 = new FloatingPoint(C.I_7, C.I_0);
+    C.F_8 = new FloatingPoint(C.I_8, C.I_0);
+    C.F_9 = new FloatingPoint(C.I_9, C.I_0);
+    C.F_10 = new FloatingPoint(C.I_10, C.I_0);
+    C.F_16 = new FloatingPoint(C.I_16, C.I_0);
+    C.F_64 = new FloatingPoint(C.I_64, C.I_0);
+    C.F_256 = new FloatingPoint(C.I_256, C.I_0);
+    C.F_NEG_ONE_EIGHTH = new FloatingPoint(
       new Integer(true, Uint32Array.of(C.BASE_DIV_8)),
       C.I_NEG_1
     );
-    C.F_NEG_ONE_QUARTER = new Float(
+    C.F_NEG_ONE_QUARTER = new FloatingPoint(
       new Integer(true, Uint32Array.of(C.BASE_DIV_4)),
       C.I_NEG_1
     );
-    C.F_NEG_ONE_HALF = new Float(
+    C.F_NEG_ONE_HALF = new FloatingPoint(
       new Integer(true, Uint32Array.of(C.BASE_DIV_2)),
       C.I_NEG_1
     );
-    C.F_ONE_HALF = new Float(
+    C.F_ONE_HALF = new FloatingPoint(
       new Integer(false, Uint32Array.of(C.BASE_DIV_2)),
       C.I_NEG_1
     );
-    C.F_ONE_QUARTER = new Float(
+    C.F_ONE_QUARTER = new FloatingPoint(
       new Integer(false, Uint32Array.of(C.BASE_DIV_4)),
       C.I_NEG_1
     );
-    C.F_ONE_EIGHTH = new Float(
+    C.F_ONE_EIGHTH = new FloatingPoint(
       new Integer(false, Uint32Array.of(C.BASE_DIV_8)),
       C.I_NEG_1
     );
-    C.F_NUMBER_MAX_SAFE_INTEGER = new Float(C.NUMBER_MAX_SAFE_INTEGER, C.I_2);
-    C.F_NUMBER_MIN_SAFE_INTEGER = new Float(C.NUMBER_MIN_SAFE_INTEGER, C.I_2);
-    C.F_NUMBER_EPSILON = new Float(C.I_1, C.I_NEG_2);
-    C.F_BASE_RECIPROCAL = new Float(C.I_1, C.I_NEG_1);
-    C.POWER_OF_TWO_FOR_BASE_FLOAT = new Float(
+    C.F_NUMBER_MAX_SAFE_INTEGER = new FloatingPoint(C.NUMBER_MAX_SAFE_INTEGER, C.I_2);
+    C.F_NUMBER_MIN_SAFE_INTEGER = new FloatingPoint(C.NUMBER_MIN_SAFE_INTEGER, C.I_2);
+    C.F_NUMBER_EPSILON = new FloatingPoint(C.I_1, C.I_NEG_2);
+    C.F_BASE_RECIPROCAL = new FloatingPoint(C.I_1, C.I_NEG_1);
+    C.POWER_OF_TWO_FOR_BASE_FLOAT = new FloatingPoint(
       C.POWER_OF_TWO_FOR_BASE_INT,
       C.I_0
     );

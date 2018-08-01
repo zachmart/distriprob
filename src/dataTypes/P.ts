@@ -29,21 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {Integer as IntegerAlias} from "./Integer";
-const Integer = IntegerAlias;
-
-import {Float as FloatAlias} from "./Float";
-const Float = FloatAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
 
 export class P {
   public static DECIMAL_DIGITS_PER_BINARY_DIGIT: number;
@@ -54,12 +39,14 @@ export class P {
     P.BINARY_DIGITS_PER_DECIMAL_DIGIT = 3.321928094887362;
   }
 
-
   public readonly baseDigits: number;
   public readonly baseDigitsInt: int;
   public readonly binDigits: number;
   public readonly decDigits: number;
   public readonly type: "base" | "dec" | "bin";
+  public readonly quadraticConvergenceSteps: number;
+  public readonly epsilon: float;
+  public readonly maxSafeInt: float;
 
   constructor(digits: number, type: "base" | "dec" | "bin") {
     if (type === "base") {
@@ -75,8 +62,70 @@ export class P {
       this.decDigits = Math.floor(P.DECIMAL_DIGITS_PER_BINARY_DIGIT * digits);
       this.baseDigits = Math.ceil(digits / C.POWER_OF_TWO_FOR_BASE) + 1;
     } else {
-
+      throw new DomainError(
+        "P",
+        "constructor",
+        "type",
+        "string",
+        type,
+        `type should be "base" | "dec" | "bin", given ${type}`
+      )
     }
+
+    this.baseDigitsInt = Core.numberToIntUnchecked(this.baseDigits);
+    this.type = type;
+    this.quadraticConvergenceSteps = P.quadraticConvergenceSteps(this.baseDigits);
+    this.epsilon = P.epsilon(this.baseDigits);
+    this.maxSafeInt = P.maxSafeInt(this.baseDigits);
+  }
+
+  public static instance(x: any): x is P {
+    return typeof x === "object" && x !== null && typeof x.baseDigits === "number" &&
+      Core.instanceI(x.baseDigitsInt) && typeof x.binDigits === "number" &&
+      typeof x.decDigits === "number" &&
+      (x.type === "base" || x.type === "dec" || x.type === "bin") &&
+      typeof x.quadraticConvergenceSteps === "number";
+  }
+
+  private static epsilon(baseDigits: number): float {
+    return new FloatingPoint(
+      C.I_2,
+      Core.numberToIntUnchecked(1 - baseDigits)
+    );
+  }
+
+  private static maxSafeInt(baseDigits: number): float {
+    return new FloatingPoint(
+      new Integer(
+        false,
+        Uint32Array.from(Array(baseDigits - 1).fill(C.BASE_MINUS_ONE))
+      ),
+      Core.numberToIntUnchecked(baseDigits - 2)
+    );
+  }
+
+  private static quadraticConvergenceSteps(baseDigits: number): number {
+    return Math.ceil(Math.log2((baseDigits * C.POWER_OF_TWO_FOR_BASE + 1) / 50));
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+import {Integer as IntegerAlias} from "./Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "./FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;

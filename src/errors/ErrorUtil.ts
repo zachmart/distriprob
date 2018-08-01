@@ -34,7 +34,8 @@ export type TypeDescriptor = "string" |
   "float" |
   "int" |
   "JSONFloat" |
-  "JSONInt";
+  "JSONInt" |
+  "P";
 
 export class ErrorUtil {
   public static typeDescription(x: any): string {
@@ -56,10 +57,13 @@ export class ErrorUtil {
   public static isTypeDescriptor(x: any): x is TypeDescriptor {
     return typeof x === "string" && (
       x === "string" || x === "number" || x === "float" || x === "int" ||
-      x === "JSONFloat" || x === "JSONInt"
+      x === "JSONFloat" || x === "JSONInt" || x === "P"
     );
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
 
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;

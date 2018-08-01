@@ -29,19 +29,12 @@
  *
  */
 
-import {int} from "../interfaces/int";
-
-import {Integer} from "../dataTypes/Integer";
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
 
 export class Bitwise {
   private static SINGLE_BITMASKS: Uint32Array;
   private static VALID_BITS_MASK: number;
 
-  private static setup(): void {
+  public static init1(): void {
     const bitmasks: number[] = [1];
     for (let i = 1; i < C.POWER_OF_TWO_FOR_BASE; i++) { bitmasks.push(1<<i); }
     Bitwise.SINGLE_BITMASKS = Uint32Array.from(bitmasks);
@@ -145,7 +138,6 @@ export class Bitwise {
   }
 
   public static leftShiftI(a: int, places: number): int {
-    if (typeof Bitwise.SINGLE_BITMASKS === "undefined") { Bitwise.setup(); }
     if (places === 0 || (a.digits.length === 1 && a.digits[0] === 0)) { return a; }
     if (places < 0) { return Bitwise.rightShiftI(a, -places); }
 
@@ -183,7 +175,6 @@ export class Bitwise {
   }
 
   public static rightShiftI(a: int, places: number): int {
-    if (typeof Bitwise.SINGLE_BITMASKS === "undefined") { Bitwise.setup(); }
     if (places === 0 || (a.digits.length === 1 && a.digits[0] === 0)) { return a; }
     if (places < 0) { return Bitwise.leftShiftI(a, -places); }
 
@@ -220,7 +211,6 @@ export class Bitwise {
   }
 
   public static lengthI(a: int): number {
-    if (typeof Bitwise.SINGLE_BITMASKS === "undefined") { Bitwise.setup(); }
     const fullPositionBits = (a.digits.length - 1) * C.POWER_OF_TWO_FOR_BASE;
 
     let i = C.POWER_OF_TWO_FOR_BASE - 1;
@@ -264,5 +254,18 @@ export class Bitwise {
     return result;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+
+// functional imports
+import {Integer} from "../dataTypes/Integer";
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
 
 

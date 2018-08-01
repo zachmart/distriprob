@@ -29,39 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {IntegerDivisionResult as IntegerDivisionResultAlias}
-  from "../dataTypes/IntegerDivisionResult";
-const IntegerDivisionResult = IntegerDivisionResultAlias;
-
-// functional imports
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {Float as FloatAlias} from "../dataTypes/Float";
-const Float = FloatAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "./Sign";
-const Sign = SignAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "./Comparison";
-const Comparison = ComparisonAlias;
-
-import {Longhand as LonghandAlias} from "../core/Longhand";
-const Longhand = LonghandAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
 
 export class Basic {
   // ********************* integer functions ************************************
@@ -108,7 +75,11 @@ export class Basic {
 
     } else {
       if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)) {
-        return C.NaN;
+        throw new NaNError(
+          "Basic",
+          "addII",
+          Comparison.isNaN_I(a) ? "a" : "b"
+        );
       } else if (aIsFinite) {   // b must be +/- infinity
         return b;
       } else if (bIsFinite) {  // a must be +/- infinity
@@ -119,14 +90,56 @@ export class Basic {
         if (sameSign) {
           return a;
         } else {
-          return C.NaN;
+          throw new DomainError(
+            "Basic",
+            "addII",
+            {
+              a: {value: a, expectedType: "int"},
+              b: {value: b, expectedType: "int"}
+            },
+            "The sum of positive and negative infinity is undefined in integer addition."
+          );
         }
       }
     }
   }
 
+  public static incI(a: int): int { return Basic.addII(a, C.I_1); }
+
+  public static decI(a: int): int { return Basic.addII(a, C.I_NEG_1); }
+
   public static subtractII(a: int, b: int): int {
-    return Basic.addII(a, Sign.negateI(b));
+    const aIsFinite = Comparison.isFiniteI(a);
+    const bIsFinite = Comparison.isFiniteI(b);
+    const aIsNaN = Comparison.isNaN_I(a);
+    const bIsNaN = Comparison.isNaN_I(b);
+
+    if ((aIsFinite && !bIsNaN) || (bIsFinite && !aIsNaN)) {
+      return Basic.addII(a, Sign.negateI(b));
+    } else if (aIsNaN || bIsNaN) {
+      throw new NaNError(
+        "Basic",
+        "subtractII",
+        Comparison.isNaN_I(a) ? "a" : "b"
+      );
+    } else { // both a and b are +/- infinity
+      const differentSign = Comparison.isNegativeI(a) !== Comparison.isNegativeI(b);
+
+      if (differentSign) {
+        return a;
+      } else {
+        throw new DomainError(
+          "Basic",
+          "subtractII",
+          {
+            a: {value: a, expectedType: "int"},
+            b: {value: b, expectedType: "int"}
+          },
+          `The difference of infinite values of the same sign is undefined in integer${""
+          } subtraction.`
+        );
+      }
+    }
   }
 
   public static multiplyII(a: int, b: int): int {
@@ -144,10 +157,22 @@ export class Basic {
         return Basic.karatsuba(a, b);
       }
     } else if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)){
-      return C.NaN;
+      throw new NaNError(
+        "Basic",
+        "multiplyII",
+        Comparison.isNaN_I(a) ? "a" : "b"
+      );
     } else if (Comparison.isZeroI(a) || Comparison.isZeroI(b)){
       // one is 0 and the other is +/- infinity
-      return C.NaN;
+      throw new DomainError(
+        "Basic",
+        "multiplyII",
+        {
+          a: {value: a, expectedType: "int"},
+          b: {value: b, expectedType: "int"}
+        },
+        "The product of 0 and +/- infinity is undefined in integer multiplication."
+      );
     } else {
       // at least one is +/- infinity and the other is not 0 or NaN
       if (a.neg === b.neg) {
@@ -172,9 +197,12 @@ export class Basic {
         return Basic.karatsubaSquare(a);
       }
     } else if (Comparison.isNaN_I(a)) {
-      return C.NaN;
-    } else {
-      // a is +/- infinity
+      throw new NaNError(
+        "Basic",
+        "squareI",
+        "a"
+      );
+    } else { // a is +/- infinity
       return C.POSITIVE_INFINITY;
     }
   }
@@ -183,68 +211,123 @@ export class Basic {
     a: int,
     b: int,
     type: "euclidean"| "trunc" | "ceil" | "floor" | "round"
-  ): {q: int, r: int} {
-    if (Comparison.isZeroI(b)) {
-      throw new Error("Division by zero error");
-    } else if (Comparison.isZeroI(a)) {
-      return new IntegerDivisionResult(C.I_0, C.I_0);
-    } else if (b.digits.length === 1 && b.digits[0] === 1) { // b === +/-1
-      return b.neg ?
-        new IntegerDivisionResult(Sign.negateI(a), C.I_0)
-        :
-        new IntegerDivisionResult(a, C.I_0);
-    } else if (Comparison.compareArray(a.digits, b.digits) === 0) { // abs(a) === abs(b)
-      return a.neg === b.neg ?
-        new IntegerDivisionResult(C.I_1, C.I_0)
-        :
-        new IntegerDivisionResult(C.I_NEG_1, C.I_0);
-    } else {
-      const absADivAbsB = Longhand.division(a.digits, b.digits);
-      const qIsNegative = a.neg !== b.neg;
+  ): {quotient: int, remainder: int} {
+    const aIsFinite = Comparison.isFiniteI(a);
+    const bIsFinite = Comparison.isFiniteI(b);
 
-      // type = "trunc" results
-      let q: int = new Integer(qIsNegative, absADivAbsB.q);
-      let r: int = new Integer(a.neg, absADivAbsB.r);
-
-      if (absADivAbsB.r.length === 1 && absADivAbsB.r[0] === 0) { // remainder is zero
-        r = C.I_0;
-      } else if (type === "euclidean" && a.neg) {
-        if (b.neg) {
-          q = Basic.addII(q, C.I_1);
-          r = Basic.subtractII(r, b);
-        } else {
-          q = Basic.subtractII(q, C.I_1);
-          r = Basic.addII(r, b);
+    if (aIsFinite && bIsFinite) {
+      if (Comparison.isZeroI(b)) { // a / 0 case
+        if (Comparison.isPositiveI(a)) {
+          return new IntegerDivisionResult(C.POSITIVE_INFINITY, C.NaN);
+        } else if (Comparison.isNegativeI(a)) {
+          return new IntegerDivisionResult(C.NEGATIVE_INFINITY, C.NaN);
+        } else { // both a and b are 0, and 0/0 is undefined
+          throw new DomainError(
+            "Basic",
+            "divideII",
+            {
+              a: {value: a, expectedType: "int"},
+              b: {value: b, expectedType: "int"}
+            },
+            "The quotient 0/0 is undefined in integer division"
+          );
         }
-      } else if (type === "ceil" && !qIsNegative) {
-        q = Basic.addII(q, C.I_1);
-        r = Basic.subtractII(r, b);
-      } else if (type === "floor" && qIsNegative) {
-        q = Basic.subtractII(q, C.I_1);
-        r = Basic.addII(r, b);
-      } else if (type === "round") {
-        const absBDiv2 = Longhand.divisionBySingleDigit(b.digits, 2);
-        const roundCutoff = Longhand.addition(absBDiv2.q, Uint32Array.of(absBDiv2.r));
-        if (Comparison.compareArray(b.digits, roundCutoff) >= 0) {
-          // in this case q is rounded outward away from 0, no matter its sign
-          // which is different from trunc
-          if (qIsNegative) {
-            q = Basic.subtractII(q, C.I_1);
-            r = Basic.addII(r, b);
-          } else {
+      } else if (Comparison.isZeroI(a)) {
+        return new IntegerDivisionResult(C.I_0, C.I_0);
+      } else if (b.digits.length === 1 && b.digits[0] === 1) { // b === +/-1
+        return b.neg ?
+          new IntegerDivisionResult(Sign.negateI(a), C.I_0)
+          :
+          new IntegerDivisionResult(a, C.I_0);
+      } else if (Comparison.compareArray(a.digits, b.digits) === 0) { // abs(a) === abs(b)
+        return a.neg === b.neg ?
+          new IntegerDivisionResult(C.I_1, C.I_0)
+          :
+          new IntegerDivisionResult(C.I_NEG_1, C.I_0);
+      } else  {
+        const absADivAbsB = Longhand.division(a.digits, b.digits);
+        const qIsNegative = a.neg !== b.neg;
+
+        // type = "trunc" results
+        let q: int = new Integer(qIsNegative, absADivAbsB.q);
+        let r: int = new Integer(a.neg, absADivAbsB.r);
+
+        if (absADivAbsB.r.length === 1 && absADivAbsB.r[0] === 0) { // remainder is zero
+          r = C.I_0;
+        } else if (type === "euclidean" && a.neg) {
+          if (b.neg) {
             q = Basic.addII(q, C.I_1);
             r = Basic.subtractII(r, b);
+          } else {
+            q = Basic.subtractII(q, C.I_1);
+            r = Basic.addII(r, b);
           }
+        } else if (type === "ceil" && !qIsNegative) {
+          q = Basic.addII(q, C.I_1);
+          r = Basic.subtractII(r, b);
+        } else if (type === "floor" && qIsNegative) {
+          q = Basic.subtractII(q, C.I_1);
+          r = Basic.addII(r, b);
+        } else if (type === "round") {
+          const absBDiv2 = Longhand.divisionBySingleDigit(b.digits, 2);
+          const roundCutoff = Longhand.addition(absBDiv2.q, Uint32Array.of(absBDiv2.r));
+          if (Comparison.compareArray(b.digits, roundCutoff) >= 0) {
+            // in this case q is rounded outward away from 0, no matter its sign
+            // which is different from trunc
+            if (qIsNegative) {
+              q = Basic.subtractII(q, C.I_1);
+              r = Basic.addII(r, b);
+            } else {
+              q = Basic.addII(q, C.I_1);
+              r = Basic.subtractII(r, b);
+            }
+          }
+        } else {
+          throw new DomainError(
+            "Basic",
+            "divideII",
+            {
+              a: {value: a, expectedType: "int"},
+              b: {value: b, expectedType: "int"},
+              type: {value: type, expectedType: "string"}
+            },
+            `The type parameter must be "euclidean", "trunc", "ceil", "floor", or "round"`
+          );
         }
-      }
 
-      return new IntegerDivisionResult(q, r);
+        return new IntegerDivisionResult(q, r);
+      }
+    } else if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)) {
+      throw new NaNError(
+        "Basic",
+        "divideII",
+        Comparison.isNaN_I(a) ? "a" : "b"
+      );
+    } else if (aIsFinite) { // b is +/- infinity
+      return new IntegerDivisionResult(C.I_0, C.NaN);
+    } else if (bIsFinite) { // a is +/- infinity
+      // following JavaScript convention with %, remainder is a
+      return new IntegerDivisionResult(
+        a.neg === b.neg? C.POSITIVE_INFINITY : C.NEGATIVE_INFINITY,
+        a
+      );
+    } else { // both a and b are +/- infinity and infinity/infinity is undefined
+      throw new DomainError(
+        "Basic",
+        "divideII",
+        {
+          a: {value: a, expectedType: "int"},
+          b: {value: b, expectedType: "int"},
+          type: {value: type, expectedType: "string"}
+        },
+        "The quotient infinity/infinity is undefined in integer division"
+      );
     }
   }
 
   // ********************* float functions ************************************
 
-  public static addFF(x: float, y: float, prec: P): float {
+  public static addFF(x: float, y: float, p: P): float {
     const xIsFinite = Comparison.isFinite(x);
     const yIsFinite = Comparison.isFinite(y);
 
@@ -273,7 +356,7 @@ export class Basic {
 
         const leastSigDigExp: int = Core.maxI(
           Core.minI(largerMagValLeastSigDigExp, smallerMagValLeastSigDigExp),
-          Basic.subtractII(largerMagVal.exp, prec.numDigitsInt)
+          Basic.subtractII(largerMagVal.exp, p.baseDigitsInt)
         );
 
         if (Comparison.ltI(smallerMagVal.exp, leastSigDigExp)) {
@@ -306,13 +389,17 @@ export class Basic {
           )
         );
 
-        const coef: int = Core.roundOffDigits(unroundedCoef, prec.numDigits);
+        const coef: int = Core.roundOffDigits(unroundedCoef, p.baseDigits);
 
-        return new Float(coef, exp);
+        return new FloatingPoint(coef, exp);
       }
     } else {
       if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
-        return C.F_NaN;
+        throw new NaNError(
+          "Basic",
+          "addFF",
+          Comparison.isNaN(x) ? "x" : "y"
+        );
       } else if (xIsFinite) {   // y must be +/- infinity
         return y;
       } else if (yIsFinite) {  // x must be +/- infinity
@@ -323,47 +410,109 @@ export class Basic {
         if (xySameSign) {
           return x;
         } else {
-          return C.F_NaN;
+          throw new DomainError(
+            "Basic",
+            "addFF",
+            {
+              x: {value: x, expectedType: "float"},
+              y: {value: y, expectedType: "float"}
+            },
+            "The sum of positive and negative infinity is undefined in float addition"
+          );
         }
       }
     }
   }
 
-  public static sumF(vals: float[], prec: P): float {
+  public static incF(x: float, p: P): float { return Basic.addFF(x, C.F_1, p); }
+
+  public static decF(x: float, p: P): float { return Basic.addFF(x, C.F_NEG_1, p); }
+
+  public static sumF(vals: float[], p: P): float {
     if (vals.length === 0) { return C.F_0; }
 
     let sum = vals[0];
 
     for (let i = 1; i < vals.length; i++) {
-      sum = Basic.addFF(sum, vals[i], prec);
+      if (Comparison.isNaN(sum) || Comparison.isNaN(vals[i])) {
+        throw new NaNError(
+          "Basic",
+          "sumF",
+          Comparison.isNaN(sum) ? "sum" : "vals[i]"
+        );
+      } else {
+        sum = Basic.addFF(sum, vals[i], p);
+      }
     }
 
     return sum;
   }
 
-  public static subtractFF(x: float, y: float, prec: P): float {
-    return Basic.addFF(x, Sign.negateF(y), prec);
+  public static subtractFF(x: float, y: float, p: P): float {
+    const xIsFinite = Comparison.isFinite(x);
+    const yIsFinite = Comparison.isFinite(y);
+    const xIsNaN = Comparison.isNaN(x);
+    const yIsNaN = Comparison.isNaN(y);
+
+    if ((xIsFinite && !yIsNaN) || (yIsFinite && !xIsNaN)) {
+      return Basic.addFF(x, Sign.negateF(y), p);
+    } else if (xIsNaN || yIsNaN) {
+      throw new NaNError(
+        "Basic",
+        "subtractFF",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
+    } else { // both a and b are +/- infinity
+      const differentSign = Comparison.isNegative(x) !== Comparison.isNegative(y);
+
+      if (differentSign) {
+        return x;
+      } else {
+        throw new DomainError(
+          "Basic",
+          "subtractFF",
+          {
+            x: {value: x, expectedType: "float"},
+            y: {value: y, expectedType: "float"}
+          },
+          `The difference of infinite values of the same sign is undefined in float${""
+            } subtraction.`
+        );
+      }
+    }
   }
 
-  public static multiplyFF(x: float, y: float, prec: P): float {
+  public static multiplyFF(x: float, y: float, p: P): float {
     if (Comparison.isFinite(x) && Comparison.isFinite(y)) {
       const neg = x.coef.neg !== y.coef.neg;
       const coefDigits = Longhand.multiplicationLengthLimit(
         x.coef.digits,
         y.coef.digits,
-        prec.numDigits
+        p.baseDigits
       );
 
       const exp = Basic.addII(Basic.addII(x.exp, y.exp), coefDigits.expAdjustment);
 
-      return new Float(new Integer(neg, coefDigits.result), exp);
+      return new FloatingPoint(new Integer(neg, coefDigits.result), exp);
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
-      return C.F_NaN;
+      throw new NaNError(
+        "Basic",
+        "multiplyFF",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
     } else if (Comparison.isZero(x) || Comparison.isZero(y)) {
       // one is 0 and the other is +/- infinity
-      return C.F_NaN
+      throw new DomainError(
+        "Basic",
+        "multiplyFF",
+        {
+          x: {value: x, expectedType: "float"},
+          y: {value: y, expectedType: "float"}
+        },
+        "The product of 0 and +/- infinity is undefined in float multiplication"
+      );
     } else {
-      // at least one is +/-infinity and the other is not 0 of NaN
+      // at least one is +/-infinity and the other is not 0 or NaN
       if (x.coef.neg === y.coef.neg) {
         return C.F_POSITIVE_INFINITY;
       } else {
@@ -372,49 +521,57 @@ export class Basic {
     }
   }
 
-  public static productF(vals: float[], prec: P): float {
+  public static productF(vals: float[], p: P): float {
     if (vals.length === 0) { return C.F_0; }
 
     let product = vals[0];
 
     for(let i = 1; i < vals.length; i++) {
-      product = Basic.multiplyFF(product, vals[i], prec);
+      product = Basic.multiplyFF(product, vals[i], p);
     }
 
     return product;
   }
 
-  public static squareF(x: float, prec: P): float {
+  public static squareF(x: float, p: P): float {
     if (Comparison.isFinite(x)) {
       const coefDigits = Longhand.multiplicationLengthLimit(
         x.coef.digits,
         x.coef.digits,
-        prec.numDigits
+        p.baseDigits
       );
       const exp = Basic.addII(Basic.addII(x.exp, x.exp), coefDigits.expAdjustment);
 
-      return new Float(new Integer(false, coefDigits.result), exp);
+      return new FloatingPoint(new Integer(false, coefDigits.result), exp);
     } else if (Comparison.isNaN(x)) {
-      return C.F_NaN;
+      throw new NaNError(
+        "Basic",
+        "squareF",
+        "x"
+      );
     } else {
       return C.F_POSITIVE_INFINITY;
     }
   }
 
-  public static reciprocalF(x: float, prec: P): float {
+  public static reciprocalF(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      return C.F_NaN;
+      throw new NaNError(
+        "Basic",
+        "reciprocalF",
+        "x"
+      );
     } else if (Comparison.isPOSITIVE_INFINITY(x) || Comparison.isNEGATIVE_INFINITY(x)) {
       return C.F_0;
     } else if (Comparison.isZero(x)) {
       return C.F_POSITIVE_INFINITY;
     } else {
       // Newton-Raphson method of finding a reciprocal
-      return Basic.newtonInversion(x, prec);
+      return Basic.newtonInversion(x, p);
     }
   }
 
-  public static divideFF(x: float, y: float, prec: P): float {
+  public static divideFF(x: float, y: float, p: P): float {
     const xIsFinite = Comparison.isFinite(x);
     const yIsFinite = Comparison.isFinite(y);
 
@@ -425,15 +582,27 @@ export class Basic {
         } else if (Comparison.isNegative(x)) {
           return C.F_NEGATIVE_INFINITY;
         } else { // 0/0 is undefined
-          return C.F_NaN;
+          throw new DomainError(
+            "Basic",
+            "divideFF",
+            {
+              x: {value: x, expectedType: "float"},
+              y: {value: y, expectedType: "float"}
+            },
+            "The quotient 0/0 is undefined in float division"
+          );
         }
       } else if (Comparison.equals(Sign.absF(x), Sign.absF(y))) {
         return x.coef.neg === y.coef.neg ? C.F_1 : C.F_NEG_1;
       } else {
-        return Basic.multiplyFF(x, Basic.newtonInversion(y, prec), prec)
+        return Basic.multiplyFF(x, Basic.newtonInversion(y, p), p)
       }
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
-      return C.F_NaN;
+      throw new NaNError(
+        "Basic",
+        "divideFF",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
     } else if (xIsFinite) { // y is +/- infinity
       return C.F_0;
     } else if (yIsFinite) { // x is +/- infinity
@@ -443,7 +612,15 @@ export class Basic {
         return C.F_NEGATIVE_INFINITY;
       }
     } else { // both x and y are +/- infinity and infinity/infinity is undefined
-      return C.F_NaN;
+      throw new DomainError(
+        "Basic",
+        "divideFF",
+        {
+          x: {value: x, expectedType: "float"},
+          y: {value: y, expectedType: "float"}
+        },
+        "The quotient infinity/infinity is undefined in float division"
+      );
     }
   }
 
@@ -577,13 +754,13 @@ export class Basic {
     return {c: c, e: Basic.subtractII(x.exp, Core.numberToInt(maxIterMinus1))};
   }
 
-  public static newtonInversion(x: float, prec: P): float {
+  public static newtonInversion(x: float, p: P): float {
     const sciNote = Basic.sciNoteBASEApprox(x);
     const zInv = 1/sciNote.c;
     const zInvFloat = Core.numberToFloatUnchecked(zInv);
 
     // here is our initial estimate of 1/x
-    let yi = new Float(
+    let yi = new FloatingPoint(
       new Integer(x.coef.neg, zInvFloat.coef.digits),
       Basic.subtractII(zInvFloat.exp, sciNote.e)
     );
@@ -591,23 +768,65 @@ export class Basic {
     // now refine it with Newton-Raphson method using f(y) = (1/y) - D, thus
     // f'(y) = -y^(-2) so the iterative step is:
     // y_i+1 = 2 * y_i - x * y_i^2
-    const steps = prec.quadraticConvergenceSteps;
+    const steps = p.quadraticConvergenceSteps;
 
     for (let i = 0; i < steps; i++) {
-      const xTimesYi = Basic.multiplyFF(x, yi, prec);
-      const oneMinusXYi = Basic.subtractFF(C.F_1, xTimesYi, prec);
+      const xTimesYi = Basic.multiplyFF(x, yi, p);
+      const oneMinusXYi = Basic.subtractFF(C.F_1, xTimesYi, p);
 
-      if (Comparison.lt(Sign.absF(oneMinusXYi), prec.epsilon) ) {
+      if (Comparison.lt(Sign.absF(oneMinusXYi), p.epsilon) ) {
         break;
       }
 
-      const xTimesYiSquared = Basic.multiplyFF(xTimesYi, yi, prec);
-      const twoTimesYi = Basic.multiplyFF(C.F_2, yi, prec);
+      const xTimesYiSquared = Basic.multiplyFF(xTimesYi, yi, p);
+      const twoTimesYi = Basic.multiplyFF(C.F_2, yi, p);
 
-      yi = Basic.subtractFF(twoTimesYi, xTimesYiSquared, prec);
+      yi = Basic.subtractFF(twoTimesYi, xTimesYiSquared, p);
     }
 
     return yi;
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+import {IntegerDivisionResult as IntegerDivisionResultAlias}
+  from "../dataTypes/IntegerDivisionResult";
+const IntegerDivisionResult = IntegerDivisionResultAlias;
+
+// functional imports
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "./Sign";
+const Sign = SignAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {Comparison as ComparisonAlias} from "./Comparison";
+const Comparison = ComparisonAlias;
+
+import {Longhand as LonghandAlias} from "../core/Longhand";
+const Longhand = LonghandAlias;
+
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+const P = PAlias;
+export type P = PAlias;

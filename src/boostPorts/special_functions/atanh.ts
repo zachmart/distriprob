@@ -31,6 +31,55 @@
  *
  */
 
+
+export class Atanh {
+  public static imp(x: float, p: P): float {
+    // note that all domain error checking has been moved to basicFunctions/Hybol.ts
+
+    const absX = Sign.absF(x);
+
+    if (Comparison.gte(absX, PREC.fourthRootEPS(p))) {
+      if (Comparison.lt(absX, C.F_ONE_HALF)) {
+        return Basic.multiplyFF(
+          C.F_ONE_HALF,
+          Basic.subtractFF(
+            Log.onePlusF(x, p),
+            Log.onePlusF(Sign.negateF(x), p),
+            p
+          ),
+          p
+        );
+      } else {
+        return Basic.multiplyFF(
+          C.F_ONE_HALF,
+          Log.f(Basic.divideFF(
+            Basic.incF(x, p),
+            Basic.subtractFF(C.F_1, x, p),
+            p
+          ), p),
+          p
+        );
+      }
+    } else {
+      let result = x;
+
+      if (Comparison.gte(absX, PREC.sqrtEPS(p))) {
+        const x3 = Basic.multiplyFF(Basic.squareF(x, p), x, p);
+        result = Basic.addFF(
+          result,
+          Basic.multiplyFF(x3, RATIO.value(1, 3, p), p),
+          p
+        );
+      }
+
+      return result;
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../../interfaces/float";
 
 import {C as CAlias} from "../../constants/C";
@@ -45,8 +94,8 @@ const Basic = BasicAlias;
 import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
 
-import {Prec as EPSILONAlias} from "../../core/Prec";
-const EPSILON = EPSILONAlias;
+import {PREC as PRECAlias} from "../../constants/PREC";
+const PREC = PRECAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
@@ -54,64 +103,6 @@ const RATIO = RATIOAlias;
 import {Log as LogAlias} from "../../basicFunctions/Log";
 const Log = LogAlias;
 
-import {StringWriter as StringWriterAlias} from "../../core/StringWriter";
-const StringWriter = StringWriterAlias;
-
 import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class Atanh {
-
-  public static imp(x: float, prec: P): float {
-    if (Comparison.lt(x, C.F_NEG_1) || Comparison.gtOne(x)) {
-      throw new Error(`atanh argument must be in range [-1, 1], got ${
-        StringWriter.toStr(x)}`);
-    }
-
-    const absX = Sign.absF(x);
-
-    if (Comparison.lt(x, Sign.negateF(EPSILON.oneMinusEPS(prec)))) {
-      return C.F_POSITIVE_INFINITY;
-    } else if (Comparison.gt(x, EPSILON.oneMinusEPS(prec))) {
-      return C.F_POSITIVE_INFINITY;
-    } else if (Comparison.gte(absX, EPSILON.fourthRoot(prec))) {
-      if (Comparison.lt(absX, C.F_ONE_HALF)) {
-        return Basic.multiplyFF(
-          C.F_ONE_HALF,
-          Basic.subtractFF(
-            Log.onePlusF(x, prec),
-            Log.onePlusF(Sign.negateF(x), prec),
-            prec
-          ),
-          prec
-        );
-      } else {
-        return Basic.multiplyFF(
-          C.F_ONE_HALF,
-          Log.f(Basic.divideFF(
-            Basic.addFF(C.F_1, x, prec),
-            Basic.subtractFF(C.F_1, x, prec),
-            prec
-          ), prec),
-          prec
-        );
-      }
-    } else {
-      let result = x;
-
-      if (Comparison.gte(absX, EPSILON.sqrt(prec))) {
-        const x3 = Basic.multiplyFF(Basic.squareF(x, prec), x, prec);
-        result = Basic.addFF(
-          result,
-          Basic.multiplyFF(x3, RATIO.value(1, 3, prec), prec),
-          prec
-        );
-      }
-
-      return result;
-    }
-  }
-}
 

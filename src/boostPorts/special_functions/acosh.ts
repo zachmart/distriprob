@@ -31,6 +31,61 @@
  *
  */
 
+
+export class Acosh {
+  public static imp(x: float, p: P): float {
+    // note that all domain error checking has been moved to basicFunctions/Hybol.ts
+
+    const y = Basic.decF(x, p);
+
+    if (Comparison.gte(y, p.epsilon)) {
+      if (Comparison.gt(x, PREC.reciprocalSqrtEPS(p))) {
+        // approximation by laurent series in 1/x at 0+ order from -1 to 0
+        return  Basic.addFF(Log.f(x, p), LN2.value(p), p);
+
+      } else if (Comparison.lt(x, RATIO.value(3, 2, p))) {
+        // This is just a rearrangement of the standard form below
+        // devised to minimize loss of precision when x ~ 1:
+        // return log1p(y + sqrt(y * y + 2 * y))
+        return Log.onePlusF(Basic.addFF(
+          y,
+          Root.squareF(Basic.addFF(
+            Basic.squareF(y, p),
+            Basic.multiplyFF(C.F_2, y, p),
+            p
+          ), p),
+          p
+        ), p);
+      } else {
+        // return log( x + sqrt(x * x - 1) )
+        return Log.f(Basic.addFF(
+          x,
+          Root.squareF(Basic.decF(Basic.squareF(x, p), p), p),
+          p
+        ), p);
+
+      }
+    } else {
+      // approximation by taylor series in y at 0 up to order 2
+      // return sqrt(2 * y) * (1 - y /12 + 3 * y * y / 160)
+      const sqrt2y = Root.squareF(Basic.multiplyFF(C.F_2, y, p), p);
+      const yDiv12 = Basic.multiplyFF(y, RATIO.value(1, 12, p), p);
+      const threeYSquaredDiv160 = Basic.multiplyFF(
+        Basic.multiplyFF(C.F_3, Basic.squareF(y, p), p),
+        RATIO.value(1, 160, p),
+        p
+      );
+      const b = Basic.subtractFF(C.F_1, yDiv12, p);
+      const c = Basic.addFF(b, threeYSquaredDiv160, p);
+
+      return Basic.multiplyFF(sqrt2y, c, p);
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../../interfaces/float";
 
 import {C as CAlias} from "../../constants/C";
@@ -42,11 +97,8 @@ const Basic = BasicAlias;
 import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
 
-import {Prec as EPSILONAlias} from "../../core/Prec";
-const EPSILON = EPSILONAlias;
-
-import {WHOLE as WHOLEAlias} from "../../constants/WHOLE";
-const WHOLE = WHOLEAlias;
+import {PREC as PRECAlias} from "../../constants/PREC";
+const PREC = PRECAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
@@ -60,65 +112,6 @@ const Log = LogAlias;
 import {LN2 as LN2Alias} from "../../constants/LN2";
 const LN2 = LN2Alias;
 
-import {StringWriter as StringWriterAlias} from "../../core/StringWriter";
-const StringWriter = StringWriterAlias;
-
 import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-export class Acosh {
-
-  public static imp(x: float, prec: P): float {
-    if (Comparison.ltOne(x)) {
-      throw new Error(`acosh function requires argument >= 1, got: ${
-        StringWriter.toStr(x)}`);
-    }
-
-    const y = Basic.subtractFF(x, C.F_1, prec);
-
-    if (Comparison.gte(y, prec.epsilon)) {
-      if (Comparison.gt(x, EPSILON.reciprocalSqrt(prec))) {
-        // approximation by laurent series in 1/x at 0+ order from -1 to 0
-        return  Basic.addFF(Log.f(x, prec), LN2.value(prec), prec);
-
-      } else if (Comparison.lt(x, RATIO.value(3, 2, prec))) {
-        // This is just a rearrangement of the standard form below
-        // devised to minimize loss of precision when x ~ 1:
-        // return log1p(y + sqrt(y * y + 2 * y))
-        return Log.onePlusF(Basic.addFF(
-          y,
-          Root.squareF(Basic.addFF(
-            Basic.squareF(y, prec),
-            Basic.multiplyFF(C.F_2, y, prec),
-            prec
-          ), prec),
-          prec
-        ), prec);
-      } else {
-        // return log( x + sqrt(x * x - 1) )
-        return Log.f(Basic.addFF(
-          x,
-          Root.squareF(Basic.subtractFF(Basic.squareF(x, prec), C.F_1, prec), prec),
-          prec
-        ), prec);
-
-      }
-    } else {
-      // approximation by taylor series in y at 0 up to order 2
-      // return sqrt(2 * y) * (1 - y /12 + 3 * y * y / 160)
-      const sqrt2y = Root.squareF(Basic.multiplyFF(C.F_2, y, prec), prec);
-      const yDiv12 = Basic.divideFF(y, WHOLE.float(12), prec);
-      const threeYSquaredDiv160 = Basic.divideFF(
-        Basic.multiplyFF(C.F_3, Basic.squareF(y, prec), prec),
-        WHOLE.float(160),
-        prec
-      );
-      const b = Basic.subtractFF(C.F_1, yDiv12, prec);
-      const c = Basic.addFF(b, threeYSquaredDiv160, prec);
-
-      return Basic.multiplyFF(sqrt2y, c, prec);
-    }
-  }
-}
 

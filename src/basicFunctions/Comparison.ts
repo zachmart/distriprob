@@ -29,21 +29,17 @@
  *
  */
 
-// interface imports
-import {int, intType} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-// functional imports
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
 
 export class Comparison {
   // integer functions
   public static compareI(a: int, b: int): number {
     if (!Comparison.isFiniteI(a) || !Comparison.isFiniteI(b)) {
       if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)) {
-        return Number.NaN;
+        throw new NaNError(
+          "Comparison",
+          "compareI",
+          Comparison.isNaN_I(a) ? "a" : "b"
+        );
       } else if (Comparison.isPOSITIVE_INFINITY_I(a)) {
         return Comparison.isPOSITIVE_INFINITY_I(b) ? 0 : 1;
       } else if (Comparison.isNEGATIVE_INFINITY_I(a)) {
@@ -139,7 +135,11 @@ export class Comparison {
   public static compare(x: float, y: float): number {
     if (!Comparison.isFinite(x) || !Comparison.isFinite(y)) {
       if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
-        return Number.NaN;
+        throw new NaNError(
+          "Comparison",
+          "compare",
+          Comparison.isNaN(x) ? "x" : "y"
+        );
       } else if (Comparison.isPOSITIVE_INFINITY(x)) {
         return Comparison.isPOSITIVE_INFINITY(y) ? 0 : 1;
       } else if (Comparison.isNEGATIVE_INFINITY(x)) {
@@ -301,4 +301,18 @@ export class Comparison {
     }
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int, intType} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
 

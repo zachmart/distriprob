@@ -29,6 +29,196 @@
  *
  */
 
+
+export class Hybol {
+  // class constants
+  public static SMALL_ARG_CUTOFF: float;
+
+  public static init1(): void {
+    Hybol.SMALL_ARG_CUTOFF = RATIO.value(
+      1,
+      100,
+      PREC.getPFromBaseDigits(3)
+    );
+  }
+
+  public static sinh(x: float, p: P): float {
+    if (Comparison.isFinite(x)) {
+      if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
+        return Hybol.taylorSeriesSinh(x, p);
+      } else {
+        return Hybol.sinhFromExp(x, p);
+      }
+    } else if (Comparison.isPOSITIVE_INFINITY(x)) {
+      return C.F_POSITIVE_INFINITY;
+    } else if (Comparison.isNEGATIVE_INFINITY(x)) {
+      return C.F_NEGATIVE_INFINITY;
+    } else { // x === NaN
+      throw new NaNError("Hybol", "sinh", "x");
+    }
+  }
+
+  public static cosh(x: float, p: P): float {
+    if (Comparison.isFinite(x)) {
+      return Hybol.coshFromExp(x, p);
+    } else if (Comparison.isPOSITIVE_INFINITY(x) || Comparison.isNEGATIVE_INFINITY(x)) {
+      return C.F_POSITIVE_INFINITY;
+    } else { // x === NaN
+      throw new NaNError("Hybol", "cosh", "x");
+    }
+  }
+
+  public static tanh(x: float, p: P): float {
+    if (Comparison.isNaN(x)) {
+      throw new NaNError("Hybol", "tanh", "x");
+    } else {
+      if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
+        const sinh = Hybol.taylorSeriesSinh(x, p);
+        const cosh = Hybol.coshFromExp(x, p);
+        return Basic.divideFF(sinh, cosh, p);
+      } else {
+        return Hybol.tanhFromExp(x, p); // +/- infinity cases handled correctly here
+      }
+    }
+  }
+
+  public static acosh(x: float, p: P): float {
+    if (Comparison.isFinite(x) && Comparison.gteOne(x)) {
+      return Acosh.imp(x, p);
+    } else if (Comparison.isPOSITIVE_INFINITY(x)) {
+      return C.F_POSITIVE_INFINITY;
+    } else if (Comparison.isNaN(x)) {
+      throw new NaNError("Hybol", "acosh", "x");
+    } else { // x is finite and < 1 or -Infinity
+      throw new DomainError(
+        "Hybol",
+        "acosh",
+        {x: {value: x, expectedType: "float"}},
+        "The acosh function is only defined for values greater than or equal to 1."
+      );
+    }
+  }
+
+  public static asinh(x: float, p: P): float {
+    if (Comparison.isFinite(x)) {
+      return Asinh.imp(x, p);
+    } else if (Comparison.isPOSITIVE_INFINITY(x)) {
+      return C.F_POSITIVE_INFINITY;
+    } else if (Comparison.isNEGATIVE_INFINITY(x)) {
+      return C.F_NEGATIVE_INFINITY;
+    } else { // x === NaN
+      throw new NaNError("Hybol", "asinh", "x");
+    }
+  }
+
+  public static atanh(x: float, p: P): float {
+    if (Comparison.isFinite(x) && Comparison.gt(x, C.F_NEG_1) && Comparison.ltOne(x)) {
+      return Atanh.imp(x, p);
+    } else if (Comparison.isOne(x)) {
+      return C.F_POSITIVE_INFINITY;
+    } else if (Comparison.isNegativeOne(x)) {
+      return C.F_NEGATIVE_INFINITY;
+    } else if (Comparison.isNaN(x)) {
+      throw new NaNError("Hybol", "atanh", "x");
+    } else { // x is finite and < -1 or > 1
+      throw new DomainError(
+        "Hybol",
+        "atanh",
+        {x: {value: x, expectedType: "float"}},
+        "The atanh function is only defined for values between -1 and 1 inclusive."
+      );
+    }
+  }
+
+
+  // ********************* support functions ************************************
+
+  private static taylorSeriesSinh(x: float, p: P): float {
+    const xSquared = Basic.squareF(x, p);
+    let termNum = x;
+    let termDenom = C.F_1;
+    let fact = {value: C.F_1, index: 1, nextIndex: 3};
+    let sumNum =  termNum;
+    let sumDenom = termDenom;
+    let sntd: float;
+    let sdtn: float;
+    let absEpsTimesSNTD: float;
+    let keepGoing = true;
+
+    while(keepGoing) {
+      termNum = Basic.multiplyFF(termNum, xSquared, p);
+      fact.nextIndex = fact.index + 2;
+      FactorialTable.calcFact(fact, p);
+      termDenom = fact.value;
+
+      sntd = Basic.multiplyFF(sumNum, termDenom, p);
+      sdtn = Basic.multiplyFF(sumDenom, termNum, p);
+      absEpsTimesSNTD = Sign.absF(Basic.multiplyFF(p.epsilon, sntd, p));
+
+      if (Comparison.gte(absEpsTimesSNTD, Sign.absF(sdtn))) { keepGoing = false; }
+
+      sumNum = Basic.addFF(sntd, sdtn, p);
+      sumDenom = Basic.multiplyFF(sumDenom, termDenom, p);
+    }
+
+    return Basic.divideFF(sumNum, sumDenom, p);
+  }
+
+  /**
+   * uses the formula for sinh(x):
+   *
+   *             exp(x) - exp(-x)
+   * sinh(x) =  ------------------
+   *                    2
+   */
+  private static sinhFromExp(x: float, p: P): float {
+    const expX = Exp.f(x, p);
+    const expNegX = Basic.reciprocalF(expX, p);
+
+    return Basic.multiplyFF(C.F_ONE_HALF, Basic.subtractFF(expX, expNegX, p), p);
+  }
+
+  /**
+   * uses the formula for cosh(x):
+   *
+   *            exp(x) + exp(-x)
+   * cosh(x) = ------------------
+   *                   2
+   */
+  private static coshFromExp(x: float, p: P): float {
+    const expX = Exp.f(x, p);
+    const expNegX = Basic.reciprocalF(expX, p);
+
+    return Basic.multiplyFF(C.F_ONE_HALF, Basic.addFF(expX, expNegX, p), p);
+  }
+
+  /**
+   * uses the formula for tanh(x):
+   *
+   *            1 - exp(-2x)
+   * tanh(x) = --------------
+   *            1 + exp(-2x)
+   */
+  private static tanhFromExp(x: float, p: P): float {
+    const expNeg2X = Exp.f(Basic.multiplyFF(C.F_NEG_2, x, p), p);
+
+    if (Comparison.lt(expNeg2X, p.epsilon)) {
+      return C.F_1;
+    } else if (Comparison.gt(expNeg2X, p.maxSafeInt)) {
+      return C.F_NEG_1;
+    } else {
+      return Basic.divideFF(
+        Basic.subtractFF(C.F_1, expNeg2X, p),
+        Basic.incF(expNeg2X, p),
+        p
+      );
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "../constants/C";
@@ -61,148 +251,14 @@ const Asinh = AsinhAlias;
 import {Atanh as AtanhAlias} from "../boostPorts/special_functions/atanh";
 const Atanh = AtanhAlias;
 
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;
+
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
 
-export class Hybol {
-  // // class constants
-  public static SMALL_ARG_CUTOFF: float;
-
-  public static setup(): void {
-    Hybol.SMALL_ARG_CUTOFF = RATIO.value(
-      1,
-      100,
-      P.createPFromNumDigits(3)
-    );
-  }
-
-  private static taylorSeriesSinh(x: float, prec: P): float {
-    const xSquared = Basic.squareF(x, prec);
-    let termNum = x;
-    let termDenom = C.F_1;
-    let fact = {value: C.F_1, index: 1, nextIndex: 3};
-    let sumNum =  termNum;
-    let sumDenom = termDenom;
-    let sntd: float;
-    let sdtn: float;
-    let absEpsTimesSNTD: float;
-    let keepGoing = true;
-
-    while(keepGoing) {
-      termNum = Basic.multiplyFF(termNum, xSquared, prec);
-      fact.nextIndex = fact.index + 2;
-      FactorialTable.calcFact(fact, prec);
-      termDenom = fact.value;
-
-      sntd = Basic.multiplyFF(sumNum, termDenom, prec);
-      sdtn = Basic.multiplyFF(sumDenom, termNum, prec);
-      absEpsTimesSNTD = Sign.absF(Basic.multiplyFF(prec.epsilon, sntd, prec));
-
-      if (Comparison.gte(absEpsTimesSNTD, Sign.absF(sdtn))) { keepGoing = false; }
-
-      sumNum = Basic.addFF(sntd, sdtn, prec);
-      sumDenom = Basic.multiplyFF(sumDenom, termDenom, prec);
-    }
-
-    return Basic.divideFF(sumNum, sumDenom, prec);
-  }
-
-  /**
-   * uses the formula for sinh(x):
-   *
-   *             exp(x) - exp(-x)
-   * sinh(x) =  ------------------
-   *                    2
-   */
-  private static sinhFromExp(x: float, prec: P): float {
-    const expX = Exp.f(x, prec);
-    const expNegX = Basic.reciprocalF(expX, prec);
-
-    return Basic.multiplyFF(C.F_ONE_HALF, Basic.subtractFF(expX, expNegX, prec), prec);
-  }
-
-  /**
-   * uses the formula for cosh(x):
-   *
-   *            exp(x) + exp(-x)
-   * cosh(x) = ------------------
-   *                   2
-   */
-  private static coshFromExp(x: float, prec: P): float {
-    const expX = Exp.f(x, prec);
-    const expNegX = Basic.reciprocalF(expX, prec);
-
-    return Basic.multiplyFF(C.F_ONE_HALF, Basic.addFF(expX, expNegX, prec), prec);
-  }
-
-  /**
-   * uses the formula for tanh(x):
-   *
-   *            1 - exp(-2x)
-   * tanh(x) = --------------
-   *            1 + exp(-2x)
-   */
-  private static tanhFromExp(x: float, prec: P): float {
-    const expNeg2X = Exp.f(Basic.multiplyFF(C.F_NEG_2, x, prec), prec);
-
-    if (Comparison.lt(expNeg2X, prec.epsilon)) {
-      return C.F_1;
-    } else if (Comparison.gt(expNeg2X, prec.maxSafeInt)) {
-      return C.F_NEG_1;
-    } else {
-      return Basic.divideFF(
-        Basic.subtractFF(C.F_1, expNeg2X, prec),
-        Basic.addFF(C.F_1, expNeg2X, prec),
-        prec
-      );
-    }
-  }
-
-  public static sinh(x: float, prec: P): float {
-    if (typeof Hybol.SMALL_ARG_CUTOFF === "undefined") { Hybol.setup(); }
-
-    if (Comparison.isPOSITIVE_INFINITY(x)) {
-      return C.F_POSITIVE_INFINITY;
-    } else if (Comparison.isNEGATIVE_INFINITY(x)) {
-      return C.F_NEGATIVE_INFINITY;
-    } else if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
-      return Hybol.taylorSeriesSinh(x, prec);
-    } else {
-      return Hybol.sinhFromExp(x, prec);
-    }
-  }
-
-  public static cosh(x: float, prec: P): float {
-    if (Comparison.isPOSITIVE_INFINITY(x) || Comparison.isNEGATIVE_INFINITY(x)) {
-      return C.F_POSITIVE_INFINITY;
-    } else {
-      return Hybol.coshFromExp(x, prec);
-    }
-  }
-
-  public static tanh(x: float, prec: P): float {
-    if (typeof Hybol.SMALL_ARG_CUTOFF === "undefined") { Hybol.setup(); }
-
-    if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
-      const sinh = Hybol.taylorSeriesSinh(x, prec);
-      const cosh = Hybol.coshFromExp(x, prec);
-      return Basic.divideFF(sinh, cosh, prec);
-    } else {
-      return Hybol.tanhFromExp(x, prec);
-    }
-  }
-
-  public static acosh(x: float, prec: P): float {
-    return Acosh.imp(x, prec);
-  }
-
-  public static asinh(x: float, prec: P): float {
-    return Asinh.imp(x, prec);
-  }
-
-  public static atanh(x: float, prec: P): float {
-    return Atanh.imp(x, prec);
-  }
-}
-
+import {PREC as PRECAlias} from "../constants/PREC";
+const PREC = PRECAlias;

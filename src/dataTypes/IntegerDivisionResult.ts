@@ -29,17 +29,19 @@
  *
  */
 
-import {int} from "../interfaces/int";
-
 
 export class IntegerDivisionResult {
-  public q: int;
-  public r: int;
+  public quotient: int;
+  public remainder: int;
 
   constructor(quotient: int, remainder: int) {
-    this.q = quotient;
-    this.r = remainder
+    this.quotient = quotient;
+    this.remainder = remainder
   }
 }
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "../interfaces/int";
 
 

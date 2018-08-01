@@ -30,6 +30,35 @@
  *
  */
 
+
+// This algorithm computes sqrt(1+x)-1
+
+export class Sqrt1pm1 {
+  public static f(x: float, p: P): float {
+    if (Comparison.isNaN(x)) {
+      throw new NaNError("Sqrt1pm1", "f", "x");
+    } else if (Comparison.lt(x, C.F_NEG_1)) {
+      throw new DomainError(
+        "Sqrt1pm1",
+        "f",
+        {x: {value: x, expectedType: "float"}, },
+        "The argument of sqrt1pm1 must be greater than or equal to negative 1"
+      );
+    } else if (Comparison.gt(Sign.absF(x), RATIO.value(3, 4, p))) {
+      return Basic.decF(Root.squareF(Basic.incF(x, p), p), p);
+    } else {
+      return Exp.m1F(Basic.multiplyFF(
+        C.F_ONE_HALF,
+        Log.onePlusF(x, p),
+        p
+      ), p);
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../../interfaces/float";
 
 import {C as CAlias} from "../../constants/C";
@@ -56,26 +85,11 @@ const Log = LogAlias;
 import {Exp as ExpAlias} from "../../basicFunctions/Exp";
 const Exp = ExpAlias;
 
+import {NaNError as NaNErrorAlias} from "../../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
+const DomainError = DomainErrorAlias;
+
 import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-// This algorithm computes sqrt(1+x)-1
-
-export class Sqrt1pm1 {
-  public static imp(x: float, prec: P): float {
-    if (Comparison.gt(Sign.absF(x), RATIO.value(3, 4, prec))) {
-      return Basic.subtractFF(
-        Root.squareF(Basic.addFF(C.F_1, x, prec), prec),
-        C.F_1,
-        prec
-      );
-    } else {
-      return Exp.m1F(Basic.multiplyFF(
-        C.F_ONE_HALF,
-        Log.onePlusF(x, prec),
-        prec
-      ), prec);
-    }
-  }
-}

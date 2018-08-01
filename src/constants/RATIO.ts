@@ -49,9 +49,11 @@ export class RATIO {
   private static _table:
     {[num: number]: {[denom: number]: {value: float, numDigits: number}}};
 
-  public static value(numerator: number, denominator: number, prec: P): float {
-    if (typeof RATIO._table === "undefined") { RATIO._table = {}; }
+  public static init0(): void {
+    RATIO._table = {};
+  }
 
+  public static value(numerator: number, denominator: number, prec: P): float {
     const negative = numerator * denominator < 0;
 
     if (numerator < 0) { numerator = Math.abs(numerator); }

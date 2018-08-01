@@ -29,31 +29,13 @@
  *
  */
 
-import {float} from "../interfaces/float";
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "./Sign";
-const Sign = SignAlias;
-
-import {Comparison as ComparisonAlias} from "./Comparison";
-const Comparison = ComparisonAlias;
-
-import {Basic as BasicAlias} from "./Basic";
-const Basic = BasicAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
 
 export class Diff {
-  public static absoluteFF(x: float, y: float, prec: P): float {
-    return Sign.absF(Basic.subtractFF(x, y, prec));
+  public static absoluteFF(x: float, y: float, p: P): float {
+    return Sign.absF(Basic.subtractFF(x, y, p));
   }
 
-  public static relativeFF(x: float, y: float, prec: P): float {
+  public static relativeFF(x: float, y: float, p: P): float {
     const xIsZero = Comparison.isZero(x);
     const yIsZero = Comparison.isZero(y);
 
@@ -69,18 +51,57 @@ export class Diff {
         && Comparison.isNEGATIVE_INFINITY(y))) {
       return C.F_0;
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
-      return C.F_1;
+      throw new NaNError(
+        "Diff",
+        "relativeFF",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
     } else {
-      const absDiff = Diff.absoluteFF(x, y, prec);
-      const re1 = Basic.divideFF(absDiff, Sign.absF(x), prec);
-      const re2 = Basic.divideFF(absDiff, Sign.absF(y), prec);
+      const absDiff = Diff.absoluteFF(x, y, p);
+      const re1 = Basic.divideFF(absDiff, Sign.absF(x), p);
+      const re2 = Basic.divideFF(absDiff, Sign.absF(y), p);
       return Comparison.gt(re1, re2) ? re1 : re2;
     }
   }
 
 
-  public static relInEpsFF(x: float, y: float, prec: P): float {
-    return Basic.divideFF(Diff.relativeFF(x, y, prec), prec.epsilon, prec);
+  public static relInEpsFF(x: float, y: float, p: P): float {
+    if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
+      throw new NaNError(
+        "Diff",
+        "relInEpsFF",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
+    } else {
+      return Basic.divideFF(Diff.relativeFF(x, y, p), p.epsilon, p);
+    }
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {float} from "../interfaces/float";
+
+
+// functional imports
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "./Sign";
+const Sign = SignAlias;
+
+import {Comparison as ComparisonAlias} from "./Comparison";
+const Comparison = ComparisonAlias;
+
+import {Basic as BasicAlias} from "./Basic";
+const Basic = BasicAlias;
+
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+const P = PAlias;
+export type P = PAlias;
 

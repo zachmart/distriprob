@@ -33,7 +33,7 @@ import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
 
 import {Integer} from "../dataTypes/Integer";
-import {Float} from "../dataTypes/Float";
+import {FloatingPoint} from "../dataTypes/FloatingPoint";
 
 import {C as CAlias} from "./C";
 const C = CAlias;
@@ -54,6 +54,10 @@ type Entry = {
 export class WHOLE {
   private static _table: {[n: number]: Entry};
 
+  public static init0(): void {
+    WHOLE._table = {};
+  }
+
   public static arr(n: number): Uint32Array {
     return WHOLE.getEntry(n).arr;
   }
@@ -71,8 +75,6 @@ export class WHOLE {
   }
 
   private static getEntry(n: number): Entry {
-    if (typeof WHOLE._table === "undefined") { WHOLE._table = {}; }
-
     if (n < 0) { n = -n; }
 
     let entry = WHOLE._table[n];
@@ -88,8 +90,8 @@ export class WHOLE {
         arr = Uint32Array.of(n);
         posInt = new Integer(false, arr);
         negInt = new Integer(true, arr);
-        posFloat = new Float(posInt, C.I_0);
-        negFloat = new Float(negInt, C.I_0);
+        posFloat = new FloatingPoint(posInt, C.I_0);
+        negFloat = new FloatingPoint(negInt, C.I_0);
       } else {
         posInt = Core.numberToIntUnchecked(n);
         arr = posInt.digits;

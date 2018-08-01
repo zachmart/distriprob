@@ -91,9 +91,12 @@ export class JSONFloat {
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
-import {Float as FloatAlias} from "./Float";
+import {FloatingPoint as FloatAlias} from "./FloatingPoint";
 const Float = FloatAlias;
 
 import {C as CAlias} from "../constants/C";

@@ -31,6 +31,64 @@
  *
  */
 
+
+export class Asinh {
+
+  public static imp(x: float, p: P): float {
+    if (Comparison.gte(x, PREC.fourthRootEPS(p))) {
+      if (Comparison.gt(x, PREC.reciprocalSqrtEPS(p))) {
+        // approximation by laurent series in 1/x at 0+ order from -1 to 1
+        const oneDiv4xSquared = Basic.reciprocalF(Basic.multiplyFF(
+          C.F_4,
+          Basic.squareF(x, p),
+          p
+        ), p);
+
+        return Basic.addFF(
+          LN2.value(p),
+          Basic.addFF(Log.f(x, p), oneDiv4xSquared, p),
+          p
+        );
+      } else if (Comparison.lt(x, C.F_ONE_HALF)) {
+        // As below, but rearranged to preserve digits:
+        return Log.onePlusF(Basic.addFF(
+          x,
+          Sqrt1pm1.f(Basic.squareF(x, p), p),
+          p
+        ), p);
+      } else {
+        // return log( x + sqrt(x*x+1) )
+        const xSquaredPlus1 = Basic.incF(Basic.squareF(x, p), p);
+        return Log.f(Basic.addFF(
+          x,
+          Root.squareF(xSquaredPlus1, p),
+          p
+        ), p);
+
+      }
+    } else if (Comparison.lte(x,  Sign.negateF(PREC.fourthRootEPS(p)))) {
+      return Sign.negateF(Asinh.imp(Sign.negateF(x), p));
+    } else {
+      // approximation by taylor series in x at 0 up to order 2
+      let result = x;
+
+      if (Comparison.gte(Sign.absF(x), PREC.sqrtEPS(p))) {
+        const x3 = Basic.multiplyFF(Basic.squareF(x, p), x, p);
+        result = Basic.subtractFF(
+          result,
+          Basic.multiplyFF(x3, RATIO.value(1, 6, p), p),
+          p
+        );
+      }
+
+      return result;
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../../interfaces/float";
 
 import {C as CAlias} from "../../constants/C";
@@ -45,8 +103,8 @@ const Basic = BasicAlias;
 import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
 
-import {Prec as EPSILONAlias} from "../../core/Prec";
-const EPSILON = EPSILONAlias;
+import {PREC as PRECAlias} from "../../constants/PREC";
+const PREC = PRECAlias;
 
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
@@ -64,61 +122,6 @@ import {Sqrt1pm1 as Sqrt1pm1Alias} from "./sqrt1pm1";
 const Sqrt1pm1 = Sqrt1pm1Alias;
 
 import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
 
-
-export class Asinh {
-
-  public static imp(x: float, prec: P): float {
-    if (Comparison.gte(x, EPSILON.fourthRoot(prec))) {
-      if (Comparison.gt(x, EPSILON.reciprocalSqrt(prec))) {
-        // approximation by laurent series in 1/x at 0+ order from -1 to 1
-        const oneDiv4xSquared = Basic.reciprocalF(Basic.multiplyFF(
-          C.F_4,
-          Basic.squareF(x, prec),
-          prec
-        ), prec);
-
-        return Basic.addFF(
-          LN2.value(prec),
-          Basic.addFF(Log.f(x, prec), oneDiv4xSquared, prec),
-          prec
-        );
-      } else if (Comparison.lt(x, C.F_ONE_HALF)) {
-        // As below, but rearranged to preserve digits:
-        return Log.onePlusF(Basic.addFF(
-          x,
-          Sqrt1pm1.imp(Basic.squareF(x, prec), prec),
-          prec
-        ), prec);
-      } else {
-        // return log( x + sqrt(x*x+1) )
-        const xSquaredPlus1 = Basic.addFF(Basic.squareF(x, prec), C.F_1, prec);
-        return Log.f(Basic.addFF(
-          x,
-          Root.squareF(xSquaredPlus1, prec),
-          prec
-        ), prec);
-
-      }
-    } else if (Comparison.lte(x,  Sign.negateF(EPSILON.fourthRoot(prec)))) {
-      return Sign.negateF(Asinh.imp(Sign.negateF(x), prec));
-    } else {
-      // approximation by taylor series in x at 0 up to order 2
-      let result = x;
-
-      if (Comparison.gte(Sign.absF(x), EPSILON.sqrt(prec))) {
-        const x3 = Basic.multiplyFF(Basic.squareF(x, prec), x, prec);
-        result = Basic.subtractFF(
-          result,
-          Basic.multiplyFF(x3, RATIO.value(1, 6, prec), prec),
-          prec
-        );
-      }
-
-      return result;
-    }
-  }
-}
 

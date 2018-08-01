@@ -30,6 +30,57 @@
  *
  */
 
+
+export class Powm1 {
+
+  public static ff(x: float, y: float, p: P): float {
+    if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
+      throw new NaNError(
+        "Powm1",
+        "ff",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
+    } else if (Comparison.isPositive(x)) {
+      const z = Sign.absF(Basic.multiplyFF(y, Basic.decF(x, p), p));
+
+      if (Comparison.lt(z, C.F_ONE_HALF)
+        || Comparison.lt(Sign.absF(y), RATIO.value(1, 5, p))) {
+        // We don't have any good/quick approximation for log(x) * y
+        // so just try it and see:
+        let l: float = Basic.multiplyFF(y, Log.f(x, p), p);
+
+        if (Comparison.lt(l, C.F_ONE_HALF)) { return Exp.m1F(l, p); }
+
+        // fall through....
+      }
+    } else {
+      // y had better be an integer:
+      if (!Conversion.isInteger(y)) {
+        throw new DomainError(
+          "Powm1",
+          "ff",
+          {
+            x: {value: x, expectedType: "float"},
+            y: {value: y, expectedType: "float"}
+          },
+          `The domain of powm1 is not defined for negative bases with non-integral${""
+          } exponents`
+        );
+      }
+
+      if (Parity.isEven(y)) {
+        return Powm1.ff(Sign.negateF(x), y, p);
+      }
+
+    }
+
+    return Basic.decF(Power.ff(x, y, p), p);
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../../interfaces/float";
 
 import {C as CAlias} from "../../constants/C";
@@ -62,46 +113,12 @@ const Exp = ExpAlias;
 import {RATIO as RATIOAlias} from "../../constants/RATIO";
 const RATIO = RATIOAlias;
 
+import {NaNError as NaNErrorAlias} from "../../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
+const DomainError = DomainErrorAlias;
+
 import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class Powm1 {
-
-  public static ff(x: float, y: float, prec: P): float {
-    if (Comparison.isPositive(x)) {
-      const z = Sign.absF(Basic.multiplyFF(y, Basic.subtractFF(x, C.F_1, prec), prec));
-
-      if (Comparison.lt(z, C.F_ONE_HALF)
-        || (Comparison.lt(
-          Sign.absF(y),
-          RATIO.value(1, 5, prec)
-        ))) {
-        // We don't have any good/quick approximation for log(x) * y
-        // so just try it and see:
-        let l: float = Basic.multiplyFF(y, Log.f(x, prec), prec);
-
-        if (Comparison.lt(l, C.F_ONE_HALF)) { return Exp.m1F(l, prec); }
-
-        // fall through....
-      }
-    } else {
-      // y had better be an integer:
-      if (!Conversion.isInteger(y)) {
-        throw new Error(
-          `Domain error: For non-integral exponent, expected base > 0 but got ${
-            x}`
-        );
-      }
-
-      if (Parity.isEven(y)) {  // y is even
-        return Powm1.ff(Sign.negateF(x), y, prec);
-      }
-
-    }
-
-    return Basic.subtractFF(Power.ff(x, y, prec), C.F_1, prec);
-  }
-}
 

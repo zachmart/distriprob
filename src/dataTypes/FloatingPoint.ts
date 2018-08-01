@@ -33,7 +33,7 @@ import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
 
 
-export class Float implements float {
+export class FloatingPoint implements float {
   public coef: int;
   public exp: int;
 

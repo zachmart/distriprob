@@ -29,40 +29,19 @@
  *
  */
 
-// interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-
-// functional imports
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "./Sign";
-const Sign = SignAlias;
-
-import {Comparison as ComparisonAlias} from "./Comparison";
-const Comparison = ComparisonAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Pow as PowAlias} from "./Pow";
-const Pow = PowAlias;
-
-import {Basic as BasicAlias} from "./Basic";
-const Basic = BasicAlias;
-
-import {RATIO as RATIOAlias} from "../constants/RATIO";
-const RATIO = RATIOAlias;
-
 
 export class Root {
   private static _table: {[n: number]: {[x: number]: {value: float, numDigits: number}}};
+  private static approxPrec: P;
+
+  public static init0(): void {
+    Root._table = {};
+  }
+
+  public static init1(): void {
+    // Using Number functions can't gives us much better accuracy than 3 BASE digits
+    Root.approxPrec = new P(3, "base");
+  }
 
   /**
    * @param {float} x - a non-negative float
@@ -108,8 +87,6 @@ export class Root {
   }
 
   public static valueFromTable(x: number, n: number, prec: P): float {
-    if (typeof Root._table === "undefined") { Root._table = {}; }
-
     const negative = x < 0;
 
     if (x < 0) { x = Math.abs(x); }
@@ -123,21 +100,19 @@ export class Root {
       const value = n === 2 ? Root.squareF(xFloat, prec) : Root.fn(xFloat, n, prec);
       entry = {
         value: value,
-        numDigits: prec.numDigits
+        numDigits: prec.baseDigits
       };
       Root._table[n][x] = entry;
-    } else if (entry.numDigits < prec.numDigits) {
+    } else if (entry.numDigits < prec.baseDigits) {
       const xFloat = Core.numberToFloatUnchecked(x);
       entry.value = n === 2 ? Root.squareF(xFloat, prec) : Root.fn(xFloat, n, prec);
-      entry.numDigits = prec.numDigits;
+      entry.numDigits = prec.baseDigits;
     }
 
     return negative ? Sign.negateF(entry.value) : entry.value;
   }
 
   public static approx(x: float, n: number): float {
-    //Using Number functions can't gives us much better accuracy than 3 BASE digits
-    const approxPrec = P.createPFromNumDigits(3);
     const nInt = Core.numberToIntUnchecked(n);
 
     const sciNote = Basic.sciNoteBASEApprox(x);
@@ -150,7 +125,7 @@ export class Root {
       nInt,
       "round"
     );
-    const twoToExNQuotient: float = Pow.fi(C.F_2, expDivN.q, approxPrec);
+    const twoToExNQuotient: float = Pow.fi(C.F_2, expDivN.q, Root.approxPrec);
     const remainderNum = Core.intToNumber(expDivN.r);
 
     let nthRootOf2toEx: float;
@@ -160,10 +135,14 @@ export class Root {
     } else {
       const twoToRemainderDivN = Core.numberToFloat(Math.pow(2, remainderNum/n));
 
-      nthRootOf2toEx = Basic.multiplyFF(twoToExNQuotient, twoToRemainderDivN, approxPrec);
+      nthRootOf2toEx = Basic.multiplyFF(
+        twoToExNQuotient,
+        twoToRemainderDivN,
+        Root.approxPrec
+      );
     }
 
-    return Basic.multiplyFF(coefRootApprox, nthRootOf2toEx, approxPrec);
+    return Basic.multiplyFF(coefRootApprox, nthRootOf2toEx, Root.approxPrec);
   }
 
 
@@ -244,3 +223,37 @@ export class Root {
     return Basic.reciprocalF(xi, prec);
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+
+// functional imports
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "./Sign";
+const Sign = SignAlias;
+
+import {Comparison as ComparisonAlias} from "./Comparison";
+const Comparison = ComparisonAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+const P = PAlias;
+export type P = PAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {Pow as PowAlias} from "./Pow";
+const Pow = PowAlias;
+
+import {Basic as BasicAlias} from "./Basic";
+const Basic = BasicAlias;
+
+import {RATIO as RATIOAlias} from "../constants/RATIO";
+const RATIO = RATIOAlias;

@@ -29,53 +29,43 @@
  *
  */
 
-// interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-// functional imports
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Comparison as ComparisonAlias} from "./Comparison";
-const Comparison = ComparisonAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-import {Sign as SignAlias} from "./Sign";
-const Sign = SignAlias;
-
-import {Basic as BasicAlias} from "./Basic";
-const Basic = BasicAlias;
-
-import {Parity as ParityAlias} from "./Parity";
-const Parity = ParityAlias;
-
 
 export class Pow {
-
-  /**
-   *
-   * @param {int} base
-   * @param {int} exponent must be >= 0
-   * @returns {Number}
-   */
   public static ii(base: int, exponent: int): int {
     if (Comparison.isNaN_I(base) || Comparison.isNaN_I(exponent)) {
-      return C.NaN;
+      throw new NaNError(
+        "Pow",
+        "ii",
+        Comparison.isNaN_I(base) ? "base" : "exponent"
+      );
     } else if (Comparison.isZeroI(exponent) || Comparison.isOneI(base)) {
       return C.I_1;
     } else if (Comparison.isZeroI(base)) {
       return C.I_0;
     } else if (Comparison.isNegativeI(exponent)) {
-      throw new Error("Cannot take negative exponents in integer pow function");
+      throw new DomainError(
+        "Pow",
+        "ii",
+        {
+          base: {value : base, expectedType: "int"},
+          exponent: {value: exponent, expectedType: "int"}
+        },
+        "The integer pow function is undefined for negative exponents."
+      );
     } else if (Comparison.isPOSITIVE_INFINITY_I(exponent)) {
       if (Comparison.isPositiveI(base)) {
         return C.POSITIVE_INFINITY;
       } else {
-        return C.NaN;
+        throw new DomainError(
+          "Pow",
+          "ii",
+          {
+            base: {value : base, expectedType: "int"},
+            exponent: {value: exponent, expectedType: "int"}
+          },
+          `The integer pow function is undefined for an infinite exponent with${""
+          } negative base.`
+        );
       }
     } else if (Comparison.isPOSITIVE_INFINITY_I(base)){
       return C.POSITIVE_INFINITY;
@@ -90,9 +80,13 @@ export class Pow {
     return Pow.positiveIntegerExponentII(base, exponent);
   }
 
-  public static fi(base: float, exponent: int, prec: P): float {
+  public static fi(base: float, exponent: int, p: P): float {
     if (Comparison.isNaN(base) || Comparison.isNaN_I(exponent)) {
-      return C.F_NaN;
+      throw new NaNError(
+        "Pow",
+        "fi",
+        Comparison.isNaN(base) ? "base" : "exponent"
+      );
     } else if (Comparison.isZeroI(exponent) || Comparison.isOne(base)) {
       return C.F_1;
     } else if (Comparison.isZero(base)) {
@@ -101,7 +95,16 @@ export class Pow {
       if (Comparison.isPositive(base)) {
         return C.F_POSITIVE_INFINITY;
       } else {
-        return C.F_NaN;
+        throw new DomainError(
+          "Pow",
+          "fi",
+          {
+            base: {value : base, expectedType: "float"},
+            exponent: {value: exponent, expectedType: "int"}
+          },
+          `The float pow function is undefined for an infinite exponent with${""
+            } negative base.`
+        );
       }
     } else if (Comparison.isPOSITIVE_INFINITY(base)){
       return C.F_POSITIVE_INFINITY;
@@ -113,7 +116,7 @@ export class Pow {
       }
     }
 
-    const result = Pow.positiveIntegerExponentFI(base, Sign.absI(exponent), prec);
+    const result = Pow.positiveIntegerExponentFI(base, Sign.absI(exponent), p);
 
     if (Comparison.isNegativeI(exponent)) {
       if (Comparison.isZero(result)
@@ -121,7 +124,7 @@ export class Pow {
         && Comparison.isNegative(base)) {
         return C.F_NEGATIVE_INFINITY;
       } else {
-        return  Basic.reciprocalF(result, prec);
+        return  Basic.reciprocalF(result, p);
       }
     } else {
       return result;
@@ -143,7 +146,8 @@ export class Pow {
         s = Basic.multiplyII(s, r);
       }
 
-      n = Basic.divideII(n, C.I_2).q;
+      n = Bitwise.rightShiftI(n, 1);
+      // n = Basic.divideII(n, C.I_2, "trunc").quotient;
 
       if (Comparison.isPositiveI(n)) {
         r = Basic.squareI(r);
@@ -162,11 +166,9 @@ export class Pow {
   public static positiveIntegerExponentFI(
     base: float,
     exponent: int,
-    prec?: P
+    p: P
   ): float {
-    if (!prec) { prec = P.p; }
-
-    const precToUse = P.createRelativeP(prec, exponent.digits.length);
+    const precToUse = PREC.getRelativeP(p, exponent.digits.length);
 
     let s = C.F_1;
     let r = base;
@@ -177,7 +179,8 @@ export class Pow {
         s = Basic.multiplyFF(s, r, precToUse);
       }
 
-      n = Basic.divideII(n, C.I_2).q;
+      n = Bitwise.rightShiftI(n, 1);
+      // n = Basic.divideII(n, C.I_2, "trunc").quotient;
 
       if (Comparison.isPositiveI(n)) {
         r = Basic.squareF(r, precToUse);
@@ -188,3 +191,41 @@ export class Pow {
     return s;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Comparison as ComparisonAlias} from "./Comparison";
+const Comparison = ComparisonAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+import {PREC as PRECAlias} from "../constants/PREC";
+const PREC = PRECAlias;
+
+import {Sign as SignAlias} from "./Sign";
+const Sign = SignAlias;
+
+import {Basic as BasicAlias} from "./Basic";
+const Basic = BasicAlias;
+
+import {Bitwise as BitwiseAlias} from "./Bitwise";
+const Bitwise = BitwiseAlias;
+
+import {Parity as ParityAlias} from "./Parity";
+const Parity = ParityAlias;
+
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;

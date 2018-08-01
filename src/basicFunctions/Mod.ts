@@ -29,7 +29,95 @@
  *
  */
 
+
+export class Mod {
+  public static qAndR(
+    x: float,
+    y: float,
+    type: "euclidean" | "trunc" | "ceil" | "floor" | "round",
+    p: P
+  ): {quotient: float, remainder: float} {
+    const xIsFinite = Comparison.isFinite(x);
+    const yIsFinite = Comparison.isFinite(y);
+
+    if (xIsFinite && yIsFinite) {
+      if (Comparison.isZero(y)) {
+        throw new DomainError(
+          "Mod",
+          "qAndR",
+          {
+            x: {value: x, expectedType: "float"},
+            y: {value: y, expectedType: "float"},
+            type: {value: type, expectedType: "string"}
+          },
+          "The mod is undefined if y is 0"
+        )
+      } else {
+        const xDivY = Basic.divideFF(x, y, p);
+        let q: float;
+
+        switch(type) {
+          case "trunc": q = Conversion.trunc(xDivY); break;
+          case "floor": q = Conversion.floor(xDivY); break;
+          case "ceil":  q = Conversion.ceil(xDivY); break;
+          case "euclidean":
+            q =  Comparison.isPositive(y) ?
+              Conversion.floor(xDivY)
+              :
+              Conversion.ceil(xDivY);
+            break;
+          case "round": q = Conversion.round(xDivY); break;
+          default: throw new DomainError(
+            "Mod",
+            "qAndR",
+            {
+              x: {value: x, expectedType: "float"},
+              y: {value: y, expectedType: "float"},
+              type: {value: type, expectedType: "string"}
+            },
+            `The type parameter must be "euclidean", "trunc", "ceil", "floor", or "round"`
+          );
+        }
+
+        let m = Basic.subtractFF(x, Basic.multiplyFF(q, y, p), p);
+
+        if (Comparison.gte(Sign.absF(m), y)) {
+          const recurseResult = Mod.qAndR(m, y, type, p);
+          m = recurseResult.remainder;
+          q = Basic.addFF(q, recurseResult.quotient, p);
+        }
+
+        return new FloatDivisionResult(q, m);
+      }
+    } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
+      throw new NaNError(
+        "Mod",
+        "qAndR",
+        Comparison.isNaN(x) ? "x" : "y"
+      );
+    } else {
+      throw new DomainError(
+        "Mod",
+        "qAndR",
+        {
+          x: {value: x, expectedType: "float"},
+          y: {value: y, expectedType: "float"},
+          type: {value: type, expectedType: "string"}
+        },
+        "The mod of x and y is undefined if either are infinite"
+      )
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
+
+import {FloatDivisionResult as FloatDivisionResultAlias}
+from "../dataTypes/FloatDivisionResult";
+const FloatDivisionResult = FloatDivisionResultAlias;
 
 import {Sign as SignAlias} from "./Sign";
 const Sign = SignAlias;
@@ -38,7 +126,6 @@ import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
 
 import {Basic as BasicAlias} from "./Basic";
@@ -47,36 +134,8 @@ const Basic = BasicAlias;
 import {Conversion as ConversionAlias} from "../core/Conversion";
 const Conversion = ConversionAlias;
 
-export class Mod {
-  public static qAndR(
-    x: float,
-    y: float,
-    type: "euclidean" | "trunc" | "ceil" | "floor" | "round",
-    prec: P
-  ): {q: float, r: float} {
-    const xDivY = Basic.divideFF(x, y, prec);
-    let q: float;
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
 
-    switch(type) {
-      case "trunc": q = Conversion.trunc(xDivY); break;
-      case "floor": q = Conversion.floor(xDivY); break;
-      case "ceil":  q = Conversion.ceil(xDivY); break;
-      case "euclidean":
-        q =  Comparison.isPositive(y) ? Conversion.floor(xDivY) : Conversion.ceil(xDivY);
-        break;
-      case "round": q = Conversion.round(xDivY); break;
-      default: throw new Error(`type "${type}", not recognized`);
-    }
-
-    let m = Basic.subtractFF(x, Basic.multiplyFF(q, y, prec), prec);
-
-    if (Comparison.gte(Sign.absF(m), y)) {
-      const recurseResult = Mod.qAndR(m, y, type, prec);
-      m = recurseResult.r;
-      q = Basic.addFF(q, recurseResult.q, prec);
-    }
-
-    return {q: q, r: m};
-  }
-
-}
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;
