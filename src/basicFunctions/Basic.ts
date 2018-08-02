@@ -555,19 +555,21 @@ export class Basic {
   }
 
   public static reciprocalF(x: float, p: P): float {
-    if (Comparison.isNaN(x)) {
+    if (Comparison.isFinite(x)) {
+      if (Comparison.isZero(x)) {
+        return C.F_POSITIVE_INFINITY;
+      } else {
+        // Newton-Raphson method of finding a reciprocal
+        return Basic.newtonInversion(x, p);
+      }
+    } else if (Comparison.isNaN(x)) {
       throw new NaNError(
         "Basic",
         "reciprocalF",
         "x"
       );
-    } else if (Comparison.isPOSITIVE_INFINITY(x) || Comparison.isNEGATIVE_INFINITY(x)) {
+    } else { // x is +/- infinity
       return C.F_0;
-    } else if (Comparison.isZero(x)) {
-      return C.F_POSITIVE_INFINITY;
-    } else {
-      // Newton-Raphson method of finding a reciprocal
-      return Basic.newtonInversion(x, p);
     }
   }
 
@@ -575,43 +577,29 @@ export class Basic {
     const xIsFinite = Comparison.isFinite(x);
     const yIsFinite = Comparison.isFinite(y);
 
-    if (xIsFinite && yIsFinite) {
-      if (Comparison.isZero(y)) {
-        if (Comparison.isPositive(x)) {
-          return C.F_POSITIVE_INFINITY;
-        } else if (Comparison.isNegative(x)) {
-          return C.F_NEGATIVE_INFINITY;
-        } else { // 0/0 is undefined
-          throw new DomainError(
-            "Basic",
-            "divideFF",
-            {
-              x: {value: x, expectedType: "float"},
-              y: {value: y, expectedType: "float"}
-            },
-            "The quotient 0/0 is undefined in float division"
-          );
-        }
-      } else if (Comparison.equals(Sign.absF(x), Sign.absF(y))) {
-        return x.coef.neg === y.coef.neg ? C.F_1 : C.F_NEG_1;
-      } else {
-        return Basic.multiplyFF(x, Basic.newtonInversion(y, p), p)
-      }
-    } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
+    if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
         "Basic",
         "divideFF",
         Comparison.isNaN(x) ? "x" : "y"
       );
-    } else if (xIsFinite) { // y is +/- infinity
-      return C.F_0;
-    } else if (yIsFinite) { // x is +/- infinity
-      if (x.coef.neg === y.coef.neg) {
-        return C.F_POSITIVE_INFINITY;
+    } else if (xIsFinite || yIsFinite) {
+      if (Comparison.isZero(y) && Comparison.isZero(x)) {
+        throw new DomainError(
+          "Basic",
+          "divideFF",
+          {
+            x: {value: x, expectedType: "float"},
+            y: {value: y, expectedType: "float"}
+          },
+          "The quotient 0/0 is undefined in float division"
+        );
+      } else if (Comparison.equals(Sign.absF(x), Sign.absF(y))){
+        return x.coef.neg === y.coef.neg ? C.F_1 : C.F_NEG_1;
       } else {
-        return C.F_NEGATIVE_INFINITY;
+        return Basic.multiplyFF(x, Basic.newtonInversion(y, p), p)
       }
-    } else { // both x and y are +/- infinity and infinity/infinity is undefined
+    } else { // both x and y are +/- infinity
       throw new DomainError(
         "Basic",
         "divideFF",
@@ -828,5 +816,4 @@ import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;

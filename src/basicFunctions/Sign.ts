@@ -29,20 +29,6 @@
  *
  */
 
-// interface imports
-import {int, intType} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-// functional imports
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
-const Float = FloatAlias;
-
 
 export class Sign {
   public static negateI(a: int): int {
@@ -55,7 +41,7 @@ export class Sign {
     } else if (a.type === intType.infinite) {
       return a.neg ? C.POSITIVE_INFINITY : C.NEGATIVE_INFINITY;
     } else { // a === NaN
-      return C.NaN;
+      throw new NaNError("Sign", "negateI", "a");
     }
   }
 
@@ -64,19 +50,21 @@ export class Sign {
   }
 
   public static i(a: int): number {
-    if (a.type === intType.NaN) {
-      return Number.NaN;
+    if (a.type === intType.finite) {
+      return a.digits.length === 1 && a.digits[0] === 0 ? 0 : a.neg ? -1 : 1;
     } else if (a.type === intType.infinite) {
       return a.neg ? -1 : 1;
-    } else if (a.digits.length === 1 && a.digits[0] === 0) {
-      return 0;
-    } else {
-      return a.neg ? -1 : 1;
+    } else { // a === NaN
+      throw new NaNError("Sign", "i", "a");
     }
   }
 
   public static negateF(x: float): float {
-    return new Float(Sign.negateI(x.coef), x.exp);
+    if (x.coef.type === intType.NaN && x.exp.type === intType.NaN) {
+      throw new NaNError("Sign", "negateF", "x");
+    } else {
+      return new Float(Sign.negateI(x.coef), x.exp);
+    }
   }
 
   public static absF(x: float): float {
@@ -91,15 +79,34 @@ export class Sign {
 
   public static f(x: float): number {
     if (x.coef.type === intType.finite) {
-      if (x.coef.digits.length === 1 && x.coef.digits[0] === 0) {
-        return 0;
-      } else {
-        return x.coef.neg ? -1 : 1;
-      }
+      return x.coef.digits.length === 1 && x.coef.digits[0] === 0 ?
+        0
+        :
+        x.coef.neg ? -1 : 1;
     } else if (x.coef.type === intType.infinite) {
       return x.coef.neg ? -1 : 1;
     } else {
-      return Number.NaN;
+      throw new NaNError("Sign", "f", "x");
     }
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int, intType} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
+const Float = FloatAlias;
+
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;

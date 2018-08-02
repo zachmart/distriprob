@@ -42,7 +42,7 @@ export class Sqrt1pm1 {
         "Sqrt1pm1",
         "f",
         {x: {value: x, expectedType: "float"}, },
-        "The argument of sqrt1pm1 must be greater than or equal to negative 1"
+        "The function sqrt1pm1 is undefined for arguments less than -1."
       );
     } else if (Comparison.gt(Sign.absF(x), RATIO.value(3, 4, p))) {
       return Basic.decF(Root.squareF(Basic.incF(x, p), p), p);

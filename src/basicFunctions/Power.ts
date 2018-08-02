@@ -29,6 +29,197 @@
  *
  */
 
+
+export class Power {
+  public static ff(base: float, exponent: float, p: P): float {
+    const baseIsFinite = Comparison.isFinite(base);
+    const expIsFinite = Comparison.isFinite(exponent);
+    const absExponent = Sign.absF(exponent);
+    const absBase = Sign.absF(base);
+
+    if (baseIsFinite && expIsFinite) {
+      if (Comparison.isZero(exponent) || Comparison.isOne(base)) {
+        return C.F_1;
+      } else if (Comparison.isZero(base)) {
+        return C.F_0;
+      } else if (Conversion.isInteger(exponent)) {
+        if (Comparison.gt(absExponent, C.F_NUMBER_MAX_SAFE_INTEGER)) {
+          const absResult = Power.usingLogAndExpFF(absBase, exponent, p);
+
+          return Comparison.isNegative(base) && Parity.isOdd(exponent) ?
+            Sign.negateF(absResult)
+            :
+            absResult;
+        } else {
+          return Pow.fi(base, Conversion.floatToInt(exponent), p)
+        }
+      } else {
+        if (Comparison.isNegative(base)) {
+          throw new DomainError(
+            "Power",
+            "ff",
+            {
+              base: {value: base, expectedType: "float"},
+              exponent: {value: exponent, expectedType: "float"}
+            },
+            `The power function is undefined for a negative real value raised to a${""
+            } non-integer real value`
+          );
+        }
+
+        return Power.usingLogAndExpFF(base, exponent, p);
+      }
+    } else if (Comparison.isNaN(base) || Comparison.isNaN(exponent)) {
+      throw new NaNError(
+        "Power",
+        "ff",
+        Comparison.isNaN(base) ? "base" : "exponent"
+      )
+    } else if (baseIsFinite) { // exponent is +/- infinity and base is finite
+      if (Comparison.isPOSITIVE_INFINITY(exponent)) {
+        if (Comparison.ltOne(absBase)) {
+          return C.F_0;
+        } else if (Comparison.isOne(base)) {
+          return C.F_1;
+        } else if (Comparison.gtOne(base)) {
+          return C.F_POSITIVE_INFINITY;
+        } else { // base <= -1
+          throw new DomainError(
+            "Power",
+            "ff",
+            {
+              base: {value: base, expectedType: "float"},
+              exponent: {value: exponent, expectedType: "float"}
+            },
+            `The power function is undefined for a negative value less than or equal${""
+            } to -1 raised to +Infinity`
+          );
+        }
+      } else { // exponent === NEGATIVE_INFINITY
+        if (Comparison.gtOne(absBase)) {
+          return C.F_0;
+        } else if (Comparison.isOne(base)) {
+          return C.F_1;
+        } else if (Comparison.isNegative(base)) { // 0 > base >= -1
+          throw new DomainError(
+            "Power",
+            "ff",
+            {
+              base: {value: base, expectedType: "float"},
+              exponent: {value: exponent, expectedType: "float"}
+            },
+            `The power function is undefined for a negative value greater than or${""
+            } equal to -1 raised to -Infinity`
+          );
+        } else { // 0 <= base < 1
+          return C.F_POSITIVE_INFINITY
+        }
+      }
+    } else if (expIsFinite) { // base is +/- infinity and exponent is finite
+      if (Comparison.isPositive(exponent)) {
+        if (Comparison.isPOSITIVE_INFINITY(base)) {
+          return C.F_POSITIVE_INFINITY;
+        } else { // base is NEGATIVE_INFINITY
+          if (Conversion.isInteger(exponent)) {
+            if (Parity.isEven(exponent)) {
+              return C.F_POSITIVE_INFINITY;
+            } else { // exponent is odd integer
+              return C.F_NEGATIVE_INFINITY;
+            }
+          } else {
+            throw new DomainError(
+              "Power",
+              "ff",
+              {
+                base: {value: base, expectedType: "float"},
+                exponent: {value: exponent, expectedType: "float"}
+              },
+              `The power function is undefined for -Infinity raised to a${""
+              } positive non-integer`
+            );
+          }
+        }
+      } else if (Comparison.isNegative(exponent)) {
+        return C.F_0;
+      } else { // exponent === 0
+        throw new DomainError(
+          "Power",
+          "ff",
+          {
+            base: {value: base, expectedType: "float"},
+            exponent: {value: exponent, expectedType: "float"}
+          },
+          "The power function is undefined for 0 base and infinite exponent"
+        );
+      }
+    } else { // both base and exponent are +/- infinity
+      if (Comparison.isPOSITIVE_INFINITY(base)) {
+        if (Comparison.isPOSITIVE_INFINITY(exponent)) {
+          return C.F_POSITIVE_INFINITY;
+        } else { // exponent === NEGATIVE_INFINITY
+          return C.F_0;
+        }
+      } else {
+        if (Comparison.isPOSITIVE_INFINITY(exponent)) {
+          throw new DomainError(
+            "Power",
+            "ff",
+            {
+              base: {value: base, expectedType: "float"},
+              exponent: {value: exponent, expectedType: "float"}
+            },
+            "The power function is undefined for -Infinity raised to +Infinity"
+          );
+        } else { // exponent === NEGATIVE_INFINITY
+          return C.F_0;
+        }
+      }
+    }
+  }
+
+
+
+  /**
+   * This function calculates powers based on the following observations:
+   *    1. we can get coef and e such that:
+   *                          base = coef * 2^e
+   *    2. base^exponent = exp(exponent * log(base))
+   *
+   * therefore using 1 and 2 we get:
+   *
+   * base^exponent = exp(exponent * log(base))
+   *               = exp(exponent * (log(coef) + log(2^e)))
+   *               = exp(exponent * (log(coef) + (e * ln2)))
+   *
+   */
+  private static usingLogAndExpFF(base: float, exponent: float, p: P): float {
+    const calcPrec = PREC.getRelativeP(p, exponent.coef.digits.length);
+    const coef = Conversion.intToFloat(base.coef, calcPrec, true);
+    const e = Conversion.intToFloat(
+      Basic.multiplyII(
+        C.POWER_OF_TWO_FOR_BASE_INT,
+        Basic.subtractII(
+          base.exp,
+          Core.numberToIntUnchecked(base.coef.digits.length - 1)
+        )
+      ),
+      calcPrec,
+      true
+    );
+    const logCoef = Log.f(coef, calcPrec);
+    const logBase = Basic.addFF(
+      logCoef,
+      Basic.multiplyFF(e, LN2.value(calcPrec), calcPrec),
+      calcPrec
+    );
+
+    return Exp.f(Basic.multiplyFF(exponent, logBase, calcPrec), calcPrec);
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {Sign as SignAlias} from "./Sign";
@@ -64,80 +255,14 @@ const Pow = PowAlias;
 import {Log as LogAlias} from "./Log";
 const Log = LogAlias;
 
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;
+
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
 
-
-export class Power {
-  public static ff(base: float, exponent: float, prec: P): float {
-    if (Comparison.isNaN(base) || Comparison.isNaN(exponent)) { return C.F_NaN; }
-
-    const absExponent = Sign.absF(exponent);
-    const absBase = Sign.absF(base);
-
-    if (Comparison.isZero(exponent) || Comparison.isOne(base)) {
-      return C.F_1;
-    } else if (Comparison.isZero(base)) {
-      return C.F_0;
-    } else if (Conversion.isInteger(exponent)) {
-      if (Comparison.gt(absExponent, C.F_NUMBER_MAX_SAFE_INTEGER)) {
-        const absResult = Power.usingLogAndExpFF(absBase, exponent, prec);
-
-        return Comparison.isNegative(base) && Parity.isOdd(exponent) ?
-          Sign.negateF(absResult)
-          :
-          absResult;
-      } else {
-        return Pow.fi(base, Conversion.floatToInt(exponent), prec)
-      }
-    } else {
-      if (Comparison.isNegative(base)) {
-        throw new Error(`Cannot raise negative value to non-integer power`);
-      }
-
-      return Power.usingLogAndExpFF(base, exponent, prec);
-    }
-  }
-
-
-  /**
-   * This function calculates powers based on the following observations:
-   *    1. we can get coef and e such that:
-   *                          base = coef * 2^e
-   *    2. base^exponent = exp(exponent * log(base))
-   *
-   * therefore using 1 and 2 we get:
-   *
-   * base^exponent = exp(exponent * log(base))
-   *               = exp(exponent * (log(coef) + log(2^e)))
-   *               = exp(exponent * (log(coef) + (e * ln2)))
-   *
-   */
-  private static usingLogAndExpFF(base: float, exponent: float, prec: P): float {
-    const calcPrec = P.createRelativeP(P.p, exponent.coef.digits.length);
-    const coef = Conversion.intToFloat(base.coef, calcPrec, true);
-    const e = Conversion.intToFloat(
-      Basic.multiplyII(
-        C.POWER_OF_TWO_FOR_BASE_INT,
-        Basic.subtractII(
-          base.exp,
-          Core.numberToIntUnchecked(base.coef.digits.length - 1)
-        )
-      ),
-      calcPrec,
-      true
-    );
-    const logCoef = Log.f(coef, calcPrec);
-    const logBase = Basic.addFF(
-      logCoef,
-      Basic.multiplyFF(e, LN2.value(calcPrec), calcPrec),
-      calcPrec
-    );
-
-    return Exp.f(Basic.multiplyFF(exponent, logBase, calcPrec), calcPrec);
-  }
-
-
-}
-
+import {PREC as PRECAlias} from "../constants/PREC";
+const PREC = PRECAlias;

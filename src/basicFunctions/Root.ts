@@ -43,50 +43,74 @@ export class Root {
     Root.approxPrec = new P(3, "base");
   }
 
-  /**
-   * @param {float} x - a non-negative float
-   * @param {P} prec
-   * @returns {float}
-   */
-  public static squareF(x: float, prec: P): float {
-    if (Comparison.isZero(x)) {
+
+  public static squareF(x: float, p: P): float {
+    if (Comparison.isNaN(x)) {
+      throw new NaNError("Root", "squareF", "x");
+    } else if (Comparison.isNegative(x)) {
+      throw new DomainError(
+        "Root",
+        "squareF",
+        {x: {value: x, expectedType: "float"}},
+        "The square root function is not defined for negative values."
+      )
+    } else if (Comparison.isZero(x)) {
       return C.F_0;
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else {
-
-      return Root.newtonsMethodSqrt(x, prec)
+      return Root.newtonsMethodSqrt(x, p)
     }
   }
 
-  public static fn(x: float, n: number, prec: P) {
-    if (Comparison.isZero(x)) {
-      return n < 0 ? C.F_POSITIVE_INFINITY : C.F_0;
-    } else {
-      const negativeX = Comparison.isNegative(x);
-      if (negativeX) {
-        if (n % 2 === 0) {
-          throw new Error(
-            `Cannot take even root of an negative number, n = ${n}, x = ${x}`
-          );
-        }
-        if (Comparison.isNEGATIVE_INFINITY(x)) {
-          return C.F_NEGATIVE_INFINITY;
-        }
-      }
-
-      if (Comparison.isPOSITIVE_INFINITY(x)) {
-        return C.F_POSITIVE_INFINITY;
+  public static fn(x: float, n: number, p: P) {
+    if (Comparison.isNaN(x) || Number.isNaN(n)) {
+      throw new NaNError(
+        "Root",
+        "fn",
+        Comparison.isNaN(x) ? "x" : "n"
+      );
+    } else if (!Number.isInteger(n) || n <= Number.MAX_SAFE_INTEGER ||
+               n >= Number.MIN_SAFE_INTEGER) {
+      throw new DomainError(
+        "Root",
+        "fn",
+        {
+          x: {value: x, expectedType: "float"},
+          n: {value: n, expectedType: "number"}
+        },
+        `The root function is undefined for non-integer degrees or degrees that are${""
+        } greater that Number.MAX_SAFE_INTEGER or less than Number.MIN_SAFE_INTEGER.`
+      )
+    } else if (n % 2 === 0 && Comparison.isNegative(x)) {
+      throw new DomainError(
+        "Root",
+        "fn",
+        {
+          x: {value: x, expectedType: "float"},
+          n: {value: n, expectedType: "number"}
+        },
+        `The root function is undefined for even degrees on negative values.`
+      )
+    } else if (Comparison.isFinite(x)) {
+      if (Comparison.isZero(x)) {
+        return n < 0 ? C.F_POSITIVE_INFINITY : C.F_0;
       }
 
       const absX = Sign.absF(x);
-      const absResult = Root.newtonsMethodGeneral(absX, n, prec);
+      const absResult = Root.newtonsMethodGeneral(absX, n, p);
 
-      return negativeX ? Sign.negateF(absResult) : absResult;
+      return Comparison.isNegative(x) ? Sign.negateF(absResult) : absResult;
+    } else { // x is +/- infinity
+      if (n < 0) {
+        return C.F_0;
+      } else {
+        return x;
+      }
     }
   }
 
-  public static valueFromTable(x: number, n: number, prec: P): float {
+  public static valueFromTable(x: number, n: number, p: P): float {
     const negative = x < 0;
 
     if (x < 0) { x = Math.abs(x); }
@@ -97,22 +121,22 @@ export class Root {
 
     if (typeof entry === "undefined") {
       const xFloat = Core.numberToFloatUnchecked(x);
-      const value = n === 2 ? Root.squareF(xFloat, prec) : Root.fn(xFloat, n, prec);
+      const value = n === 2 ? Root.squareF(xFloat, p) : Root.fn(xFloat, n, p);
       entry = {
         value: value,
-        numDigits: prec.baseDigits
+        numDigits: p.baseDigits
       };
       Root._table[n][x] = entry;
-    } else if (entry.numDigits < prec.baseDigits) {
+    } else if (entry.numDigits < p.baseDigits) {
       const xFloat = Core.numberToFloatUnchecked(x);
-      entry.value = n === 2 ? Root.squareF(xFloat, prec) : Root.fn(xFloat, n, prec);
-      entry.numDigits = prec.baseDigits;
+      entry.value = n === 2 ? Root.squareF(xFloat, p) : Root.fn(xFloat, n, p);
+      entry.numDigits = p.baseDigits;
     }
 
     return negative ? Sign.negateF(entry.value) : entry.value;
   }
 
-  public static approx(x: float, n: number): float {
+  private static approx(x: float, n: number): float {
     const nInt = Core.numberToIntUnchecked(n);
 
     const sciNote = Basic.sciNoteBASEApprox(x);
@@ -125,12 +149,12 @@ export class Root {
       nInt,
       "round"
     );
-    const twoToExNQuotient: float = Pow.fi(C.F_2, expDivN.q, Root.approxPrec);
-    const remainderNum = Core.intToNumber(expDivN.r);
+    const twoToExNQuotient: float = Pow.fi(C.F_2, expDivN.quotient, Root.approxPrec);
+    const remainderNum = Core.intToNumber(expDivN.remainder);
 
     let nthRootOf2toEx: float;
 
-    if (Comparison.isZeroI(expDivN.r)) {
+    if (Comparison.isZeroI(expDivN.remainder)) {
       nthRootOf2toEx = twoToExNQuotient;
     } else {
       const twoToRemainderDivN = Core.numberToFloat(Math.pow(2, remainderNum/n));
@@ -152,7 +176,7 @@ export class Root {
    * @param {P} prec
    * @returns {float}
    */
-  public static newtonsMethodSqrt(x: float, prec: P): float {
+  private static newtonsMethodSqrt(x: float, prec: P): float {
     const steps = prec.quadraticConvergenceSteps;
     const xNum = Core.floatToNumber(x);
     const guess = Number.isFinite(xNum) && xNum !== 0 ?
@@ -188,7 +212,7 @@ export class Root {
    * @param {P} prec
    * @returns {float}
    */
-  public static newtonsMethodGeneral(x: float, n: number, prec: P): float {
+  private static newtonsMethodGeneral(x: float, n: number, prec: P): float {
     const steps = prec.quadraticConvergenceSteps;
     const xNum = Core.floatToNumber(x);
     const nInt = Core.numberToInt(n);
@@ -228,7 +252,6 @@ export class Root {
 // *** imports come at end to avoid circular dependency ***
 
 // interface imports
-import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
 
 
@@ -257,3 +280,9 @@ const Basic = BasicAlias;
 
 import {RATIO as RATIOAlias} from "../constants/RATIO";
 const RATIO = RATIOAlias;
+
+import {NaNError as NaNErrorAlias} from "../errors/NaNError";
+const NaNError = NaNErrorAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;
