@@ -30,32 +30,6 @@
  *
  */
 
-import {float} from "../../interfaces/float";
-
-import {C as CAlias} from "../../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "../../basicFunctions/Sign";
-const Sign = SignAlias;
-
-import {Core as CoreAlias} from "../../core/Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Basic as BasicAlias} from "../../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-import {Conversion as ConversionAlias} from "../../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {Pow as PowAlias} from "../../basicFunctions/Pow";
-const Pow = PowAlias;
-
-import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
 
 export type Tol = (a: float, b: float) => boolean;
 
@@ -75,7 +49,7 @@ export class Toms748 {
   private fd: float;
   private fe: float;
   private fu: float;
-  private prec: P;
+  private p: P;
 
   private constructor(
     f: (x: float) => float,
@@ -83,7 +57,7 @@ export class Toms748 {
     b: float,
     fa: float,
     fb: float,
-    prec: P
+    p: P
   ) {
     this.f = f;
     this.a = a;
@@ -98,24 +72,24 @@ export class Toms748 {
     this.fd = C.F_NaN;
     this.fe = C.F_NaN;
     this.fu = C.F_NaN;
-    this.prec = prec;
+    this.p = p;
   }
 
 
-  public static epsTolerance(prec: P, bits?: number): Tol {
-    let eps = Basic.multiplyFF(C.F_4, prec.epsilon, prec);
+  public static epsTolerance(p: P, bits?: number): Tol {
+    let eps = Basic.multiplyFF(C.F_4, p.epsilon, p);
 
     if (typeof bits === "number") {
       eps = Core.maxF(
-        Pow.fi(C.F_2, Core.numberToIntUnchecked(1 - bits), prec),
+        Pow.fi(C.F_2, Core.numberToIntUnchecked(1 - bits), p),
         eps
       );
     }
 
     return (x: float, y: float) => {
-      const distBetweenAAndB = Sign.absF(Basic.subtractFF(x, y, prec));
+      const distBetweenAAndB = Sign.absF(Basic.subtractFF(x, y, p));
       const minAbsXY = Core.minF(Sign.absF(x), Sign.absF(y));
-      return Comparison.lte(distBetweenAAndB, Basic.multiplyFF(eps, minAbsXY, prec));
+      return Comparison.lte(distBetweenAAndB, Basic.multiplyFF(eps, minAbsXY, p));
     }
   }
 
@@ -143,7 +117,7 @@ export class Toms748 {
     // the interval.  In other words d is the third best guess
     // to the root.
     //
-    const tol = Basic.multiplyFF(this.prec.epsilon, C.F_2, this.prec);
+    const tol = Basic.multiplyFF(this.p.epsilon, C.F_2, this.p);
     //
     // If the interval [a,b] is very small, or if c is too close
     // to one end of the interval then we need to adjust the
@@ -152,23 +126,23 @@ export class Toms748 {
     let temp: float;
 
     if (Comparison.lt(
-      Basic.subtractFF(this.b, this.a, this.prec),
-      Basic.productF([C.F_2, tol, this.a], this.prec)
+      Basic.subtractFF(this.b, this.a, this.p),
+      Basic.productF([C.F_2, tol, this.a], this.p)
     )) {
       c = Basic.addFF(
         this.a,
         Basic.multiplyFF(
-          Basic.subtractFF(this.b, this.a, this.prec),
+          Basic.subtractFF(this.b, this.a, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         ),
-        this.prec);
+        this.p);
     } else if (Comparison.lte(
       c,
       temp = Basic.addFF(
         this.a,
-        Basic.multiplyFF(Sign.absF(this.a), tol, this.prec),
-        this.prec
+        Basic.multiplyFF(Sign.absF(this.a), tol, this.p),
+        this.p
       )
     )) {
       c = temp;
@@ -176,8 +150,8 @@ export class Toms748 {
       c,
       temp = Basic.subtractFF(
         this.b,
-        Basic.multiplyFF(Sign.absF(this.b), tol, this.prec),
-        this.prec
+        Basic.multiplyFF(Sign.absF(this.b), tol, this.p),
+        this.p
       )
     )) {
       c = temp;
@@ -226,30 +200,30 @@ export class Toms748 {
     // close to a or b.
     //
 
-    const tol = Basic.multiplyFF(this.prec.epsilon, C.F_5, this.prec);
+    const tol = Basic.multiplyFF(this.p.epsilon, C.F_5, this.p);
     const c = Basic.subtractFF(this.a, Basic.multiplyFF(
-      Basic.divideFF(this.fa, Basic.subtractFF(this.fb, this.fa, this.prec), this.prec),
-      Basic.subtractFF(this.b, this.a, this.prec),
-      this.prec
-    ), this.prec);
+      Basic.divideFF(this.fa, Basic.subtractFF(this.fb, this.fa, this.p), this.p),
+      Basic.subtractFF(this.b, this.a, this.p),
+      this.p
+    ), this.p);
     const condition1 = Comparison.lte(
       c,
-      Basic.addFF(this.a, Basic.multiplyFF(Sign.absF(this.a), tol, this.prec), this.prec)
+      Basic.addFF(this.a, Basic.multiplyFF(Sign.absF(this.a), tol, this.p), this.p)
     );
     const condition2 = Comparison.gte(
       c,
       Basic.subtractFF(
         this.b,
-        Basic.multiplyFF(Sign.absF(this.b), tol, this.prec),
-        this.prec
+        Basic.multiplyFF(Sign.absF(this.b), tol, this.p),
+        this.p
       )
     );
 
     if (condition1 || condition2) {
       return Basic.multiplyFF(
-        Basic.addFF(this.a, this.b, this.prec),
+        Basic.addFF(this.a, this.b, this.p),
         C.F_ONE_HALF,
-        this.prec
+        this.p
       );
     }
 
@@ -272,21 +246,21 @@ export class Toms748 {
     // Start by obtaining the coefficients of the quadratic polynomial:
     //
     const bb = Basic.divideFF(
-      Basic.subtractFF(this.fb, this.fa, this.prec),
-      Basic.subtractFF(this.b, this.a, this.prec),
-      this.prec
+      Basic.subtractFF(this.fb, this.fa, this.p),
+      Basic.subtractFF(this.b, this.a, this.p),
+      this.p
     );
 
     let aa = Basic.divideFF(
-      Basic.subtractFF(this.fd, this.fb, this.prec),
-      Basic.subtractFF(this.d, this.b, this.prec),
-      this.prec
+      Basic.subtractFF(this.fd, this.fb, this.p),
+      Basic.subtractFF(this.d, this.b, this.p),
+      this.p
     );
 
     aa = Basic.divideFF(
-      Basic.subtractFF(aa, bb, this.prec),
-      Basic.subtractFF(this.d, this.a, this.prec),
-      this.prec
+      Basic.subtractFF(aa, bb, this.p),
+      Basic.subtractFF(this.d, this.a, this.p),
+      this.p
     );
 
     if (Comparison.isZero(aa)) {
@@ -310,21 +284,21 @@ export class Toms748 {
         Basic.addFF(this.fa, Basic.multiplyFF(
           Basic.addFF(
             bb,
-            Basic.multiplyFF(aa, Basic.subtractFF(c, this.b, this.prec), this.prec),
-            this.prec
+            Basic.multiplyFF(aa, Basic.subtractFF(c, this.b, this.p), this.p),
+            this.p
           ),
-          Basic.subtractFF(c, this.a, this.prec),
-          this.prec
+          Basic.subtractFF(c, this.a, this.p),
+          this.p
           ),
-          this.prec
+          this.p
         ),
         Basic.addFF(bb, Basic.multiplyFF(aa, Basic.multiplyFF(
           C.F_2,
-          Basic.subtractFF(c, Basic.subtractFF(this.a, this.b, this.prec), this.prec),
-          this.prec
-        ), this.prec), this.prec),
-        this.prec
-      ), this.prec);
+          Basic.subtractFF(c, Basic.subtractFF(this.a, this.b, this.p), this.p),
+          this.p
+        ), this.p), this.p),
+        this.p
+      ), this.p);
     }
 
     if (Comparison.lte(c, this.a) || Comparison.gte(c, this.b)) {
@@ -349,52 +323,52 @@ export class Toms748 {
     //
 
     const q11 = Basic.multiplyFF(
-      Basic.subtractFF(this.d, this.e, this.prec),
-      Basic.divideFF(this.fd, Basic.subtractFF(this.fe, this.fd, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(this.d, this.e, this.p),
+      Basic.divideFF(this.fd, Basic.subtractFF(this.fe, this.fd, this.p), this.p),
+      this.p
     ); //(d - e) * fd / (fe - fd);
     const q21 = Basic.multiplyFF(
-      Basic.subtractFF(this.b, this.d, this.prec),
-      Basic.divideFF(this.fb, Basic.subtractFF(this.fd, this.fb, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(this.b, this.d, this.p),
+      Basic.divideFF(this.fb, Basic.subtractFF(this.fd, this.fb, this.p), this.p),
+      this.p
     ); //(b - d) * fb / (fd - fb);
     const q31 = Basic.multiplyFF(
-      Basic.subtractFF(this.a, this.b, this.prec),
-      Basic.divideFF(this.fa, Basic.subtractFF(this.fb, this.fa, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(this.a, this.b, this.p),
+      Basic.divideFF(this.fa, Basic.subtractFF(this.fb, this.fa, this.p), this.p),
+      this.p
     );//(a - b) * fa / (fb - fa);
     const d21 = Basic.multiplyFF(
-      Basic.subtractFF(this.b, this.d, this.prec),
-      Basic.divideFF(this.fd, Basic.subtractFF(this.fd, this.fb, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(this.b, this.d, this.p),
+      Basic.divideFF(this.fd, Basic.subtractFF(this.fd, this.fb, this.p), this.p),
+      this.p
     );//(b - d) * fd / (fd - fb);
     const d31 = Basic.multiplyFF(
-      Basic.subtractFF(this.a, this.b, this.prec),
-      Basic.divideFF(this.fb, Basic.subtractFF(this.fb, this.fa, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(this.a, this.b, this.p),
+      Basic.divideFF(this.fb, Basic.subtractFF(this.fb, this.fa, this.p), this.p),
+      this.p
     );//(a - b) * fb / (fb - fa);
     const q22 = Basic.multiplyFF(
-      Basic.subtractFF(d21, q11, this.prec),
-      Basic.divideFF(this.fb, Basic.subtractFF(this.fe, this.fb, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(d21, q11, this.p),
+      Basic.divideFF(this.fb, Basic.subtractFF(this.fe, this.fb, this.p), this.p),
+      this.p
     );//(d21 - q11) * fb / (fe - fb);
     const q32 = Basic.multiplyFF(
-      Basic.subtractFF(d31, q21, this.prec),
-      Basic.divideFF(this.fa, Basic.subtractFF(this.fd, this.fa, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(d31, q21, this.p),
+      Basic.divideFF(this.fa, Basic.subtractFF(this.fd, this.fa, this.p), this.p),
+      this.p
     );//(d31 - q21) * fa / (fd - fa);
     const d32 = Basic.multiplyFF(
-      Basic.subtractFF(d31, q21, this.prec),
-      Basic.divideFF(this.fd, Basic.subtractFF(this.fd, this.fa, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(d31, q21, this.p),
+      Basic.divideFF(this.fd, Basic.subtractFF(this.fd, this.fa, this.p), this.p),
+      this.p
     );//(d31 - q21) * fd / (fd - fa);
     const q33 = Basic.multiplyFF(
-      Basic.subtractFF(d32, q22, this.prec),
-      Basic.divideFF(this.fa, Basic.subtractFF(this.fe, this.fa, this.prec), this.prec),
-      this.prec
+      Basic.subtractFF(d32, q22, this.p),
+      Basic.divideFF(this.fa, Basic.subtractFF(this.fe, this.fa, this.p), this.p),
+      this.p
     );//(d32 - q22) * fa / (fe - fa);
 
-    const c = Basic.sumF([q31, q32, q33, this.a], this.prec); //q31 + q32 + q33 + a;
+    const c = Basic.sumF([q31, q32, q33, this.a], this.p); //q31 + q32 + q33 + a;
 
     if (Comparison.lte(c, this.a) || Comparison.gte(c, this.b)) {
       // Out of bounds step, fall back to quadratic interpolation:
@@ -424,7 +398,7 @@ export class Toms748 {
 
     // initialize a, b and fa, fb:
     if (Comparison.gte(this.a, this.b)) {
-      throw new Error(`Domain error: Parameters a and b out of order: a=${this.a
+      throw new Error(`Parameters a and b out of order: a=${this.a
         }, b=${this.b}`);
     }
 
@@ -439,7 +413,7 @@ export class Toms748 {
 
     if (Sign.f(this.fa) * Sign.f(this.fb) > 0) {
       throw new Error(
-        `Domain error: Parameters a and b do not bracket the root: a=${
+        `Parameters a and b do not bracket the root: a=${
           this.a}, b=${this.b}`
       );
     }
@@ -513,17 +487,17 @@ export class Toms748 {
         this.fu = this.fb;
       }
       c = Basic.subtractFF(this.u, Basic.multiplyFF(C.F_2, Basic.multiplyFF(
-        Basic.divideFF(this.fu, Basic.subtractFF(this.fb, this.fa, this.prec), this.prec),
-        Basic.subtractFF(this.b, this.a, this.prec),
-        this.prec
-      ), this.prec), this.prec);
+        Basic.divideFF(this.fu, Basic.subtractFF(this.fb, this.fa, this.p), this.p),
+        Basic.subtractFF(this.b, this.a, this.p),
+        this.p
+      ), this.p), this.p);
 
       const condition1 = Comparison.gt(
-        Sign.absF(Basic.subtractFF(c, this.u, this.prec)),
+        Sign.absF(Basic.subtractFF(c, this.u, this.p)),
         Basic.multiplyFF(
-          Basic.subtractFF(this.b, this.a, this.prec),
+          Basic.subtractFF(this.b, this.a, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         )
       );
 
@@ -531,11 +505,11 @@ export class Toms748 {
         c = Basic.addFF(
           this.a,
           Basic.multiplyFF(
-            Basic.subtractFF(this.b, this.a, this.prec),
+            Basic.subtractFF(this.b, this.a, this.p),
             C.F_ONE_HALF,
-            this.prec
+            this.p
           ),
-          this.prec
+          this.p
         );
       }
       //
@@ -553,11 +527,11 @@ export class Toms748 {
       // to be taken, we do this if we're not converging fast enough:
       //
       const condition2 = Comparison.lt(
-        Basic.subtractFF(this.b, this.a, this.prec),
+        Basic.subtractFF(this.b, this.a, this.p),
         Basic.multiplyFF(
           C.F_ONE_HALF,
-          Basic.subtractFF(this.b0, this.a0, this.prec),
-          this.prec
+          Basic.subtractFF(this.b0, this.a0, this.p),
+          this.p
         )
       );
 
@@ -573,11 +547,11 @@ export class Toms748 {
         Basic.addFF(
           this.a,
           Basic.multiplyFF(
-            Basic.subtractFF(this.b, this.a, this.prec),
+            Basic.subtractFF(this.b, this.a, this.p),
             C.F_ONE_HALF,
-            this.prec
+            this.p
           ),
-          this.prec
+          this.p
         )
       );
       count--;
@@ -601,9 +575,9 @@ export class Toms748 {
     fbx: float,
     tol: Tol,
     maxIter: number,
-    prec: P
+    p: P
   ): { a: float, b: float, iterations: number } {
-    const toms748 = new Toms748(f, ax, bx, fax, fbx, prec);
+    const toms748 = new Toms748(f, ax, bx, fax, fbx, p);
     return toms748.solve(tol, maxIter);
   }
 
@@ -614,7 +588,7 @@ export class Toms748 {
     rising: boolean,
     tol: Tol,
     maxIter: number,
-    prec: P
+    p: P
   ): { a: float, b: float, iterations: number } {
     //
     // Set up inital brackets:
@@ -637,8 +611,11 @@ export class Toms748 {
       //
       while (Sign.f(fb) === Sign.f(fa)) {
         if (count === 0) {
-          throw new Error(`Evaluation error: Unable to bracket root, last${""
-          } nearest value was ${b}`);
+          throw new CalculationError(
+            "toms748",
+            "bracketAndSolveRoot",
+            "Unable to bracket root in given number of maximum iterations"
+          );
         }
         //
         // Heuristic: normally it's best not to increase the step sizes as we'll just end
@@ -649,7 +626,7 @@ export class Toms748 {
         // std::numeric_limits<T>::min().
         //
         if ((maxIter - count) % step === 0) {
-          factor = Basic.multiplyFF(C.F_2, factor, prec);
+          factor = Basic.multiplyFF(C.F_2, factor, p);
           if (step > 1) {
             step = Math.trunc(step / 2);
           }
@@ -659,7 +636,7 @@ export class Toms748 {
         //
         a = b;
         fa = fb;
-        b = Basic.multiplyFF(b, factor, prec);
+        b = Basic.multiplyFF(b, factor, p);
         fb = f(b);
         count--;
       }
@@ -680,9 +657,11 @@ export class Toms748 {
 
         }
         if (count === 0) {
-          throw new Error(
-            `Evaluation error: Unable to bracket root, last nearest${""
-              } value was ${a}`);
+          throw new CalculationError(
+            "toms748",
+            "bracketAndSolveRoot",
+            "Unable to bracket root in given number of maximum iterations"
+          );
         }
         //
         // Heuristic: normally it's best not to increase the step sizes as we'll just end
@@ -693,7 +672,7 @@ export class Toms748 {
         // std::numeric_limits<T>::min().
         //
         if ((maxIter - count) % step === 0) {
-          factor = Basic.multiplyFF(C.F_2, factor, prec);
+          factor = Basic.multiplyFF(C.F_2, factor, p);
           if (step > 1) {
             step = Math.trunc(step / 2)
           }
@@ -703,7 +682,7 @@ export class Toms748 {
         //
         b = a;
         fb = fa;
-        a = Basic.divideFF(a, factor, prec);
+        a = Basic.divideFF(a, factor, p);
         fa = f(a);
         count--;
       }
@@ -718,10 +697,42 @@ export class Toms748 {
       (Comparison.isNegative(a) ? fa : fb),
       tol,
       count,
-      prec
+      p
     );
     r.iterations += maxIter;
 
     return r;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {float} from "../../interfaces/float";
+
+import {C as CAlias} from "../../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "../../basicFunctions/Sign";
+const Sign = SignAlias;
+
+import {Core as CoreAlias} from "../../core/Core";
+const Core = CoreAlias;
+
+import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Basic as BasicAlias} from "../../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {Conversion as ConversionAlias} from "../../core/Conversion";
+const Conversion = ConversionAlias;
+
+import {Pow as PowAlias} from "../../basicFunctions/Pow";
+const Pow = PowAlias;
+
+import {CalculationError as CalculationErrorAlias} from "../../errors/CalculationError";
+const CalculationError = CalculationErrorAlias;
+
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;

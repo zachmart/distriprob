@@ -29,6 +29,24 @@
  *
  */
 
+
+export class E {
+  private static _value: float;
+  private static _baseDigits: number;
+
+  public static value(p: P): float {
+    if (!E._baseDigits || E._baseDigits < p.baseDigits) {
+      E._value = Exp.f(C.F_1, p);
+      E._baseDigits = p.baseDigits;
+    }
+
+    return E._value;
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "./C";
@@ -38,20 +56,4 @@ import {Exp as ExpAlias} from "../basicFunctions/Exp";
 const Exp = ExpAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class E {
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (!E._numDigits || E._numDigits < prec.numDigits) {
-      E._value = Exp.f(C.F_1, prec);
-      E._numDigits = prec.numDigits;
-    }
-
-    return E._value;
-  }
-}

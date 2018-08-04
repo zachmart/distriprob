@@ -29,15 +29,6 @@
  *
  */
 
-import {int, intType} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
-const FloatingPoint = FloatingPointAlias;
-
 
 export class C {
 
@@ -266,4 +257,16 @@ export class C {
     );
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int, intType} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
 

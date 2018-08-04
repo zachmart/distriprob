@@ -29,38 +29,6 @@
  *
  */
 
-// interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "../basicFunctions/Sign";
-const Sign = SignAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-import {Pow as PowAlias} from "../basicFunctions/Pow";
-const Pow = PowAlias;
-
-import {Core as CoreAlias} from "./Core";
-const Core = CoreAlias;
-
-import {Conversion as ConversionAlias} from "./Conversion";
-const Conversion = ConversionAlias;
-
-import {Diff as DiffAlias} from "../basicFunctions/Diff";
-const Diff = DiffAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
 
 export class StringParser {
 
@@ -73,7 +41,7 @@ export class StringParser {
   public static INFINITY_REGEX: RegExp;
   public static ALL_ZEROS: RegExp;
 
-  public static setup(): void {
+  public static init0(): void {
     StringParser.DEC_NUM_REGEX =
       /^([\s\-+]*)(\d*)(?:\.(\d*))?\s*(?:([eEpP])([\s\-+]*)(\d+))?\s*$/;
     StringParser.BIN_NUM_REGEX =
@@ -98,8 +66,6 @@ export class StringParser {
   private _int: int;
 
   constructor(str: string) {
-    if (typeof StringParser.DEC_NUM_REGEX === "undefined") { StringParser.setup(); }
-
     this.str = str;
     let match;
 
@@ -121,8 +87,13 @@ export class StringParser {
     } else if (match = str.match(StringParser.HEX_NUM_REGEX)) {
       this.coefficientRadix = 16;
     } else {
-      throw new Error(
-        `Parse error for string "${str}" to be parsed to a numerical Value.`
+      throw new ConversionError(
+        "StringParser",
+        "constructor",
+        "str",
+        "string",
+        "float or int",
+        str
       );
     }
 
@@ -135,8 +106,13 @@ export class StringParser {
       significandDigitsBeforeRadixPoint + significandDigitsAfterRadixPoint;
 
     if (this.sigStrWithoutRadixPoint.length <= 0) {
-      throw new Error(
-        `Parse error for string "${match[0]}" to be parsed to a numerical Value.`
+      throw new ConversionError(
+        "StringParser",
+        "constructor",
+        "str",
+        "string",
+        "float or int",
+        str
       );
     }
 
@@ -186,15 +162,23 @@ export class StringParser {
           Pow.ii(
             Core.numberToInt(this.coefficientRadix),
             Core.numberToInt(numSignificandRadixPlaces)
-          )
+          ),
+          "trunc"
         );
 
-        if (!Comparison.isZeroI(divResult.r)) {
-          throw new Error(`Cannot parse ${this.str} as an integer`);
+        if (!Comparison.isZeroI(divResult.remainder)) {
+          throw new ConversionError(
+            "StringParser",
+            "int get method",
+            "str",
+            "string",
+            "int",
+            this.str
+          );
         }
 
 
-        val = divResult.q;
+        val = divResult.quotient;
       }
 
       if (this.negative && !Comparison.isZeroI(val)) {
@@ -207,7 +191,7 @@ export class StringParser {
     return this._int;
   }
 
-  public float(prec: P): float {
+  public float(p: P): float {
     if (this.type === "finite") {
       const numSignificandDigits = this.sigStrWithoutRadixPoint.length;
       const numSignificandRadixPlaces =
@@ -215,13 +199,17 @@ export class StringParser {
       let val = Conversion.intToFloat(StringParser.parseSimpleNonnegativeIntString(
         this.sigStrWithoutRadixPoint,
         this.coefficientRadix
-      ), prec);
+      ), p, false);
 
       if (!Comparison.isZeroI(this.exponent)) {
         val = Basic.multiplyFF(
           val,
-          Pow.fi(Conversion.intToFloat(this.base, prec), this.exponent, prec),
-          prec
+          Pow.fi(
+            Conversion.intToFloat(this.base, p, false),
+            this.exponent,
+            p
+          ),
+          p
         );
       }
 
@@ -231,9 +219,9 @@ export class StringParser {
           Pow.fi(
             Core.numberToFloat(this.coefficientRadix),
             Core.numberToInt(numSignificandRadixPlaces),
-            prec
+            p
           ),
-          prec
+          p
         );
       }
 
@@ -243,9 +231,9 @@ export class StringParser {
       // in the value, this is especially true when the string value can be exactly
       // represented by a JavaScript number
       const numParsingFloat: float = Core.numberToFloat(parseFloat(this.str));
-      const relDiff: float = Diff.relativeFF(numParsingFloat, val, prec);
+      const relDiff: float = Diff.relativeFF(numParsingFloat, val, p);
 
-      if (Comparison.lt(relDiff, prec.epsilon)) {
+      if (Comparison.lt(relDiff, p.epsilon)) {
         // number parsing seems to be better
         return numParsingFloat;
       } else {
@@ -303,4 +291,42 @@ export class StringParser {
     return value;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "../basicFunctions/Sign";
+const Sign = SignAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {Pow as PowAlias} from "../basicFunctions/Pow";
+const Pow = PowAlias;
+
+import {Core as CoreAlias} from "./Core";
+const Core = CoreAlias;
+
+import {Conversion as ConversionAlias} from "./Conversion";
+const Conversion = ConversionAlias;
+
+import {Diff as DiffAlias} from "../basicFunctions/Diff";
+const Diff = DiffAlias;
+
+import {ConversionError as ConversionErrorAlias} from "../errors/ConversionError";
+const ConversionError = ConversionErrorAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
 

@@ -29,6 +29,105 @@
  *
  */
 
+
+/**
+ * This class calculates Catalan's Constant to the desired precision. It uses a series
+ * representation for the constant found by A. Lupas in 2000. It is as follows:
+ *
+ *                           +inf
+ *                          -----       n-1  8n      2                  3    2
+ *                     1    \       (-1)  * 2  * (40n - 24n + 3) * (2n)! * n!
+ * CatalansConstant = ----   \      ---------------------------------------------
+ *                     64    /              3                 2
+ *                          /              n * (2n -1) * (4n)!
+ *                          -----
+ *                          n = 1
+ */
+export class CATALAN {
+  private static _value: float;
+  private static _baseDigits: number;
+
+  public static value(p: P): float {
+    if (typeof CATALAN._baseDigits === "undefined" || CATALAN._baseDigits < p.baseDigits){
+      CATALAN._value = CATALAN.calculate(p);
+      CATALAN._baseDigits = p.baseDigits;
+    }
+
+    return CATALAN._value;
+  }
+
+  private static calculate(p: P): float {
+    let negative = false;
+    let twoTo8N = C.F_256;
+    let poly = WHOLE.float(19);
+    let twoNFact = {value: C.F_2, index: 2, nextIndex: 4};
+    let twoNFactCubed = C.F_8;
+    let nFact = C.F_1;
+    let nFactSquared = C.F_1;
+    let nCubed = C.F_1;
+    let twoNMinus1 = C.F_1;
+    let fourNFact = {value: WHOLE.float(24), index: 4, nextIndex:8};
+    let fourNFactSquared: float;
+    let termNum = WHOLE.float(608);
+    let termDenom = C.F_9;
+    let sumNum = termNum;
+    let sumDenom = termDenom;
+    let sntd: float;
+    let sdtn: float;
+    let absEpsTimesSNTD: float;
+    let keepGoing = true;
+    let n = 1;
+    let nFloat = C.F_1;
+
+    while(keepGoing) {
+      n++;
+      negative = !negative;
+      nFloat = Core.numberToFloatUnchecked(n);
+      twoTo8N = Basic.multiplyFF(twoTo8N, C.F_256, p);
+      poly = Core.numberToFloatUnchecked(40*(n**2) - 24*n + 3);
+
+      twoNFact.nextIndex = 2 * n;
+      FactorialTable.calcFact(twoNFact, p);
+      twoNFactCubed = Basic.multiplyFF(
+        Basic.squareF(twoNFact.value, p),
+        twoNFact.value,
+        p
+      );
+
+
+      nFact = n <= FactorialTable.maxIndex ?
+        FactorialTable.float(n)
+        :
+        Basic.multiplyFF(nFact, nFloat, p);
+      nFactSquared = Basic.squareF(nFact, p);
+      nCubed = Core.numberToFloatUnchecked(n * n * n);
+      twoNMinus1 = Core.numberToFloatUnchecked((2 * n) - 1);
+
+      fourNFact.nextIndex = 4 * n;
+      FactorialTable.calcFact(fourNFact, p);
+      fourNFactSquared = Basic.squareF(fourNFact.value, p);
+
+      termNum = Basic.productF([twoTo8N, poly, twoNFactCubed, nFactSquared], p);
+      termNum = negative ? Sign.negateF(termNum) : termNum;
+      termDenom = Basic.productF([nCubed, twoNMinus1, fourNFactSquared], p);
+
+      sntd = Basic.multiplyFF(sumNum, termDenom, p);
+      sdtn = Basic.multiplyFF(sumDenom, termNum, p);
+      absEpsTimesSNTD = Sign.absF(Basic.multiplyFF(p.epsilon, sntd, p));
+
+      if (Comparison.gte(absEpsTimesSNTD, Sign.absF(sdtn))) { keepGoing = false; }
+
+      sumNum = Basic.addFF(sntd, sdtn, p);
+      sumDenom = Basic.multiplyFF(sumDenom, termDenom, p);
+    }
+
+    return Basic.divideFF(sumNum, Basic.multiplyFF(C.F_64, sumDenom, p), p);
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "./C";
@@ -53,89 +152,5 @@ import {FactorialTable as FactorialTableAlias} from "./FactorialTable";
 const FactorialTable = FactorialTableAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class CATALAN {
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (typeof CATALAN._numDigits === "undefined" || CATALAN._numDigits < prec.numDigits){
-      CATALAN._value = CATALAN.calculate(prec);
-      CATALAN._numDigits = prec.numDigits;
-    }
-
-    return CATALAN._value;
-  }
-
-  private static calculate(prec: P): float {
-    let negative = false;
-    let twoTo8N = C.F_256;
-    let p = WHOLE.float(19);
-    let twoNFact = {value: C.F_2, index: 2, nextIndex: 4};
-    let twoNFactCubed = C.F_8;
-    let nFact = C.F_1;
-    let nFactSquared = C.F_1;
-    let nCubed = C.F_1;
-    let twoNMinus1 = C.F_1;
-    let fourNFact = {value: WHOLE.float(24), index: 4, nextIndex:8};
-    let fourNFactSquared: float;
-    let termNum = WHOLE.float(608);
-    let termDenom = C.F_9;
-    let sumNum = termNum;
-    let sumDenom = termDenom;
-    let sntd: float;
-    let sdtn: float;
-    let absEpsTimesSNTD: float;
-    let keepGoing = true;
-    let n = 1;
-    let nFloat = C.F_1;
-
-    while(keepGoing) {
-      n++;
-      negative = !negative;
-      nFloat = Core.numberToFloatUnchecked(n);
-      twoTo8N = Basic.multiplyFF(twoTo8N, C.F_256, prec);
-      p = Core.numberToFloatUnchecked(40*(n**2) - 24*n + 3);
-
-      twoNFact.nextIndex = 2 * n;
-      FactorialTable.calcFact(twoNFact, prec);
-      twoNFactCubed = Basic.multiplyFF(
-        Basic.squareF(twoNFact.value, prec),
-        twoNFact.value,
-        prec
-      );
-
-
-      nFact = n <= FactorialTable.maxIndex ?
-        FactorialTable.float(n)
-        :
-        Basic.multiplyFF(nFact, nFloat, prec);
-      nFactSquared = Basic.squareF(nFact, prec);
-      nCubed = Core.numberToFloatUnchecked(n * n * n);
-      twoNMinus1 = Core.numberToFloatUnchecked((2 * n) - 1);
-
-      fourNFact.nextIndex = 4 * n;
-      FactorialTable.calcFact(fourNFact, prec);
-      fourNFactSquared = Basic.squareF(fourNFact.value, prec);
-
-      termNum = Basic.productF([twoTo8N, p, twoNFactCubed, nFactSquared], prec);
-      termNum = negative ? Sign.negateF(termNum) : termNum;
-      termDenom = Basic.productF([nCubed, twoNMinus1, fourNFactSquared], prec);
-
-      sntd = Basic.multiplyFF(sumNum, termDenom, prec);
-      sdtn = Basic.multiplyFF(sumDenom, termNum, prec);
-      absEpsTimesSNTD = Sign.absF(Basic.multiplyFF(prec.epsilon, sntd, prec));
-
-      if (Comparison.gte(absEpsTimesSNTD, Sign.absF(sdtn))) { keepGoing = false; }
-
-      sumNum = Basic.addFF(sntd, sdtn, prec);
-      sumDenom = Basic.multiplyFF(sumDenom, termDenom, prec);
-    }
-
-    return Basic.divideFF(sumNum, Basic.multiplyFF(C.F_64, sumDenom, prec), prec);
-  }
-}
 

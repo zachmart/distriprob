@@ -262,7 +262,8 @@ export class Bitwise {
 import {int} from "../interfaces/int";
 
 // functional imports
-import {Integer} from "../dataTypes/Integer";
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
 
 import {C as CAlias} from "../constants/C";
 const C = CAlias;

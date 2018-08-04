@@ -33,9 +33,11 @@ export type TypeDescriptor = "string" |
   "number" |
   "float" |
   "int" |
+  "float or int" |
   "JSONFloat" |
   "JSONInt" |
-  "P";
+  "P" |
+  "function";
 
 export class ErrorUtil {
   public static typeDescription(x: any): string {
@@ -57,7 +59,8 @@ export class ErrorUtil {
   public static isTypeDescriptor(x: any): x is TypeDescriptor {
     return typeof x === "string" && (
       x === "string" || x === "number" || x === "float" || x === "int" ||
-      x === "JSONFloat" || x === "JSONInt" || x === "P"
+      x === "float or int" || x === "JSONFloat" || x === "JSONInt" || x === "P" ||
+      x === "function"
     );
   }
 }

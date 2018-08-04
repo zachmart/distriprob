@@ -29,29 +29,6 @@
  *
  */
 
-// interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-// functional imports
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
-const Float = FloatAlias;
-
-import {IntegerSplit as IntegerSplitAlias} from "../dataTypes/IntegerSplit";
-const IntegerSplit = IntegerSplitAlias;
-
-import {ArraySplit as ArraySplitAlias} from "../dataTypes/ArraySplit";
-const ArraySplit = ArraySplitAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
 
 export class Core {
 
@@ -61,7 +38,7 @@ export class Core {
   public static TWO_TO_NEG_ABS_CHUNK_LIMIT: number;
 
 
-  public static setStaticProperties(): void {
+  public static init0(): void {
     // constants for adjusting the exponents of numbers
     Core.ABS_CHUNK_LIMIT = 1021;
     Core.TWO_TO_ABS_CHUNK_LIMIT = 2 ** Core.ABS_CHUNK_LIMIT;
@@ -174,7 +151,10 @@ export class Core {
       coef *= C.BASE;
     }
 
-    return new Float(Core.numberToIntUnchecked(coef), Core.numberToIntUnchecked(exp));
+    return new FloatingPoint(
+      Core.numberToIntUnchecked(coef),
+      Core.numberToIntUnchecked(exp)
+    );
   }
 
   public static maxF(x: float, y: float): float { return Comparison.gte(x, y) ? x : y; }
@@ -424,6 +404,32 @@ export class Core {
     return typeof module !== 'undefined' && module.exports;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
+import {IntegerSplit as IntegerSplitAlias} from "../dataTypes/IntegerSplit";
+const IntegerSplit = IntegerSplitAlias;
+
+import {ArraySplit as ArraySplitAlias} from "../dataTypes/ArraySplit";
+const ArraySplit = ArraySplitAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
 
 
 

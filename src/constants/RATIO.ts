@@ -29,6 +29,44 @@
  *
  */
 
+
+export class RATIO {
+  private static _table:
+    {[num: number]: {[denom: number]: {value: float, numDigits: number}}};
+
+  public static init0(): void {
+    RATIO._table = {};
+  }
+
+  public static value(numerator: number, denominator: number, p: P): float {
+    const negative = numerator * denominator < 0;
+
+    if (numerator < 0) { numerator = Math.abs(numerator); }
+    if (denominator < 0) { denominator = Math.abs(denominator); }
+
+    if (typeof RATIO._table[numerator] === "undefined") { RATIO._table[numerator] = {}; }
+
+    let entry = RATIO._table[numerator][denominator];
+
+    if (typeof entry === "undefined" || entry.numDigits < p.baseDigits) {
+      entry = {
+        value: Basic.divideFF(
+          Core.numberToFloatUnchecked(numerator),
+          Core.numberToFloatUnchecked(denominator),
+          p
+        ),
+        numDigits: p.baseDigits
+      };
+      RATIO._table[numerator][denominator] = entry;
+    }
+
+    return negative ? Sign.negateF(entry.value) : entry.value;
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {Sign as SignAlias} from "../basicFunctions/Sign";
@@ -41,48 +79,5 @@ import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class RATIO {
-  private static _table:
-    {[num: number]: {[denom: number]: {value: float, numDigits: number}}};
-
-  public static init0(): void {
-    RATIO._table = {};
-  }
-
-  public static value(numerator: number, denominator: number, prec: P): float {
-    const negative = numerator * denominator < 0;
-
-    if (numerator < 0) { numerator = Math.abs(numerator); }
-    if (denominator < 0) { denominator = Math.abs(denominator); }
-
-    if (typeof RATIO._table[numerator] === "undefined") { RATIO._table[numerator] = {}; }
-
-    let entry = RATIO._table[numerator][denominator];
-
-    if (typeof entry === "undefined") {
-      entry = {
-        value: Basic.divideFF(
-          Core.numberToFloatUnchecked(numerator),
-          Core.numberToFloatUnchecked(denominator),
-          prec
-        ),
-        numDigits: prec.numDigits
-      };
-      RATIO._table[numerator][denominator] = entry;
-    } else if (entry.numDigits < prec.numDigits) {
-      entry.value = Basic.divideFF(
-        Core.numberToFloatUnchecked(numerator),
-        Core.numberToFloatUnchecked(denominator),
-        prec
-      );
-      entry.numDigits = prec.numDigits;
-    }
-
-    return negative ? Sign.negateF(entry.value) : entry.value;
-  }
-}
 

@@ -29,8 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-
 
 export class IntegerSplit {
   public readonly hi: int;
@@ -41,3 +39,8 @@ export class IntegerSplit {
     this.lo = lo;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "../interfaces/int";

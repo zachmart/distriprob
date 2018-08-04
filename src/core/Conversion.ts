@@ -29,50 +29,17 @@
  *
  */
 
-// interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-// functional imports
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
-const Float = FloatAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "./Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Sign as SignAlias} from "../basicFunctions/Sign";
-const Sign = SignAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-import {Longhand as LonghandAlias} from "./Longhand";
-const Longhand = LonghandAlias;
-
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
-
 
 export class Conversion {
 
-  public static intToFloat(a: int, prec: P, sameUint32Array: boolean = false): float {
+  public static intToFloat(a: int, p: P, sameUint32Array: boolean): float {
     if (Comparison.isNaN_I(a)) { return C.F_NaN; }
     if (Comparison.isPOSITIVE_INFINITY_I(a)) { return C.F_POSITIVE_INFINITY; }
     if (Comparison.isNEGATIVE_INFINITY_I(a)) { return C.F_NEGATIVE_INFINITY; }
 
     const exp: int = Core.numberToInt((a.digits.length - 1));
     let coef: int;
-    let sliceEndIndex = Math.min(prec.numDigits, a.digits.length);
+    let sliceEndIndex = Math.min(p.baseDigits, a.digits.length);
     let sliceEndIndexMinus1 = sliceEndIndex - 1;
 
     while(sliceEndIndexMinus1 > 1 && a.digits[sliceEndIndexMinus1] === 0) {
@@ -91,22 +58,12 @@ export class Conversion {
       }
     }
 
-    return new Float(coef, exp);
+    return new FloatingPoint(coef, exp);
   }
 
   public static intToFloatFullPrecision(a: int, sameUint32Array: boolean): float {
-    const prec = P.createPFromNumDigits(a.digits.length - 1);
+    const prec = PREC.getPFromBaseDigits(a.digits.length);
     return Conversion.intToFloat(a, prec, sameUint32Array);
-  }
-
-  public static intArrayToFloat(intArray: int[], prec: P): float[] {
-    let result = Array(intArray.length).fill(C.F_0);
-
-    for (let i = 0; i < intArray.length; i++) {
-      result[i] = Conversion.intToFloat(intArray[i], prec);
-    }
-
-    return result;
   }
 
   public static isInteger(x: float): boolean {
@@ -142,7 +99,7 @@ export class Conversion {
         digits = Longhand.addition(digits, C.ARR_1);
       }
 
-      return new Float(new Integer(x.coef.neg, digits), x.exp);
+      return new FloatingPoint(new Integer(x.coef.neg, digits), x.exp);
     }
   }
 
@@ -158,9 +115,9 @@ export class Conversion {
     } else { // integer part of x !== 0 and fractional part of x !== 0
       const placesBelowZero = -Core.intToNumber(leastSigDigPlace);
       const positionNegativeOneIndex = x.coef.digits.length - placesBelowZero;
-      const digits = x.coef.digits.subarray(0, positionNegativeOneIndex);
+      const digits = x.coef.digits.slice(0, positionNegativeOneIndex);
 
-      return new Float(new Integer(x.coef.neg, digits), x.exp);
+      return new FloatingPoint(new Integer(x.coef.neg, digits), x.exp);
     }
   }
 
@@ -176,13 +133,13 @@ export class Conversion {
     } else { // integer part of x !== 0 and fractional part of x !== 0
       const placesBelowZero = -Core.intToNumber(leastSigDigPlace);
       const positionNegativeOneIndex = x.coef.digits.length - placesBelowZero;
-      let digits = x.coef.digits.subarray(0, positionNegativeOneIndex);
+      let digits = x.coef.digits.slice(0, positionNegativeOneIndex);
 
       if (x.coef.neg) {
         digits = Longhand.addition(digits, C.ARR_1);
       }
 
-      return new Float(new Integer(x.coef.neg, digits), x.exp);
+      return new FloatingPoint(new Integer(x.coef.neg, digits), x.exp);
     }
   }
 
@@ -204,7 +161,7 @@ export class Conversion {
         digits = Longhand.addition(digits, C.ARR_1);
       }
 
-      return new Float(new Integer(x.coef.neg, digits), x.exp);
+      return new FloatingPoint(new Integer(x.coef.neg, digits), x.exp);
     }
   }
 
@@ -243,4 +200,39 @@ export class Conversion {
     }
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "./Core";
+const Core = CoreAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+import {PREC as PRECAlias} from "../constants/PREC";
+const PREC = PRECAlias;
+
+import {Longhand as LonghandAlias} from "./Longhand";
+const Longhand = LonghandAlias;
+
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
 

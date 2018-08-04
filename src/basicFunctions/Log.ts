@@ -45,7 +45,7 @@
  *
  */
 export class Log {
-  private static _table: {[n: number]: {value: float, numDigits: number}};
+  private static _table: {[n: number]: {value: float, baseDigits: number}};
 
   public static init0(): void { Log._table = {}; }
 
@@ -77,10 +77,10 @@ export class Log {
   public static valueFromTable(n: number, p: P): float {
     let entry = Log._table[n];
 
-    if (typeof entry === "undefined" || entry.numDigits < p.baseDigits) {
+    if (typeof entry === "undefined" || entry.baseDigits < p.baseDigits) {
       entry = {
         value: Log.f(Core.numberToFloatUnchecked(n), p),
-        numDigits: p.baseDigits
+        baseDigits: p.baseDigits
       };
       Log._table[n] = entry;
     }

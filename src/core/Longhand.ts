@@ -29,21 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-
-import {ArrayDivisionResult as ArrayDivisionResultAlias}
-  from "../dataTypes/ArrayDivisionResult";
-const ArrayDivisionResult = ArrayDivisionResultAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "./Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
 
 export class Longhand {
   /**
@@ -516,3 +501,21 @@ export class Longhand {
     return result;
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "../interfaces/int";
+
+import {ArrayDivisionResult as ArrayDivisionResultAlias}
+  from "../dataTypes/ArrayDivisionResult";
+const ArrayDivisionResult = ArrayDivisionResultAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "./Core";
+const Core = CoreAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;

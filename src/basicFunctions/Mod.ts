@@ -75,7 +75,8 @@ export class Mod {
               y: {value: y, expectedType: "float"},
               type: {value: type, expectedType: "string"}
             },
-            `The type parameter must be "euclidean", "trunc", "ceil", "floor", or "round"`
+            `The type parameter for the float modulo operation must be "euclidean",${""
+            } "trunc", "ceil", "floor", or "round"`
           );
         }
 

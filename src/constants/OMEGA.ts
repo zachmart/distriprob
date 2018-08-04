@@ -29,13 +29,64 @@
  *
  */
 
+
+export class OMEGA {
+  private static _value: float;
+  private static _baseDigits: number;
+
+  public static value(p: P): float {
+    if (typeof OMEGA._baseDigits === "undefined" || OMEGA._baseDigits < p.baseDigits) {
+      OMEGA._value = OMEGA.calculate(p);
+      OMEGA._baseDigits = p.baseDigits;
+    }
+
+    return OMEGA._value;
+  }
+
+  private static calculate(p: P): float {
+    const initialGuess = typeof OMEGA._baseDigits === "undefined" ||
+    OMEGA._baseDigits < 3 ?
+      Core.numberToFloatUnchecked(0.567143290409783873)
+      :
+      OMEGA._value;
+    let val = initialGuess;
+    let oldVal: float;
+
+    for(let i = 0; i < p.quadraticConvergenceSteps; i++) {
+      oldVal = val;
+      val = Basic.divideFF(
+        Basic.addFF(C.F_1, val, p),
+        Basic.addFF(C.F_1, Exp.f(val, p), p),
+        p
+      );
+      if (Comparison.lt(
+              Sign.absF(Basic.subtractFF(val, oldVal, p)),
+              Basic.multiplyFF(val, p.epsilon, p)
+      )) {
+        break;
+      }
+    }
+
+    return val;
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "./C";
 const C = CAlias;
 
+import {Sign as SignAlias} from "../basicFunctions/Sign";
+const Sign = SignAlias;
+
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
 
 import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
@@ -45,39 +96,4 @@ const Exp = ExpAlias;
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
-
-
-export class OMEGA {
-  private static _initialGuess: float;
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (typeof OMEGA._numDigits === "undefined" || OMEGA._numDigits < prec.numDigits) {
-      OMEGA._value = OMEGA.calculate(prec);
-      OMEGA._numDigits = prec.numDigits;
-    }
-
-    return OMEGA._value;
-  }
-
-  private static calculate(prec: P): float {
-    if (typeof OMEGA._initialGuess === "undefined") {
-      OMEGA._initialGuess = Core.numberToFloatUnchecked(0.567143290409783873);
-    }
-
-    const iterations = prec.quadraticConvergenceSteps;
-    let val = OMEGA._initialGuess;
-
-    for(let i = 1; i <= iterations; i++) {
-      val = Basic.divideFF(
-        Basic.addFF(C.F_1, val, prec),
-        Basic.addFF(C.F_1, Exp.f(val, prec), prec),
-        prec
-      );
-    }
-
-    return val;
-  }
-}
 

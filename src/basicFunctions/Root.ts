@@ -31,7 +31,7 @@
 
 
 export class Root {
-  private static _table: {[n: number]: {[x: number]: {value: float, numDigits: number}}};
+  private static _table: {[n: number]: {[x: number]: {value: float, baseDigits: number}}};
   private static approxPrec: P;
 
   public static init0(): void {
@@ -124,13 +124,13 @@ export class Root {
       const value = n === 2 ? Root.squareF(xFloat, p) : Root.fn(xFloat, n, p);
       entry = {
         value: value,
-        numDigits: p.baseDigits
+        baseDigits: p.baseDigits
       };
       Root._table[n][x] = entry;
-    } else if (entry.numDigits < p.baseDigits) {
+    } else if (entry.baseDigits < p.baseDigits) {
       const xFloat = Core.numberToFloatUnchecked(x);
       entry.value = n === 2 ? Root.squareF(xFloat, p) : Root.fn(xFloat, n, p);
-      entry.numDigits = p.baseDigits;
+      entry.baseDigits = p.baseDigits;
     }
 
     return negative ? Sign.negateF(entry.value) : entry.value;

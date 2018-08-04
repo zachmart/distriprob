@@ -134,5 +134,4 @@ import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;

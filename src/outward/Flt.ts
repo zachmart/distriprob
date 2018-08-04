@@ -56,37 +56,37 @@ export class Flt {
   }
 
 
-  public acos(prec?: P | null | undefined): Flt {
+  public acos(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public acosh(prec?: P | null | undefined): Flt {
+  public acosh(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public asin(prec?: P | null | undefined): Flt {
+  public asin(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public asinh(prec?: P | null | undefined): Flt {
+  public asinh(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public atan(prec?: P | null | undefined): Flt {
+  public atan(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public atanh(prec?: P | null | undefined): Flt {
+  public atanh(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public cbrt(prec?: P | null | undefined): Flt {
+  public cbrt(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -101,22 +101,22 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 
-  public cos(prec?: P | null | undefined): Flt {
+  public cos(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public cosh(prec?: P | null | undefined): Flt {
+  public cosh(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public divBy(divisor: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public divBy(divisor: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public divide(dividend: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public divide(dividend: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -126,12 +126,12 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 
-  public exp(prec?: P | null | undefined): Flt {
+  public exp(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public expm1(prec?: P | null | undefined): Flt {
+  public expm1(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -178,32 +178,32 @@ export class Flt {
 
   public isZero(): boolean { return Comparison.isZero(this.f); }
 
-  public ln(prec?: P | null | undefined): Flt {
+  public ln(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public log(prec?: P | null | undefined): Flt {
+  public log(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public log1p(prec?: P | null | undefined): Flt {
+  public log1p(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public log2(prec?: P | null | undefined): Flt {
+  public log2(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public log10(prec?: P | null | undefined): Flt {
+  public log10(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public logBase(base: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public logBase(base: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -218,7 +218,7 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 
-  public minus(y: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public minus(y: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -226,7 +226,7 @@ export class Flt {
   public mod(
     y: Flt | Int | number | string,
     type?: "euclidean" | "trunc" | "ceil" | "floor" | "round",
-    prec?: P | null | undefined
+    p?: P | null | undefined
   ): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
@@ -234,17 +234,17 @@ export class Flt {
 
   public neg(): Flt { return new Flt(Sign.negateF(this.f)); }
 
-  public plus(y: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public plus(y: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public reciprocal(prec?: P | null | undefined): Flt {
+  public reciprocal(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public root(degree: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public root(degree: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -259,37 +259,37 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 
-  public sin(prec?: P | null | undefined): Flt {
+  public sin(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public sinh(prec?: P | null | undefined): Flt {
+  public sinh(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public sqrt(prec?: P | null | undefined): Flt {
+  public sqrt(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public squared(prec?: P | null | undefined): Flt {
+  public squared(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public tan(prec?: P | null | undefined): Flt {
+  public tan(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public tanh(prec?: P | null | undefined): Flt {
+  public tanh(p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
 
-  public times(y: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public times(y: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -302,7 +302,7 @@ export class Flt {
     return Core.floatToNumber(this.f);
   }
 
-  public toPow(exponent: Flt | Int | number | string, prec?: P | null | undefined): Flt {
+  public toPow(exponent: Flt | Int | number | string, p?: P | null | undefined): Flt {
     // TODO: implement this function
     throw new Error("this method is not implemented yet");
   }
@@ -324,6 +324,9 @@ export class Flt {
     throw new Error("this method is not implemented yet");
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
 
 import {float} from "../interfaces/float";
 

@@ -31,33 +31,6 @@
  */
 
 
-import {Tol} from "./toms748";
-
-import {float} from "../../interfaces/float";
-
-import {C as CAlias} from "../../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "../../basicFunctions/Sign";
-const Sign = SignAlias;
-
-import {Core as CoreAlias} from "../../core/Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Basic as BasicAlias} from "../../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-import {RATIO as RATIOAlias} from "../../constants/RATIO";
-const RATIO = RATIOAlias;
-
-import {P as PAlias} from "../../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-
 export class Roots {
   private f: (x: float) => { f0: float, f1: float, f2?: float };
   private f0: float;
@@ -69,14 +42,14 @@ export class Roots {
   private guess: float;
   private min: float;
   private max: float;
-  private prec: P;
+  private p: P;
 
   constructor(
     f: (x: float) => { f0: float, f1: float, f2?: float },
     guess: float,
     min: float,
     max: float,
-    prec: P
+    p: P
   ) {
     this.f = f;
     this.lastF0 = C.F_0;
@@ -86,7 +59,7 @@ export class Roots {
     this.guess = guess;
     this.min = min;
     this.max = max;
-    this.prec = prec;
+    this.p = p;
   }
 
   private handleZeroDerivative(): void {
@@ -99,37 +72,37 @@ export class Roots {
         this.guess = this.min;
       }
       this.lastF0 = this.f(this.guess).f0;
-      this.delta = Basic.subtractFF(this.guess, this.result, this.prec);
+      this.delta = Basic.subtractFF(this.guess, this.result, this.p);
     }
 
     if (Sign.f(this.lastF0) * Sign.f(this.f0) < 0) {
       // we've crossed over so move in opposite direction to last step:
       if (Comparison.isNegative(this.delta)) {
         this.delta = Basic.multiplyFF(
-          Basic.subtractFF(this.result, this.min, this.prec),
+          Basic.subtractFF(this.result, this.min, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         );
       } else {
         this.delta = Basic.multiplyFF(
-          Basic.subtractFF(this.result, this.max, this.prec),
+          Basic.subtractFF(this.result, this.max, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         );
       }
     } else {
       // move in same direction as last step:
       if (Comparison.isNegative(this.delta)) {
         this.delta = Basic.multiplyFF(
-          Basic.subtractFF(this.result, this.max, this.prec),
+          Basic.subtractFF(this.result, this.max, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         );
       } else {
         this.delta = Basic.multiplyFF(
-          Basic.subtractFF(this.result, this.min, this.prec),
+          Basic.subtractFF(this.result, this.min, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         );
       }
     }
@@ -159,38 +132,38 @@ export class Roots {
       if (Comparison.isZero(this.f1)) {
         this.handleZeroDerivative();
       } else {
-        this.delta = Basic.divideFF(this.f0, this.f1, this.prec);
+        this.delta = Basic.divideFF(this.f0, this.f1, this.p);
       }
 
       if (Comparison.gt(
-        Sign.absF(Basic.multiplyFF(this.delta, C.F_2, this.prec)),
+        Sign.absF(Basic.multiplyFF(this.delta, C.F_2, this.p)),
         Sign.absF(delta2)
       )) {
         // last two steps haven't converged, try bisection:
         this.delta = Comparison.isPositive(this.delta) ?
           Basic.multiplyFF(
-            Basic.subtractFF(this.result, this.min, this.prec),
+            Basic.subtractFF(this.result, this.min, this.p),
             C.F_ONE_HALF,
-            this.prec
+            this.p
           )
           :
           Basic.multiplyFF(
-            Basic.subtractFF(this.result, this.max, this.prec),
+            Basic.subtractFF(this.result, this.max, this.p),
             C.F_ONE_HALF,
-            this.prec
+            this.p
           );
       }
 
       this.guess = this.result;
-      this.result = Basic.subtractFF(this.result, this.delta, this.prec);
+      this.result = Basic.subtractFF(this.result, this.delta, this.p);
 
       if (Comparison.lte(this.result, this.min)) {
         this.delta = Basic.multiplyFF(
-          Basic.subtractFF(this.guess, this.min, this.prec),
+          Basic.subtractFF(this.guess, this.min, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         );
-        this.result = Basic.subtractFF(this.guess, this.delta, this.prec);
+        this.result = Basic.subtractFF(this.guess, this.delta, this.p);
 
         if (Comparison.equals(this.result, this.min)
           || Comparison.equals(this.result, this.max)) {
@@ -198,11 +171,11 @@ export class Roots {
         }
       } else if (Comparison.gte(this.result, this.max)) {
         this.delta = Basic.multiplyFF(
-          Basic.subtractFF(this.guess, this.max, this.prec),
+          Basic.subtractFF(this.guess, this.max, this.p),
           C.F_ONE_HALF,
-          this.prec
+          this.p
         );
-        this.result = Basic.subtractFF(this.guess, this.delta, this.prec);
+        this.result = Basic.subtractFF(this.guess, this.delta, this.p);
 
         if (Comparison.equals(this.result, this.min)
           || Comparison.equals(this.result, this.max)) {
@@ -215,12 +188,10 @@ export class Roots {
       } else {
         this.min = this.guess;
       }
-    } while (count
-      && Comparison.lt(
-      Sign.absF(Basic.multiplyFF(this.result, this.prec.epsilon, this.prec)),
-      Sign.absF(this.delta)
-      )
-      );
+    } while (count && Comparison.lt(
+        Sign.absF(Basic.multiplyFF(this.result, this.p.epsilon, this.p)),
+        Sign.absF(this.delta)
+      ));
 
     maxIter -= count;
 
@@ -259,9 +230,9 @@ export class Roots {
         if (!Comparison.isZero(this.f2)) {
           this.delta = step(this.result, this.f0, this.f1, this.f2);
           if (Comparison.isNegative(Basic.divideFF(
-            Basic.multiplyFF(this.delta, this.f1, this.prec),
+            Basic.multiplyFF(this.delta, this.f1, this.p),
             this.f0,
-            this.prec
+            this.p
           ))) {
             // Oh dear, we have a problem as Newton and Halley steps
             // disagree about which way we should move.  Probably
@@ -272,10 +243,10 @@ export class Roots {
             // by no more than twice the current guess value, otherwise
             // we can jump way out of bounds if we're not careful.
             // See https://svn.boost.org/trac/boost/ticket/8314.
-            this.delta = Basic.divideFF(this.f0, this.f1, this.prec);
+            this.delta = Basic.divideFF(this.f0, this.f1, this.p);
             if (Comparison.gt(
               Sign.absF(this.delta),
-              temp = Basic.multiplyFF(C.F_2, Sign.absF(this.guess), this.prec))) {
+              temp = Basic.multiplyFF(C.F_2, Sign.absF(this.guess), this.p))) {
               this.delta = temp;
               if (Comparison.isNegative(this.delta)) {
                 this.delta = Sign.negateF(this.delta);
@@ -283,26 +254,26 @@ export class Roots {
             }
           }
         } else {
-          this.delta = Basic.divideFF(this.f0, this.f1, this.prec);
+          this.delta = Basic.divideFF(this.f0, this.f1, this.p);
         }
       }
 
-      let convergence = Sign.absF(Basic.divideFF(this.delta, delta2, this.prec));
+      let convergence = Sign.absF(Basic.divideFF(this.delta, delta2, this.p));
 
-      if (Comparison.gt(convergence, RATIO.value(4, 5, this.prec))
+      if (Comparison.gt(convergence, RATIO.value(4, 5, this.p))
         && Comparison.lt(convergence, C.F_2)) {
         // last two steps haven't converged, try bisection:
         this.delta = Comparison.isPositive(this.delta) ?
           Basic.multiplyFF(
-            Basic.subtractFF(this.result, this.min, this.prec),
+            Basic.subtractFF(this.result, this.min, this.p),
             C.F_ONE_HALF,
-            this.prec
+            this.p
           )
           :
           Basic.multiplyFF(
-            Basic.subtractFF(this.result, this.max, this.prec),
+            Basic.subtractFF(this.result, this.max, this.p),
             C.F_ONE_HALF,
-            this.prec
+            this.p
           );
 
         if (Comparison.gt(Sign.absF(this.delta), this.result)) {
@@ -311,16 +282,16 @@ export class Roots {
         }
         // reset delta2 so that this branch will *not* be taken on the
         // next iteration:
-        delta2 = Basic.multiplyFF(this.delta, C.F_3, this.prec);
+        delta2 = Basic.multiplyFF(this.delta, C.F_3, this.p);
       }
       this.guess = this.result;
-      this.result = Basic.subtractFF(this.result, this.delta, this.prec);
+      this.result = Basic.subtractFF(this.result, this.delta, this.p);
 
       // check for out of bounds step:
       if (Comparison.lt(this.result, this.min)) {
-        let diff = Basic.divideFF(this.result, this.min, this.prec);
-        if (Comparison.lt(Sign.absF(diff), C.F_1)) {
-          diff = Basic.reciprocalF(diff, this.prec);
+        let diff = Basic.divideFF(this.result, this.min, this.p);
+        if (Comparison.ltOne(Sign.absF(diff))) {
+          diff = Basic.reciprocalF(diff, this.p);
         }
 
         if (!out_of_bounds_sentry
@@ -329,29 +300,29 @@ export class Roots {
           // Only a small out of bounds step, lets assume that the result
           // is probably approximately at min:
           this.delta = Basic.multiplyFF(
-            RATIO.value(99, 100, this.prec),
-            Basic.subtractFF(this.guess, this.min, this.prec),
-            this.prec
+            RATIO.value(99, 100, this.p),
+            Basic.subtractFF(this.guess, this.min, this.p),
+            this.p
           );
-          this.result = Basic.subtractFF(this.guess, this.delta, this.prec);
+          this.result = Basic.subtractFF(this.guess, this.delta, this.p);
           out_of_bounds_sentry = true; // only take this branch once!
         } else {
           this.delta = Basic.multiplyFF(
             C.F_ONE_HALF,
-            Basic.subtractFF(this.guess, this.min, this.prec),
-            this.prec
+            Basic.subtractFF(this.guess, this.min, this.p),
+            this.p
           );
-          this.result = Basic.subtractFF(this.guess, this.delta, this.prec);
+          this.result = Basic.subtractFF(this.guess, this.delta, this.p);
           if (Comparison.equals(this.result, this.min)
             || Comparison.equals(this.result, this.max)) {
             break;
           }
         }
       } else if (Comparison.gt(this.result, this.max)) {
-        let diff = Basic.divideFF(this.result, this.max, this.prec);
+        let diff = Basic.divideFF(this.result, this.max, this.p);
 
-        if (Comparison.lt(Sign.absF(diff), C.F_1)) {
-          diff = Basic.reciprocalF(diff, this.prec);
+        if (Comparison.ltOne(Sign.absF(diff))) {
+          diff = Basic.reciprocalF(diff, this.p);
         }
 
         if (!out_of_bounds_sentry
@@ -360,19 +331,19 @@ export class Roots {
           // Only a small out of bounds step, lets assume that the result
           // is probably approximately at min:
           this.delta = Basic.multiplyFF(
-            RATIO.value(99, 100, this.prec),
-            Basic.subtractFF(this.guess, this.max, this.prec),
-            this.prec
+            RATIO.value(99, 100, this.p),
+            Basic.subtractFF(this.guess, this.max, this.p),
+            this.p
           );
-          this.result = Basic.subtractFF(this.guess, this.delta, this.prec);
+          this.result = Basic.subtractFF(this.guess, this.delta, this.p);
           out_of_bounds_sentry = true; // only take this branch once!
         } else {
           this.delta = Basic.multiplyFF(
             C.F_ONE_HALF,
-            Basic.subtractFF(this.guess, this.max, this.prec),
-            this.prec
+            Basic.subtractFF(this.guess, this.max, this.p),
+            this.p
           );
-          this.result = Basic.subtractFF(this.guess, this.delta, this.prec);
+          this.result = Basic.subtractFF(this.guess, this.delta, this.p);
           if (Comparison.equals(this.result, this.min)
             || Comparison.equals(this.result, this.max)) {
             break;
@@ -388,7 +359,7 @@ export class Roots {
 
     } while (count
     && Comparison.lt(
-      Sign.absF(Basic.multiplyFF(this.result, this.prec.epsilon, this.prec)),
+      Sign.absF(Basic.multiplyFF(this.result, this.p.epsilon, this.p)),
       Sign.absF(this.delta)
     ));
 
@@ -404,14 +375,14 @@ export class Roots {
     f1: float,
     f2: float
   ): float {
-    const denom = Basic.multiplyFF(C.F_2, f0, this.prec);
+    const denom = Basic.multiplyFF(C.F_2, f0, this.p);
     const num = Basic.subtractFF(
-      Basic.multiplyFF(C.F_2, f1, this.prec),
-      Basic.multiplyFF(f0, Basic.divideFF(f2, f1, this.prec), this.prec),
-      this.prec
+      Basic.multiplyFF(C.F_2, f1, this.p),
+      Basic.multiplyFF(f0, Basic.divideFF(f2, f1, this.p), this.p),
+      this.p
     );
 
-    return Basic.divideFF(denom, num, this.prec);
+    return Basic.divideFF(denom, num, this.p);
   }
 
   private schroderStep(
@@ -420,21 +391,21 @@ export class Roots {
     f1: float,
     f2: float
   ): float {
-    const ratio = Basic.divideFF(f0, f1, this.prec);
+    const ratio = Basic.divideFF(f0, f1, this.p);
     let delta: float;
 
     if (Comparison.lt(
-      Basic.divideFF(ratio, x, this.prec),
-      RATIO.value(1, 10, this.prec)
+      Basic.divideFF(ratio, x, this.p),
+      RATIO.value(1, 10, this.p)
     )) {
       delta = Basic.addFF(
         ratio,
         Basic.multiplyFF(
-          Basic.divideFF(f2, Basic.multiplyFF(C.F_2, f1, this.prec), this.prec),
-          Basic.squareF(ratio, this.prec),
-          this.prec
+          Basic.divideFF(f2, Basic.multiplyFF(C.F_2, f1, this.p), this.p),
+          Basic.squareF(ratio, this.p),
+          this.p
         ),
-        this.prec
+        this.p
       );
 
       if (Sign.f(delta) * Sign.f(ratio) < 0) {
@@ -454,7 +425,7 @@ export class Roots {
     max: float,
     tol: Tol,
     maxIter: number,
-    prec: P
+    p: P
   ): { a: float, b: float, iterations: number } {
     let fMin = f(min);
     let fMax = f(max);
@@ -471,15 +442,35 @@ export class Roots {
     // Error checking:
     //
     if (Comparison.gte(min, max)) {
-      throw new Error(
-        `Evaluation error: Arguments in wrong order in BoostRoots.bisect${""
-          } (first arg=${Core.floatToNumber(min)})`);
+      throw new DomainError(
+        "roots",
+        "bisect",
+        {
+          f: {value: f, expectedType: "function"},
+          min: {value: min, expectedType: "float"},
+          max: {value: max, expectedType: "float"},
+          tol: {value: tol, expectedType: "function"},
+          maxIter: {value: maxIter, expectedType: "number"},
+          p: {value: p, expectedType: "P"}
+        },
+        `In the bisection function, output is undefined for arguments min >= max`
+      );
     }
-    if (!Comparison.isNegative(Basic.multiplyFF(fMin, fMax, prec))) {
-      throw new Error(
-        `Evaluation error: No change of sign in BoostRoots.bisect,${""
-          } either there is no root to find, or there are multiple roots in the interval${""
-          } (f(min) = ${Core.floatToNumber(fMin)}`);
+    if (!Comparison.isNegative(Basic.multiplyFF(fMin, fMax, p))) {
+      throw new DomainError(
+        "roots",
+        "bisect",
+        {
+          f: {value: f, expectedType: "function"},
+          min: {value: min, expectedType: "float"},
+          max: {value: max, expectedType: "float"},
+          tol: {value: tol, expectedType: "function"},
+          maxIter: {value: maxIter, expectedType: "number"},
+          p: {value: p, expectedType: "P"}
+        },
+        `No change of sign between f(min) and f(max). Either there is no root to find,${""
+        } or there are multiple roots in the interval.`
+      );
     }
 
     //
@@ -494,7 +485,7 @@ export class Roots {
 
 
     while (count && (!tol(min, max))) {
-      let mid = Basic.multiplyFF(Basic.addFF(min, max, prec), C.F_ONE_HALF, prec);
+      let mid = Basic.multiplyFF(Basic.addFF(min, max, p), C.F_ONE_HALF, p);
       let fMid = f(mid);
       --count;
 
@@ -526,9 +517,9 @@ export class Roots {
     min: float,
     max: float,
     maxIter: number,
-    prec: P
+    p: P
   ): { result: float, iterations: number } {
-    const r = new Roots(f, guess, min, max, prec);
+    const r = new Roots(f, guess, min, max, p);
     return r.newtonRaphsonIterate(maxIter);
   }
 
@@ -538,9 +529,9 @@ export class Roots {
     min: float,
     max: float,
     maxIter: number,
-    prec: P
+    p: P
   ): { result: float, iterations: number } {
-    const r = new Roots(f, guess, min, max, prec);
+    const r = new Roots(f, guess, min, max, p);
     return r.secondOrderRootFinder(maxIter, r.halleyStep);
   }
 
@@ -550,10 +541,38 @@ export class Roots {
     min: float,
     max: float,
     maxIter: number,
-    prec: P
+    p: P
   ): { result: float, iterations: number } {
-    const r = new Roots(f, guess, min, max, prec);
+    const r = new Roots(f, guess, min, max, p);
     return r.secondOrderRootFinder(maxIter, r.schroderStep);
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {Tol} from "./toms748";
+
+import {float} from "../../interfaces/float";
+
+import {C as CAlias} from "../../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "../../basicFunctions/Sign";
+const Sign = SignAlias;
+
+import {Comparison as ComparisonAlias} from "../../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Basic as BasicAlias} from "../../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {RATIO as RATIOAlias} from "../../constants/RATIO";
+const RATIO = RATIOAlias;
+
+import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
+const DomainError = DomainErrorAlias;
+
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
 

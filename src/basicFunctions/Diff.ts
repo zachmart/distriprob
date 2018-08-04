@@ -102,6 +102,5 @@ import {NaNError as NaNErrorAlias} from "../errors/NaNError";
 const NaNError = NaNErrorAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
 

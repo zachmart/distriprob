@@ -82,8 +82,5 @@ export class ConversionError {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
 import {ErrorUtil as ErrorUtilAlias, TypeDescriptor} from "./ErrorUtil";
 const ErrorUtil = ErrorUtilAlias;

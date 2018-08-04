@@ -29,36 +29,6 @@
  *
  */
 
-import {float} from "../interfaces/float";
-import {int} from "../interfaces/int";
-
-import {C as CAlias} from "./C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-import {Conversion as ConversionAlias} from "../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {Pow as PowAlias} from "../basicFunctions/Pow";
-const Pow = PowAlias;
-
-import {Root as RootAlias} from "../basicFunctions/Root";
-const Root = RootAlias;
-
-import {WHOLE as WHOLEAlias} from "./WHOLE";
-const WHOLE = WHOLEAlias;
-
-import {RATIO as RATIOAlias} from "./RATIO";
-const RATIO = RATIOAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
 
 /**
  * The calculation of PI used here is an optimized version of the Chudnovsky algorithm,
@@ -81,45 +51,48 @@ export type P = PAlias;
  *    n_k+1 = n_k + 12                                       with  n_0 = 6
  *
  */
-
-
 export class PI {
   private static _value: float;
-  private static _numDigits: number;
+  private static _baseDigits: number;
   private static _reciprocal: float;
-  private static _recipNumDigits: number;
-  private static _mulTable: {[n: number]: {value: float, numDigits: number}};
-  private static _divTable: {[n: number]: {value: float, numDigits: number}};
-  private static _recipMulTable: {[n: number]: {value: float, numDigits: number}};
-  private static _recipDivTable: {[n: number]: {value: float, numDigits: number}};
+  private static _recipBaseDigits: number;
+  private static _mulTable: {[n: number]: {value: float, baseDigits: number}};
+  private static _divTable: {[n: number]: {value: float, baseDigits: number}};
+  private static _recipMulTable: {[n: number]: {value: float, baseDigits: number}};
+  private static _recipDivTable: {[n: number]: {value: float, baseDigits: number}};
 
-  public static value(prec: P): float {
-    if (!PI._numDigits || PI._numDigits < prec.numDigits) {
-      PI._value = PI.calculate(prec);
-      PI._numDigits = prec.numDigits;
+  public static init0(): void {
+    PI._mulTable = {};
+    PI._divTable = {};
+    PI._recipMulTable = {};
+    PI._recipDivTable = {};
+  }
+
+  public static value(p: P): float {
+    if (!PI._baseDigits || PI._baseDigits < p.baseDigits) {
+      PI._value = PI.calculate(p);
+      PI._baseDigits = p.baseDigits;
     }
 
     return PI._value
   }
 
-  public static reciprocal(prec: P): float {
-    if (!PI._recipNumDigits || PI._recipNumDigits < prec.numDigits) {
-      PI._reciprocal = Basic.reciprocalF(PI.value(prec), prec);
-      PI._recipNumDigits = prec.numDigits;
+  public static reciprocal(p: P): float {
+    if (!PI._recipBaseDigits || PI._recipBaseDigits < p.baseDigits) {
+      PI._reciprocal = Basic.reciprocalF(PI.value(p), p);
+      PI._recipBaseDigits = p.baseDigits;
     }
 
     return PI._reciprocal;
   }
 
-  public static mul(n: number, prec: P): float {
-    if (typeof PI._mulTable === "undefined") { PI._mulTable = {}; }
-
+  public static mul(n: number, p: P): float {
     let entry = PI._mulTable[n];
 
-    if (typeof entry === "undefined" || entry.numDigits < prec.numDigits) {
+    if (typeof entry === "undefined" || entry.baseDigits < p.baseDigits) {
       entry = {
-        value: Basic.multiplyFF(PI.value(prec), WHOLE.float(n), prec),
-        numDigits: prec.numDigits
+        value: Basic.multiplyFF(PI.value(p), WHOLE.float(n), p),
+        baseDigits: p.baseDigits
       };
       PI._mulTable[n] = entry;
     }
@@ -127,15 +100,13 @@ export class PI {
     return entry.value;
   }
 
-  public static div(n: number, prec: P): float {
-    if (typeof PI._divTable === "undefined") { PI._divTable = {}; }
-
+  public static div(n: number, p: P): float {
     let entry = PI._divTable[n];
 
-    if (typeof entry === "undefined" || entry.numDigits < prec.numDigits) {
+    if (typeof entry === "undefined" || entry.baseDigits < p.baseDigits) {
       entry = {
-        value: Basic.multiplyFF(PI.value(prec), RATIO.value(1, n, prec), prec),
-        numDigits: prec.numDigits
+        value: Basic.multiplyFF(PI.value(p), RATIO.value(1, n, p), p),
+        baseDigits: p.baseDigits
       };
       PI._divTable[n] = entry;
     }
@@ -143,15 +114,13 @@ export class PI {
     return entry.value;
   }
 
-  public static reciprocalMul(n: number, prec: P): float {
-    if (typeof PI._recipMulTable === "undefined") { PI._recipMulTable = {}; }
-
+  public static reciprocalMul(n: number, p: P): float {
     let entry = PI._recipMulTable[n];
 
-    if (typeof entry === "undefined" || entry.numDigits < prec.numDigits) {
+    if (typeof entry === "undefined" || entry.baseDigits < p.baseDigits) {
       entry = {
-        value: Basic.multiplyFF(PI.reciprocal(prec), WHOLE.float(n), prec),
-        numDigits: prec.numDigits
+        value: Basic.multiplyFF(PI.reciprocal(p), WHOLE.float(n), p),
+        baseDigits: p.baseDigits
       };
       PI._recipMulTable[n] = entry;
     }
@@ -159,19 +128,17 @@ export class PI {
     return entry.value;
   }
 
-  public static reciprocalDiv(n: number, prec: P): float {
-    if (typeof PI._recipDivTable === "undefined") { PI._recipDivTable = {}; }
-
+  public static reciprocalDiv(n: number, p: P): float {
     let entry = PI._recipDivTable[n];
 
-    if (typeof entry === "undefined" || entry.numDigits < prec.numDigits) {
+    if (typeof entry === "undefined" || entry.baseDigits < p.baseDigits) {
       entry = {
         value: Basic.multiplyFF(
-          PI.reciprocal(prec),
-          RATIO.value(1, n, prec),
-          prec
+          PI.reciprocal(p),
+          RATIO.value(1, n, p),
+          p
         ),
-        numDigits: prec.numDigits
+        baseDigits: p.baseDigits
       };
       PI._recipDivTable[n] = entry;
     }
@@ -185,7 +152,7 @@ export class PI {
       Root.squareF(WHOLE.float(10005), prec),
       prec
     );
-    const iterations: number = Math.ceil(prec.binaryDigits / 47.110413138215842) + 1;
+    const iterations: number = Math.ceil(prec.binDigits / 47.110413138215842) + 1;
     const I_545140134 = WHOLE.int(545140134);
     const F_NEG_262537412640768000 = WHOLE.float(-262537412640768000);
 
@@ -219,7 +186,11 @@ export class PI {
       mkNum = Basic.multiplyFF(mkNum, Basic.subtractFF(nkCubed, nkTimes16, prec), prec);
       mkDenom = Basic.multiplyFF(mkDenom, kPlus1Cubed, prec);
 
-      termNum = Basic.multiplyFF(mkNum, Conversion.intToFloat(lk, prec), prec);
+      termNum = Basic.multiplyFF(
+        mkNum,
+        Conversion.intToFloat(lk, prec, true),
+        prec
+      );
       termDenom = Basic.multiplyFF(mkDenom, xk, prec);
 
       sumNum = Basic.addFF(
@@ -234,5 +205,37 @@ export class PI {
 
     return Basic.divideFF(Basic.multiplyFF(D, sumDenom, prec), sumNum, prec);
   }
-
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {float} from "../interfaces/float";
+import {int} from "../interfaces/int";
+
+import {C as CAlias} from "./C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;
+
+import {Pow as PowAlias} from "../basicFunctions/Pow";
+const Pow = PowAlias;
+
+import {Root as RootAlias} from "../basicFunctions/Root";
+const Root = RootAlias;
+
+import {WHOLE as WHOLEAlias} from "./WHOLE";
+const WHOLE = WHOLEAlias;
+
+import {RATIO as RATIOAlias} from "./RATIO";
+const RATIO = RATIOAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;

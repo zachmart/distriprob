@@ -29,6 +29,31 @@
  *
  */
 
+
+export class SciNote {
+  public static base2Exact(x: float): {c: float, e: float, precC: P, precE: P} {
+    const precC = PREC.getPFromBaseDigits(x.coef.digits.length - 1);
+    const eInt = Basic.multiplyII(
+      Basic.addII(
+        x.exp,
+        Core.numberToIntUnchecked(1 - x.coef.digits.length)
+      ),
+      C.POWER_OF_TWO_FOR_BASE_INT
+    );
+    const precE = PREC.getPFromBaseDigits(eInt.digits.length - 1);
+
+    return {
+      c: Conversion.intToFloat(x.coef, precC, true),
+      e: Conversion.intToFloat(eInt, precE, true),
+      precC: precC,
+      precE: precE,
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "../constants/C";
@@ -44,28 +69,7 @@ import {Conversion as ConversionAlias} from "./Conversion";
 const Conversion = ConversionAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
 
-
-export class SciNote {
-  public static base2Exact(x: float): {c: float, e: float, precC: P, precE: P} {
-    const precC = P.createPFromNumDigits(x.coef.digits.length - 1);
-    const eInt = Basic.multiplyII(
-      Basic.addII(
-        x.exp,
-        Core.numberToIntUnchecked(1 - x.coef.digits.length)
-      ),
-      C.POWER_OF_TWO_FOR_BASE_INT
-    );
-    const precE = P.createPFromNumDigits(eInt.digits.length - 1);
-
-    return {
-      c: Conversion.intToFloat(x.coef, precC, true),
-      e: Conversion.intToFloat(eInt, precE, true),
-      precC: precC,
-      precE: precE,
-    }
-  }
-}
-
+import {PREC as PRECAlias} from "../constants/PREC";
+const PREC = PRECAlias;

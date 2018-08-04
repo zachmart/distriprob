@@ -29,10 +29,13 @@
  *
  */
 
-import {int} from "./int";
-
 
 export interface float {
   coef: int;
   exp: int;
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "./int";

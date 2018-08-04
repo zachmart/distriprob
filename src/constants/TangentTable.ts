@@ -29,6 +29,70 @@
  *
  */
 
+
+export class TangentTable {
+  public static maxIndex: number;
+  private static _Uint32ArrayTable: Array<Uint32Array>;
+  private static _intTable: {[n: number]: int};
+  private static _fltTable: {[n: number]: float};
+
+  public init2(): void {
+    TangentTable.maxIndex = Math.min(FactorialTable.maxIndex + 1, 500);
+    TangentTable._intTable = {};
+    TangentTable._fltTable = {};
+  }
+
+  public static setup(): void {
+    const digitTable: Array<Uint32Array> = Array(TangentTable.maxIndex).fill(C.ARR_0);
+
+    for (let i = 0; i < TangentTable.maxIndex; i++) {
+      digitTable[i] = FactorialTable.uint32(i);
+    }
+
+    for (let k = 1; k < TangentTable.maxIndex; k++){
+      for (let j = k; j < TangentTable.maxIndex; j++) {
+        digitTable[j] = Longhand.addition(
+          Longhand.multiplication(Uint32Array.of(j - k), digitTable[j-1]),
+          Longhand.multiplication(Uint32Array.of(j - k + 2), digitTable[j])
+        );
+      }
+    }
+
+    TangentTable._Uint32ArrayTable = digitTable;
+  }
+
+  public static uint32(n: number): Uint32Array {
+    if (!TangentTable._Uint32ArrayTable) { TangentTable.setup(); }
+
+    return TangentTable._Uint32ArrayTable[n - 1];
+  }
+
+  public static int(n: number): int {
+    if (typeof TangentTable._intTable[n] === "undefined") {
+      TangentTable._intTable[n] = new Integer(
+        false,
+        TangentTable.uint32(n)
+      );
+    }
+
+    return TangentTable._intTable[n];
+  }
+
+  public static float(n: number): float {
+    if (typeof TangentTable._fltTable[n] === "undefined") {
+      TangentTable._fltTable[n] = Conversion.intToFloatFullPrecision(
+        TangentTable.int(n),
+        true
+      );
+    }
+
+    return TangentTable._fltTable[n];
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
 
@@ -41,9 +105,6 @@ const C = CAlias;
 import {Longhand as LonghandAlias} from "../core/Longhand";
 const Longhand = LonghandAlias;
 
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
 import {Conversion as ConversionAlias} from "../core/Conversion";
 const Conversion = ConversionAlias;
 
@@ -51,78 +112,5 @@ import {FactorialTable as FactorialTableAlias} from "./FactorialTable";
 const FactorialTable = FactorialTableAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class TangentTable {
-  public static maxIndex: number;
-  private static _Uint32ArrayTable: Array<Uint32Array>;
-  private static _intTable: Array<int>;
-  private static _fltTable: Array<float>;
-  private static _prec: P;
-
-  public static setup(): void {
-    if (!FactorialTable._Uint32ArrayTable) { FactorialTable.setup(); }
-
-    TangentTable.maxIndex = Math.min(FactorialTable.maxIndex + 1, 500);
-    const digitTable: Array<Uint32Array> = FactorialTable._Uint32ArrayTable.slice(
-      0,
-      TangentTable.maxIndex
-    );
-
-    for (let k = 1; k < TangentTable.maxIndex; k++){
-      for (let j = k; j < TangentTable.maxIndex; j++) {
-        digitTable[j] = Longhand.addition(
-          Longhand.multiplication(Uint32Array.of(j - k), digitTable[j-1]),
-          Longhand.multiplication(Uint32Array.of(j - k + 2), digitTable[j])
-        );
-      }
-    }
-
-    TangentTable._Uint32ArrayTable = digitTable;
-
-    TangentTable._intTable = Array(TangentTable.maxIndex + 1).fill(C.I_0);
-    TangentTable._fltTable = Array(TangentTable.maxIndex + 1).fill(C.F_0);
-    TangentTable._prec
-      = P.createPFromNumDigits(digitTable[TangentTable.maxIndex - 1].length);
-  }
-
-  public static uint32(n: number): Uint32Array {
-    if (!TangentTable._Uint32ArrayTable) { TangentTable.setup(); }
-
-    return TangentTable._Uint32ArrayTable[n - 1];
-  }
-
-  public static int(n: number): int {
-    if (!TangentTable._Uint32ArrayTable) { TangentTable.setup(); }
-
-    const nMinus1 = n - 1;
-
-    if (Comparison.isZeroI(TangentTable._intTable[nMinus1])) {
-      TangentTable._intTable[nMinus1] = new Integer(
-        false,
-        TangentTable.uint32(n)
-      );
-    }
-
-    return TangentTable._intTable[nMinus1];
-  }
-
-  public static float(n: number): float {
-    if (!TangentTable._Uint32ArrayTable) { TangentTable.setup(); }
-
-    const nMinus1 = n - 1;
-
-    if (Comparison.isZero(TangentTable._fltTable[nMinus1])) {
-      TangentTable._fltTable[nMinus1] = Conversion.intToFloat(
-        TangentTable.int(n),
-        TangentTable._prec,
-        true
-      );
-    }
-
-    return TangentTable._fltTable[nMinus1];
-  }
-}
 

@@ -29,6 +29,80 @@
  *
  */
 
+
+export class FactorialTable {
+  public static maxIndex: number;
+  public static _Uint32ArrayTable: {[n: number]: Uint32Array};
+  private static _intTable: {[n: number]: int};
+  private static _fltTable: {[n: number]: float};
+
+  public static init0(): void {
+    FactorialTable.maxIndex = 1000;
+    FactorialTable._Uint32ArrayTable = {};
+    FactorialTable._intTable = {};
+    FactorialTable._fltTable = {};
+  }
+
+  public static uint32(n: number): Uint32Array {
+    if (typeof FactorialTable._Uint32ArrayTable[n] === "undefined") {
+      if (n === 0 || n === 1) {
+        FactorialTable._Uint32ArrayTable[n] = C.ARR_1;
+      } else {
+        FactorialTable._Uint32ArrayTable[n] = Longhand.multiplication(
+          FactorialTable.uint32(n - 1),
+          WHOLE.arr(n)
+        );
+      }
+    }
+
+    return FactorialTable._Uint32ArrayTable[n];
+  }
+
+  public static int(n: number): int {
+    if (typeof FactorialTable._intTable[n] === "undefined") {
+      FactorialTable._intTable[n] = new Integer(
+        false,
+        FactorialTable.uint32(n)
+      );
+    }
+
+    return FactorialTable._intTable[n];
+  }
+
+  public static float(n: number): float {
+    if (typeof FactorialTable._fltTable[n] === "undefined") {
+      FactorialTable._fltTable[n] = Conversion.intToFloatFullPrecision(
+        FactorialTable.int(n),
+        true
+      );
+    }
+
+    return FactorialTable._fltTable[n];
+  }
+
+  public static calcFact(
+    factObj: {value: float, index: number, nextIndex: number},
+    p: P
+  ): void {
+    if (factObj.nextIndex <= FactorialTable.maxIndex) {
+      factObj.value = FactorialTable.float(factObj.nextIndex);
+      factObj.index = factObj.nextIndex;
+    } else {
+      for(let i = factObj.index + 1; i <= factObj.nextIndex; i++) {
+        factObj.value = Basic.multiplyFF(
+          factObj.value,
+          Core.numberToFloatUnchecked(i),
+          p
+        );
+        factObj.index = factObj.nextIndex;
+      }
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
 
@@ -47,92 +121,11 @@ const Longhand = LonghandAlias;
 import {Basic as BasicAlias} from "../basicFunctions/Basic";
 const Basic = BasicAlias;
 
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
 import {Conversion as ConversionAlias} from "../core/Conversion";
 const Conversion = ConversionAlias;
 
+import {WHOLE as WHOLEAlias} from "./WHOLE";
+const WHOLE = WHOLEAlias;
+
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class FactorialTable {
-  public static maxIndex: number;
-  public static _Uint32ArrayTable: Array<Uint32Array>;
-  private static _intTable: Array<int>;
-  private static _fltTable: Array<float>;
-  private static _prec: P;
-
-  public static setup(): void {
-    FactorialTable.maxIndex = 1000;
-    const digitTable: Array<Uint32Array> = Array(FactorialTable.maxIndex + 1);
-
-    digitTable[0] = C.ARR_1;
-    digitTable[1] = C.ARR_1;
-
-    for (let i = 2; i <= FactorialTable.maxIndex; i++) {
-      digitTable[i] = Longhand.multiplication(Uint32Array.of(i), digitTable[i-1]);
-    }
-
-    FactorialTable._Uint32ArrayTable = digitTable;
-
-    FactorialTable._intTable = Array(FactorialTable.maxIndex + 1).fill(C.I_0);
-    FactorialTable._fltTable = Array(FactorialTable.maxIndex + 1).fill(C.F_0);
-    FactorialTable._prec
-      = P.createPFromNumDigits(digitTable[FactorialTable.maxIndex].length);
-  }
-
-  public static uint32(n: number): Uint32Array {
-    if (!FactorialTable._Uint32ArrayTable) { FactorialTable.setup(); }
-
-    return FactorialTable._Uint32ArrayTable[n];
-  }
-
-  public static int(n: number): int {
-    if (!FactorialTable._Uint32ArrayTable) { FactorialTable.setup(); }
-
-    if (Comparison.isZeroI(FactorialTable._intTable[n])) {
-      FactorialTable._intTable[n] = new Integer(
-        false,
-        FactorialTable._Uint32ArrayTable[n]
-      );
-    }
-
-    return FactorialTable._intTable[n];
-  }
-
-  public static float(n: number): float {
-    if (!FactorialTable._Uint32ArrayTable) { FactorialTable.setup(); }
-
-    if (Comparison.isZero(FactorialTable._fltTable[n])) {
-      FactorialTable._fltTable[n] = Conversion.intToFloat(
-        FactorialTable.int(n),
-        FactorialTable._prec,
-        true
-      );
-    }
-
-    return FactorialTable._fltTable[n];
-  }
-
-  public static calcFact(
-    factObj: {value: float, index: number, nextIndex: number},
-    prec: P
-  ): void {
-    if (factObj.nextIndex <= FactorialTable.maxIndex) {
-      factObj.value = FactorialTable.float(factObj.nextIndex);
-      factObj.index = factObj.nextIndex;
-    } else {
-      for(let i = factObj.index + 1; i <= factObj.nextIndex; i++) {
-        factObj.value = Basic.multiplyFF(
-          factObj.value,
-          Core.numberToFloatUnchecked(i),
-          prec
-        );
-        factObj.index = factObj.nextIndex;
-      }
-    }
-  }
-}

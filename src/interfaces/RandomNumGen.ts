@@ -29,8 +29,6 @@
  *
  */
 
-import {IRandomState} from "./IRandomState";
-
 
 export interface RandomNumGen {
   outputWidth: number;
@@ -38,3 +36,7 @@ export interface RandomNumGen {
   state(): IRandomState
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+import {IRandomState} from "./IRandomState";

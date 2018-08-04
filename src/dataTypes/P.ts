@@ -65,11 +65,9 @@ export class P {
       throw new DomainError(
         "P",
         "constructor",
-        "type",
-        "string",
-        type,
+        {type: {value: type, expectedType: "string"}},
         `type should be "base" | "dec" | "bin", given ${type}`
-      )
+      );
     }
 
     this.baseDigitsInt = Core.numberToIntUnchecked(this.baseDigits);

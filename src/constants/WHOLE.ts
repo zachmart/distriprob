@@ -29,18 +29,6 @@
  *
  */
 
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-import {Integer} from "../dataTypes/Integer";
-import {FloatingPoint} from "../dataTypes/FloatingPoint";
-
-import {C as CAlias} from "./C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
 
 type Entry = {
   arr: Uint32Array,
@@ -96,8 +84,8 @@ export class WHOLE {
         posInt = Core.numberToIntUnchecked(n);
         arr = posInt.digits;
         negInt = new Integer(true, arr);
-        posFloat = Core.numberToFloatUnchecked(n);
-        negFloat = Core.numberToFloatUnchecked(-n);
+        posFloat = Conversion.intToFloatFullPrecision(posInt, true);
+        negFloat = Conversion.intToFloatFullPrecision(negInt, true);
       }
 
       entry = {
@@ -114,3 +102,23 @@ export class WHOLE {
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
+import {C as CAlias} from "./C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;

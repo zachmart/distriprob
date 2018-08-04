@@ -30,6 +30,31 @@
  */
 
 
+export class PHI {
+  private static _value: float;
+  private static _baseDigits: number;
+
+  public static value(p: P): float {
+    if (typeof PHI._baseDigits === "undefined" || PHI._baseDigits < p.baseDigits) {
+      PHI._value = PHI.calculate(p);
+      PHI._baseDigits = p.baseDigits;
+    }
+
+    return PHI._value;
+  }
+
+  private static calculate(p: P): float {
+    return Basic.multiplyFF(
+      C.F_ONE_HALF,
+      Basic.addFF(C.F_1, Root.valueFromTable(5, 2, p), p),
+      p
+    );
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "./C";
@@ -43,27 +68,4 @@ const Root = RootAlias;
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
-
-
-export class PHI {
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (typeof PHI._numDigits === "undefined" || PHI._numDigits < prec.numDigits) {
-      PHI._value = PHI.calculate(prec);
-      PHI._numDigits = prec.numDigits;
-    }
-
-    return PHI._value;
-  }
-
-  private static calculate(prec: P): float {
-    return Basic.multiplyFF(
-      C.F_ONE_HALF,
-      Basic.addFF(C.F_1, Root.valueFromTable(5, 2, prec), prec),
-      prec
-    );
-  }
-}
 

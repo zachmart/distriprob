@@ -291,7 +291,8 @@ export class Basic {
               b: {value: b, expectedType: "int"},
               type: {value: type, expectedType: "string"}
             },
-            `The type parameter must be "euclidean", "trunc", "ceil", "floor", or "round"`
+            `The type parameter for integer division must be "euclidean", "trunc",${""
+            } "ceil", "floor", or "round"`
           );
         }
 

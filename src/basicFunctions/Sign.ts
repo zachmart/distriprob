@@ -105,8 +105,8 @@ const C = CAlias;
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 
-import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
-const Float = FloatAlias;
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
 
 import {NaNError as NaNErrorAlias} from "../errors/NaNError";
 const NaNError = NaNErrorAlias;

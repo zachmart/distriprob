@@ -29,6 +29,7 @@
  *
  */
 
+
 export class JSONFloat {
   public static stringify(x: float): string {
     if (Comparison.isNaN(x)) {
@@ -56,7 +57,7 @@ export class JSONFloat {
       const coefStr = str.substring(7, indexToBreakOn);
       const expStr = str.substring(indexToBreakOn + 1);
 
-      return new Float(JSONInt.parse(coefStr), JSONInt.parse(expStr));
+      return new FloatingPoint(JSONInt.parse(coefStr), JSONInt.parse(expStr));
     }
   }
 
@@ -96,8 +97,8 @@ export class JSONFloat {
 
 import {float} from "../interfaces/float";
 
-import {FloatingPoint as FloatAlias} from "./FloatingPoint";
-const Float = FloatAlias;
+import {FloatingPoint as FloatingPointAlias} from "./FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
 
 import {C as CAlias} from "../constants/C";
 const C = CAlias;

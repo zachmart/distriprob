@@ -162,9 +162,9 @@ export class Int {
     return new Int(Basic.squareI(this.i));
   }
 
-  public toFloat(prec?: P | null | undefined): Flt {
-    if (prec) {
-      return new Flt(Conversion.intToFloat(this.i, prec, false));
+  public toFloat(p?: P | null | undefined): Flt {
+    if (p) {
+      return new Flt(Conversion.intToFloat(this.i, p, false));
     } else {
       return new Flt(this.f);
     }

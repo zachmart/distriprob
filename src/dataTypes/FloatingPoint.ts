@@ -29,9 +29,6 @@
  *
  */
 
-import {float} from "../interfaces/float";
-import {int} from "../interfaces/int";
-
 
 export class FloatingPoint implements float {
   public coef: int;
@@ -43,3 +40,8 @@ export class FloatingPoint implements float {
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+import {float} from "../interfaces/float";
+import {int} from "../interfaces/int";

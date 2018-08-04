@@ -126,6 +126,9 @@ export class JSONInt {
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
 import {int, intType} from "../interfaces/int";
 
 import {Integer as IntegerAlias} from "./Integer";
@@ -135,5 +138,4 @@ import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
 import {Int as IntAlias} from "../outward/Int";
-const Int = IntAlias;
 export type Int = IntAlias;

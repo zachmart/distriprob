@@ -29,45 +29,6 @@
  *
  */
 
-// interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-
-// functional imports
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
-
-import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
-const Float = FloatAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Sign as SignAlias} from "../basicFunctions/Sign";
-const Sign = SignAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Core as CoreAlias} from "./Core";
-const Core = CoreAlias;
-
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-import {Conversion as ConversionAlias} from "./Conversion";
-const Conversion = ConversionAlias;
-
-import {Power as PowerAlias} from "../basicFunctions/Power";
-const Power = PowerAlias;
-
-import {Log as LogAlias} from "../basicFunctions/Log";
-const Log = LogAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
 
 export class StringWriter {
 
@@ -79,7 +40,7 @@ export class StringWriter {
   public static NEGATIVE_INFINITY_STRING: string;
   public static RADIX_POINT_STRING: string;
 
-  public static setStaticProperties(): void {
+  public static init0(): void {
     StringWriter.EXTREME_EXPONENT = new Integer(false, Uint32Array.of(10000));
     StringWriter.LARGE_INTEGER_LENGTH = 1000;
     StringWriter.NaN_STRING = "NaN";
@@ -147,12 +108,12 @@ export class StringWriter {
             let prec: P;
 
             if (precision < 1) { // default precision for ints is full precision
-              prec = P.createPFromNumDigits(val.digits.length);
+              prec = PREC.getPFromBaseDigits(val.digits.length);
             } else {
               prec = StringWriter.getPFromPrecision(precision, coefficientRadix);
             }
 
-            const valFloat = Conversion.intToFloat(val, prec);
+            const valFloat = Conversion.intToFloat(val, prec, true);
             const sciNote = StringWriter.sciNote(valFloat, base, prec);
             this.exp = sciNote.exponent;
 
@@ -289,9 +250,9 @@ export class StringWriter {
 
   private get expString(): string {
     if (Comparison.gtI(Sign.absI(this.exp), C.NUMBER_MAX_SAFE_INTEGER)) {
-      const digits = StringWriter.changeIntRadix(this.exp, this.coefRadix);
+      const digits = StringWriter.changeIntRadix(this.exp, this.expRadix);
       const absExpStr = digits
-        .map(d => d.toString(this.coefRadix))
+        .map(d => d.toString(this.expRadix))
         .join("");
 
       let signStr: string;
@@ -307,10 +268,10 @@ export class StringWriter {
       return signStr + absExpStr;
     } else {
       const expNum = Core.intToNumber(this.exp);
-      const result = expNum.toString(this.coefRadix);
+      const result = expNum.toString(this.expRadix);
 
 
-      return expNum > 0 ? "+" + result : result;
+      return expNum > 0 ? `+${result}`: result;
     }
   }
 
@@ -348,16 +309,16 @@ export class StringWriter {
 
   public static defaultPrecisionFloat(coefficientRadix: number): number {
     if (coefficientRadix === 2) {
-      return P.p.binaryDigits;
+      return P.p.binDigits;
     } else if (coefficientRadix === 10) {
-      return P.p.decimalDigits;
+      return P.p.decDigits;
     } else {
       return Math.ceil(Core.logWithBase(coefficientRadix, 2) * P.p.binaryDigits);
     }
   }
 
   public static getPFromPrecision(precision: number, coefficientRadix: number): P {
-    return P.createPFromNumDigits(Math.ceil(
+    return PREC.getPFromBaseDigits(Math.ceil(
       precision * Core.logWithBase(C.BASE, coefficientRadix
       )) + 1
     );
@@ -376,12 +337,12 @@ export class StringWriter {
     const radixInt = Core.numberToIntUnchecked(radix);
     let rest = Sign.absI(a);
     const digits: number[] = [];
-    let div: {q: int, r: int};
+    let div: {quotient: int, remainder: int};
 
     while(Comparison.isPositiveI(rest)) {
-      div = Basic.divideII(rest, radixInt);
-      digits.unshift(Core.intToNumber(div.r));
-      rest = div.q;
+      div = Basic.divideII(rest, radixInt, "euclidean");
+      digits.unshift(Core.intToNumber(div.remainder));
+      rest = div.quotient;
     }
 
     return digits;
@@ -394,17 +355,17 @@ export class StringWriter {
    *
    * @param {float} x - a finite non-zero float
    * @param {number} base - a positive integer number
-   * @param {P} prec
+   * @param {P} p
    * @returns {{coefficient: float, exponent: int}}
    */
   public static sciNote(
     x: float,
     base: number,
-    prec: P
+    p: P
   ): {coefficient: float, exponent: int} {
     if (base === C.BASE) {
       return {
-        coefficient: new Float(x.coef, C.I_0),
+        coefficient: new FloatingPoint(x.coef, C.I_0),
         exponent: x.exp
       }
     } else {
@@ -415,30 +376,29 @@ export class StringWriter {
         exponentFloat = Basic.addFF(
           Core.numberToFloatUnchecked(Core.logWithBase(base, x.coef.digits[0])),
           Basic.multiplyFF(
-            Conversion.intToFloat(x.exp, prec),
+            Conversion.intToFloat(x.exp, p, true),
             Core.numberToFloatUnchecked(
               Core.logWithBase(base, 2) * C.POWER_OF_TWO_FOR_BASE
             ),
-            prec
+            p
           ),
-          prec
+          p
         );
       } else {
         exponentFloat = Log.baseFF(
           x,
           baseFloat,
-          P.createPFromNumDigits(x.exp.digits.length))
+          PREC.getPFromBaseDigits(x.exp.digits.length))
       }
 
       // exponentFloat is probably not an integer yet, so floor it
       let exponent = Conversion.floatToInt(exponentFloat, "floor");
-      exponentFloat = Conversion.intToFloat(
+      exponentFloat = Conversion.intToFloatFullPrecision(
         exponent,
-        P.createPFromNumDigits(exponent.digits.length),
         true
       );
-      const baseToExponent: float = Power.ff(baseFloat, exponentFloat, prec);
-      let coefficient = Basic.divideFF(x, baseToExponent, prec);
+      const baseToExponent: float = Power.ff(baseFloat, exponentFloat, p);
+      let coefficient = Basic.divideFF(x, baseToExponent, p);
 
       // we want to make sure that the exponent level is set so that
       // 1 <= |coefficient| < base, rounding errors may have occurred in the calculation
@@ -447,13 +407,13 @@ export class StringWriter {
 
       while (Comparison.gte(absCoef, baseFloat)) {
         exponent = Basic.addII(exponent, C.I_1);
-        coefficient = Basic.divideFF(coefficient, baseFloat, prec);
+        coefficient = Basic.divideFF(coefficient, baseFloat, p);
         absCoef = Sign.absF(coefficient);
       }
 
       while (Comparison.lt(absCoef, C.F_1)) {
         exponent = Basic.addII(exponent, C.I_NEG_1);
-        coefficient = Basic.multiplyFF(coefficient, baseFloat, prec);
+        coefficient = Basic.multiplyFF(coefficient, baseFloat, p);
         absCoef = Sign.absF(coefficient);
       }
 
@@ -483,14 +443,12 @@ export class StringWriter {
     sciNote: {coefficient: float, exponent: int},
     precision: number,
     radix: number,
-    prec?: P
+    p: P
   ): {result: number[], digitsBeforeRadixPoint: number} {
     // Note that the correctness of this algorithm depends on: 2 <= radix <= 36 and
     // 0 <= chunkSize <= 10 and radix and chunkSize are both integers so
     // 1 <= Math.pow(radix, chuckSize) <= 3656158440062976 < Number.MAX_SAFE_INTEGER
-    if (!prec) { prec = P.p; }
-
-    const maxChunkSize: number = prec.numDigits > 2 ? 10 : 5;
+    const maxChunkSize: number = p.baseDigits > 2 ? 10 : 5;
     let chunkSize = Math.min(precision - 1, maxChunkSize);
     let radixToChunkSizePow: float = Core.numberToFloat(Math.pow(radix, chunkSize));
     let result: number[] = [];
@@ -543,9 +501,9 @@ export class StringWriter {
 
 
       x = Basic.multiplyFF(
-        Basic.subtractFF(x, Core.numberToFloatUnchecked(chunk), prec),
+        Basic.subtractFF(x, Core.numberToFloatUnchecked(chunk), p),
         radixToChunkSizePow,
-        prec
+        p
       );
     }
 
@@ -692,3 +650,47 @@ export class StringWriter {
     return sw.toScientificNotation(removeTrailingFractionalZeros);
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface imports
+import {int} from "../interfaces/int";
+import {float} from "../interfaces/float";
+
+// functional imports
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
+
+import {Sign as SignAlias} from "../basicFunctions/Sign";
+const Sign = SignAlias;
+
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
+
+import {Core as CoreAlias} from "./Core";
+const Core = CoreAlias;
+
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {Conversion as ConversionAlias} from "./Conversion";
+const Conversion = ConversionAlias;
+
+import {Power as PowerAlias} from "../basicFunctions/Power";
+const Power = PowerAlias;
+
+import {Log as LogAlias} from "../basicFunctions/Log";
+const Log = LogAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+import {PREC as PRECAlias} from "../constants/PREC";
+const PREC = PRECAlias;

@@ -29,8 +29,6 @@
  *
  */
 
-import {int, intType} from "../interfaces/int";
-
 
 export class Integer implements int {
   public readonly neg: boolean;
@@ -48,5 +46,10 @@ export class Integer implements int {
     }
   }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+import {int, intType} from "../interfaces/int";
 
 

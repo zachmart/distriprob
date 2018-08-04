@@ -29,24 +29,6 @@
  *
  */
 
-import {float} from "../interfaces/float";
-
-import {C as CAlias} from "./C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-import {WHOLE as WHOLEAlias} from "./WHOLE";
-const WHOLE = WHOLEAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
 
 /**
  * This static class evaluates the natural log of 2 for a given precision. It does so by
@@ -77,32 +59,12 @@ export type P = PAlias;
 export class LN2 {
   private static _equation: Array<{coef: float, k: float, k2: float}>;
   private static _value: float;
-  private static _numDigits: number;
+  private static _baseDigits: number;
   private static _reciprocal: float;
-  private static _recipNumDigits: number;
+  private static _recipBaseDigits: number;
 
-  public static value(prec: P): float {
-    if (!LN2._equation) { LN2.setupEquation(); }
-
-    if (!LN2._numDigits || LN2._numDigits < prec.numDigits) {
-      LN2._value = LN2.calc(prec);
-      LN2._numDigits = prec.numDigits;
-    }
-
-    return LN2._value;
-  }
-
-  public static reciprocal(prec: P): float {
-    if (!LN2._recipNumDigits || LN2._recipNumDigits < prec.numDigits) {
-      LN2._reciprocal = Basic.reciprocalF(LN2.value(prec), prec);
-      LN2._recipNumDigits = prec.numDigits;
-    }
-
-    return LN2._reciprocal;
-  }
-
-  private static setupEquation(): void {
-    const squarePrec = P.createPFromNumDigits(3);
+  public static init1(): void {
+    const squareP = PREC.getPFromBaseDigits(3);
     const coefs: float[] = [
       WHOLE.float(144),
       WHOLE.float(54),
@@ -122,15 +84,31 @@ export class LN2 {
       LN2._equation.push({
         coef: coefs[i],
         k: ks[i],
-        k2: Basic.squareF(ks[i], squarePrec)
+        k2: Basic.squareF(ks[i], squareP)
       });
     }
   }
 
-  private static calc(prec: P): float {
-    if (!LN2._equation) { LN2.setupEquation(); }
+  public static value(p: P): float {
+    if (!LN2._baseDigits || LN2._baseDigits < p.baseDigits) {
+      LN2._value = LN2.calc(p);
+      LN2._baseDigits = p.baseDigits;
+    }
 
-    const iterations = Math.ceil(prec.binaryDigits/15.943087107901544) + 1;
+    return LN2._value;
+  }
+
+  public static reciprocal(p: P): float {
+    if (!LN2._recipBaseDigits || LN2._recipBaseDigits < p.baseDigits) {
+      LN2._reciprocal = Basic.reciprocalF(LN2.value(p), p);
+      LN2._recipBaseDigits = p.baseDigits;
+    }
+
+    return LN2._reciprocal;
+  }
+
+  private static calc(p: P): float {
+    const iterations = Math.ceil(p.binDigits/15.943087107901544) + 1;
     const limit = (2 * iterations) + 1;
     const num = Array(LN2._equation.length).fill(C.F_1);
     const denom = Array(LN2._equation.length).fill(C.F_1);
@@ -142,33 +120,55 @@ export class LN2 {
       nFloat = Core.numberToFloatUnchecked(n);
 
       for (let i = 0; i < LN2._equation.length; i++) {
-        kPow[i] = Basic.multiplyFF(kPow[i], LN2._equation[i].k2, prec);
-        nextTermDenom = Basic.multiplyFF(nFloat, kPow[i], prec);
+        kPow[i] = Basic.multiplyFF(kPow[i], LN2._equation[i].k2, p);
+        nextTermDenom = Basic.multiplyFF(nFloat, kPow[i], p);
         num[i] = Basic.addFF(
-          Basic.multiplyFF(num[i], nextTermDenom, prec),
+          Basic.multiplyFF(num[i], nextTermDenom, p),
           denom[i],
-          prec
+          p
         );
-        denom[i] = Basic.multiplyFF(denom[i], nextTermDenom, prec);
+        denom[i] = Basic.multiplyFF(denom[i], nextTermDenom, p);
       }
     }
 
-    let finalNumerator: float = Basic.multiplyFF(LN2._equation[0].coef, num[0], prec);
-    let finalDenominator: float = Basic.multiplyFF(LN2._equation[0].k, denom[0], prec);
+    let finalNumerator: float = Basic.multiplyFF(LN2._equation[0].coef, num[0], p);
+    let finalDenominator: float = Basic.multiplyFF(LN2._equation[0].k, denom[0], p);
 
     for(let i = 1; i < LN2._equation.length; i++) {
-      num[i] = Basic.multiplyFF(LN2._equation[i].coef, num[i], prec);
-      denom[i] = Basic.multiplyFF(LN2._equation[i].k, denom[i], prec);
+      num[i] = Basic.multiplyFF(LN2._equation[i].coef, num[i], p);
+      denom[i] = Basic.multiplyFF(LN2._equation[i].k, denom[i], p);
 
       finalNumerator = Basic.addFF(
-        Basic.multiplyFF(finalNumerator, denom[i], prec),
-        Basic.multiplyFF(finalDenominator, num[i], prec),
-        prec
+        Basic.multiplyFF(finalNumerator, denom[i], p),
+        Basic.multiplyFF(finalDenominator, num[i], p),
+        p
       );
-      finalDenominator = Basic.multiplyFF(finalDenominator, denom[i], prec);
+      finalDenominator = Basic.multiplyFF(finalDenominator, denom[i], p);
     }
 
-    return Basic.divideFF(finalNumerator, finalDenominator, prec);
+    return Basic.divideFF(finalNumerator, finalDenominator, p);
   }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+import {float} from "../interfaces/float";
+
+import {C as CAlias} from "./C";
+const C = CAlias;
+
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
+import {Basic as BasicAlias} from "../basicFunctions/Basic";
+const Basic = BasicAlias;
+
+import {WHOLE as WHOLEAlias} from "./WHOLE";
+const WHOLE = WHOLEAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+import {PREC as PRECAlias} from "./PREC";
+const PREC = PRECAlias;

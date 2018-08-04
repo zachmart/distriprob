@@ -55,83 +55,79 @@ export class PREC {
     PREC._decTable = {};
   }
 
-  private static createEntry(prec: P): Entry {
-    const eps = prec.epsilon;
-    const sqrtEps = Root.squareF(eps, prec);
+  private static createEntry(p: P): Entry {
+    const eps = p.epsilon;
+    const sqrtEps = Root.squareF(eps, p);
     const entry: Entry = {
       sqrtEPS: sqrtEps,
-      cbrtEPS: Root.fn(eps, 3, prec),
-      fourthRootEPS: Root.fn(eps, 4, prec),
+      cbrtEPS: Root.fn(eps, 3, p),
+      fourthRootEPS: Root.fn(eps, 4, p),
       truncLogEPSDiv2: Conversion.trunc(Basic.divideFF(
-        Log.f(eps, prec),
+        Log.f(eps, p),
         C.F_NEG_2,
-        prec
+        p
       )),
-      reciprocalSqrtEPS: Basic.reciprocalF(sqrtEps, prec),
-      oneMinusEPS: Basic.subtractFF(C.F_1, eps, prec),
-      minSafeInt: Sign.negateF(prec.maxSafeInt),
-      p: prec
+      reciprocalSqrtEPS: Basic.reciprocalF(sqrtEps, p),
+      oneMinusEPS: Basic.subtractFF(C.F_1, eps, p),
+      minSafeInt: Sign.negateF(p.maxSafeInt),
+      p: p
     };
 
-    if (prec.type === "base") {
-      PREC._baseTable[prec.baseDigits] = entry;
-    } else if (prec.type === "bin") {
-      PREC._binTable[prec.binDigits] = entry;
-    } else if (prec.type === "dec") {
-      PREC._decTable[prec.decDigits] = entry;
+    if (p.type === "base") {
+      PREC._baseTable[p.baseDigits] = entry;
+    } else if (p.type === "bin") {
+      PREC._binTable[p.binDigits] = entry;
+    } else if (p.type === "dec") {
+      PREC._decTable[p.decDigits] = entry;
     } else {
-      PREC.throwBadPTypeDomainError("createEntry", prec);
+      throw PREC.badPTypeError(p);
     }
 
     return entry;
   }
 
-  private static getEntry(prec: P): Entry {
+  private static getEntry(p: P): Entry {
     let entry: Entry | undefined;
 
-    if (prec.type === "base") {
-      entry = PREC._baseTable[prec.baseDigits];
-    } else if (prec.type === "bin") {
-      entry = PREC._binTable[prec.binDigits];
-    } else if (prec.type === "dec") {
-      entry = PREC._decTable[prec.decDigits];
+    if (p.type === "base") {
+      entry = PREC._baseTable[p.baseDigits];
+    } else if (p.type === "bin") {
+      entry = PREC._binTable[p.binDigits];
+    } else if (p.type === "dec") {
+      entry = PREC._decTable[p.decDigits];
     } else {
-      PREC.throwBadPTypeDomainError("getEntry", prec);
+      throw PREC.badPTypeError(p);
     }
 
-    if (typeof entry === "undefined") { entry = PREC.createEntry(prec);}
+    if (typeof entry === "undefined") { entry = PREC.createEntry(p);}
 
     return entry;
   }
 
-  public static eps(prec: P): float { return prec.epsilon; }
+  public static eps(p: P): float { return p.epsilon; }
 
-  public static sqrtEPS(prec: P): float { return PREC.getEntry(prec).sqrtEPS; }
+  public static sqrtEPS(p: P): float { return PREC.getEntry(p).sqrtEPS; }
 
-  public static cbrtEPS(prec: P): float { return PREC.getEntry(prec).cbrtEPS; }
+  public static cbrtEPS(p: P): float { return PREC.getEntry(p).cbrtEPS; }
 
-  public static fourthRootEPS(prec: P): float {
-    return PREC.getEntry(prec).fourthRootEPS;
+  public static fourthRootEPS(p: P): float { return PREC.getEntry(p).fourthRootEPS; }
+
+  public static truncLogEPSDiv2(p: P): float { return PREC.getEntry(p).truncLogEPSDiv2; }
+
+  public static reciprocalSqrtEPS(p: P): float {
+    return PREC.getEntry(p).reciprocalSqrtEPS;
   }
 
-  public static truncLogEPSDiv2(prec: P): float {
-    return PREC.getEntry(prec).truncLogEPSDiv2;
+  public static oneMinusEPS(p: P): float {
+    return PREC.getEntry(p).oneMinusEPS;
   }
 
-  public static reciprocalSqrtEPS(prec: P): float {
-    return PREC.getEntry(prec).reciprocalSqrtEPS;
+  public static maxSafeInteger(p: P): float {
+    return p.maxSafeInt;
   }
 
-  public static oneMinusEPS(prec: P): float {
-    return PREC.getEntry(prec).oneMinusEPS;
-  }
-
-  public static maxSafeInteger(prec: P): float {
-    return prec.maxSafeInt;
-  }
-
-  public static minSafeInteger(prec: P): float {
-    return PREC.getEntry(prec).minSafeInt;
+  public static minSafeInteger(p: P): float {
+    return PREC.getEntry(p).minSafeInt;
   }
 
   public static  getPFromBaseDigits(baseDigits: number): P {
@@ -167,67 +163,52 @@ export class PREC {
     return entry.p;
   }
 
-  public static getRelativeP(prec: P, relativeBaseDigits: number): P {
-    return PREC.getPFromBaseDigits(prec.baseDigits - 1 + relativeBaseDigits);
+  public static getRelativeP(p: P, relativeBaseDigits: number): P {
+    return PREC.getPFromBaseDigits(p.baseDigits - 1 + relativeBaseDigits);
   }
 
-  public static calcDisplayEpsilon(prec: P): float {
-    if (prec.type === "base") {
-      return prec.epsilon;
-    } else if (prec.type === "bin") {
-      return Pow.fi(C.F_2, Core.numberToIntUnchecked(-prec.binDigits), prec);
-    } else if (prec.type === "dec") {
-      return Pow.fi(C.F_10, Core.numberToIntUnchecked(-prec.decDigits), prec);
+  public static calcDisplayEpsilon(p: P): float {
+    if (p.type === "base") {
+      return p.epsilon;
+    } else if (p.type === "bin") {
+      return Pow.fi(C.F_2, Core.numberToIntUnchecked(-p.binDigits), p);
+    } else if (p.type === "dec") {
+      return Pow.fi(C.F_10, Core.numberToIntUnchecked(-p.decDigits), p);
     } else {
-      return PREC.throwBadPTypeDomainError("calcEpsilon", prec);
+      throw PREC.badPTypeError(p);
     }
   }
 
-  private static calcDisplayMaxSafeInteger(prec: P): float {
-    if (prec.type === "base") {
-      return prec.maxSafeInt;
-    } else if (prec.type === "bin") {
+  private static calcDisplayMaxSafeInteger(p: P): float {
+    if (p.type === "base") {
+      return p.maxSafeInt;
+    } else if (p.type === "bin") {
       return Basic.subtractFF(
-        Pow.fi(C.F_2, Core.numberToIntUnchecked(prec.binDigits), prec),
+        Pow.fi(C.F_2, Core.numberToIntUnchecked(p.binDigits), p),
         C.F_1,
-        prec
+        p
       );
-    } else if (prec.type === "dec") {
+    } else if (p.type === "dec") {
       return Basic.subtractFF(
-        Pow.fi(C.F_10, Core.numberToIntUnchecked(prec.decDigits), prec),
+        Pow.fi(C.F_10, Core.numberToIntUnchecked(p.decDigits), p),
         C.F_1,
-        prec
+        p
       );
     } else {
-      return PREC.throwBadPTypeDomainError("calcMaxSafeInteger", prec);
+      throw PREC.badPTypeError(p);
     }
   }
 
-  private static throwBadPTypeDomainError(functionName: string, prec: P): float {
-    throw new DomainError(
-      PREC.className,
-      functionName,
-      "prec",
-      "P",
-      prec,
-      `P object prec poorly formed, whose type property should be "base", ${""
-        }"bin", or "dec", given prec.type = ${(<string>prec.type).toString()}`
-    );
-    return C.F_NaN;
+  private static badPTypeError(p: P): Error {
+    return new Error(`P instance type property should be "base", ${""
+      }"bin", or "dec", given prec.type = ${(<string>p.type).toString()}`);
   }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
-
-import {FloatingPoint as FloatAlias} from "../dataTypes/FloatingPoint";
-const Float = FloatAlias;
-
-import {Integer as IntegerAlias} from "../dataTypes/Integer";
-const Integer = IntegerAlias;
 
 import {C as CAlias} from "./C";
 const C = CAlias;
@@ -253,101 +234,6 @@ const Root = RootAlias;
 import {Log as LogAlias} from "../basicFunctions/Log";
 const Log = LogAlias;
 
-import {DomainError as DomainErrorAlias} from "../errors/DomainError";
-const DomainError = DomainErrorAlias;
-
 import {P as PAlias} from "../dataTypes/P";
 const P = PAlias;
 export type P = PAlias;
-
-
-
-
-// export class POld {
-//   public static p: P;
-//
-//   public readonly numDigits: number;
-//   public readonly numDigitsInt: int;
-//   public readonly binaryDigits: number;
-//   public readonly decimalDigits: number;
-//   public readonly quadraticConvergenceSteps: number;
-//   public readonly epsilon: float;
-//   public readonly maxSafeInt: float;
-//
-//   constructor(numDoubles: number, binaryDigits: number, decimalDigits: number) {
-//     const numDoublesMinus1 = numDoubles - 1;
-//     this.numDigits = numDoubles;
-//     this.numDigitsInt = Core.numberToInt(numDoubles);
-//     this.binaryDigits = binaryDigits;
-//     this.decimalDigits = decimalDigits;
-//     this.quadraticConvergenceSteps = P.quadraticConvergenceSteps(numDoublesMinus1);
-//     this.epsilon = P.epsilonFromNumDubs(numDoublesMinus1);
-//     this.maxSafeInt = P.maxSafeInteger(numDoublesMinus1);
-//   }
-//
-//   public static setDecimalDigits(digits: number): void {
-//     P.changeP(P.createPFromDecimalDigits(digits));
-//   }
-//
-//   public static setBinaryDigits(digits: number): void {
-//     P.changeP(P.createPFromBinaryDigits(digits));
-//   }
-//
-//   public static setNumDigits(numDigits: number): void {
-//     P.changeP(P.createPFromNumDigits(numDigits));
-//   }
-//
-//   public static createPFromDecimalDigits(decimalDigits: number): P {
-//     const binaryDigits = Math.ceil(3.321928094887362 * decimalDigits);
-//     const numDigits =
-//       Math.ceil(binaryDigits / C.POWER_OF_TWO_FOR_BASE) + 1;
-//
-//     return new P(numDigits, binaryDigits, decimalDigits);
-//   }
-//
-//   public static createPFromBinaryDigits(binaryDigits: number): P {
-//     const decimalDigits = Math.floor(0.3010299956639812 * binaryDigits);
-//     const numDigits = Math.ceil(binaryDigits / C.POWER_OF_TWO_FOR_BASE) + 1;
-//
-//     return new P(numDigits, binaryDigits, decimalDigits);
-//   }
-//
-//   public static createPFromNumDigits(numDigits: number): P {
-//     const binaryDigits = numDigits * C.POWER_OF_TWO_FOR_BASE;
-//     const decimalDigits = Math.floor(0.3010299956639812 * binaryDigits);
-//
-//     return new P(numDigits + 1, binaryDigits, decimalDigits);
-//   }
-//
-//   public static createRelativeP(p: P, relativeNumDigits: number): P {
-//     return P.createPFromNumDigits(
-//       p.numDigits - 1 + relativeNumDigits
-//     );
-//   }
-//
-//   private static changeP(newP: P): void {
-//     P.p = newP;
-//   }
-//
-//   private static quadraticConvergenceSteps(numDoubles: number): number {
-//     return Math.ceil(Math.log2((numDoubles * C.POWER_OF_TWO_FOR_BASE + 1) / 50));
-//   }
-//
-//   private static epsilonFromNumDubs(numDoubles: number): float {
-//     return new Float(
-//       C.I_2,
-//       Core.numberToIntUnchecked(-numDoubles)
-//     )
-//   }
-//
-//   private static maxSafeInteger(numDigits: number): float {
-//     return new Float(
-//       new Integer(
-//         false,
-//         Uint32Array.from(Array(numDigits).fill(C.BASE_MINUS_ONE))
-//       ),
-//       Core.numberToIntUnchecked(numDigits - 1)
-//     );
-//   }
-// }
-

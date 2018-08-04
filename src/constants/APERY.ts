@@ -29,6 +29,132 @@
  *
  */
 
+/**
+ * This class calculates Apery's Constant to the desired precision. It uses a series
+ * representation for the constant found by Sebastian Wedeniwski in 1998. It is as
+ * follows:
+ *
+ *                      +inf
+ *                     ------                            3
+ *                     \           k   ((2k + 1)!(2k)!k!)
+ * AperysConstant   =   \      (-1) ------------------------ Poly(k)
+ *                      /                                 3
+ *                     /              24(3k + 2)!(4k + 3)!
+ *                     ------
+ *                      k = 0
+ *
+ *  where:
+ *                           5         4         3         2
+ *          Poly(k) = 126392k + 412708k + 531578k + 336367k + 104000k + 12463
+ */
+export class APERY {
+  private static _value: float;
+  private static _baseDigits: number;
+
+  public static value(p: P): float {
+    if (typeof APERY._baseDigits === "undefined" || APERY._baseDigits < p.baseDigits) {
+      APERY._value = APERY.calculate(p);
+      APERY._baseDigits = p.baseDigits;
+    }
+
+    return APERY._value;
+  }
+
+  private static calculate(p: P): float {
+    const iterations = Math.ceil(((p.baseDigits - 1) * 26)/16.7) + 1;
+    const F_24 = WHOLE.float(24);
+    let negative = false;
+    let polynomial = WHOLE.float(12463);
+    let kFact = C.F_1;
+    let twoKFact = {value: C.F_1, index: 0, nextIndex: 2};
+    let twoKPlus1Fact = {value: C.F_1, index: 1, nextIndex: 3};
+    let threeKPlus2Fact = {value: C.F_2, index: 2, nextIndex: 5};
+    let fourKPlus3Fact = {value: C.F_6, index: 3, nextIndex: 7};
+    let termNum = polynomial;
+    let termDenom = WHOLE.float(10368);
+    let sumNum = termNum;
+    let sumDenom = termDenom;
+
+    for (let k = 1; k <= iterations; k++) {
+      kFact = k <= FactorialTable.maxIndex ?
+        FactorialTable.float(k)
+        :
+        Basic.multiplyFF(kFact, Core.numberToFloatUnchecked(k), p);
+
+      twoKFact.nextIndex = 2 * k;
+      FactorialTable.calcFact(twoKFact, p);
+
+      twoKPlus1Fact.nextIndex = 2 * k + 1;
+      FactorialTable.calcFact(twoKPlus1Fact, p);
+
+      threeKPlus2Fact.nextIndex = 3 * k + 2;
+      FactorialTable.calcFact(threeKPlus2Fact, p);
+
+      fourKPlus3Fact.nextIndex = 4 * k + 3;
+      FactorialTable.calcFact(fourKPlus3Fact, p);
+
+      polynomial = APERY.getPolynomialValue(k, p);
+      negative = !negative;
+
+      termNum = Basic.multiplyFF(
+        Pow.fi(
+          Basic.productF([twoKPlus1Fact.value, twoKFact.value, kFact], p),
+          C.I_3,
+          p
+        ),
+        polynomial,
+        p
+      );
+      termNum = negative ? Sign.negateF(termNum) : termNum;
+      termDenom = Basic.productF([
+        F_24,
+        threeKPlus2Fact.value,
+        Pow.fi(fourKPlus3Fact.value, C.I_3, p)
+      ], p);
+
+      sumNum = Basic.addFF(
+        Basic.multiplyFF(sumNum, termDenom, p),
+        Basic.multiplyFF(sumDenom, termNum, p),
+        p
+      );
+      sumDenom = Basic.multiplyFF(sumDenom, termDenom, p);
+    }
+
+    return Basic.divideFF(sumNum, sumDenom, p);
+  }
+
+  private static getPolynomialValue(k: number, p: P): float {
+    if (k <= 147) { // P is less than Number.MAX_SAFE_INTEGER
+      const k2 = k * k;
+      const k3 = k * k2;
+      const k4 = k * k3;
+      const k5 = k * k4;
+      const resultNum = 126392 * k5 + 412708 * k4 + 531578 * k3 + 336367 * k2 +
+        104000 * k + 12463;
+
+      return Core.numberToFloatUnchecked(resultNum);
+    } else {
+      const kFloat = Core.numberToFloatUnchecked(k);
+      const k2 = Basic.squareF(kFloat, p);
+      const k3 = Basic.multiplyFF(kFloat, k2, p);
+      const k4 = Basic.multiplyFF(kFloat, k3, p);
+      const k5 = Basic.multiplyFF(kFloat, k4, p);
+
+      return Basic.sumF([
+        Basic.multiplyFF(WHOLE.float(126392), k5, p),
+        Basic.multiplyFF(WHOLE.float(412708), k4, p),
+        Basic.multiplyFF(WHOLE.float(531578), k3, p),
+        Basic.multiplyFF(WHOLE.float(336367), k2, p),
+        Basic.multiplyFF(WHOLE.float(104000), kFloat, p),
+        WHOLE.float(12463)
+      ], p);
+    }
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
 import {float} from "../interfaces/float";
 
 import {C as CAlias} from "./C";
@@ -53,112 +179,5 @@ import {FactorialTable as FactorialTableAlias} from "./FactorialTable";
 const FactorialTable = FactorialTableAlias;
 
 import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
 export type P = PAlias;
-
-
-export class APERY {
-  private static _value: float;
-  private static _numDigits: number;
-
-  public static value(prec: P): float {
-    if (typeof APERY._numDigits === "undefined" || APERY._numDigits < prec.numDigits) {
-      APERY._value = APERY.calculate(prec);
-      APERY._numDigits = prec.numDigits;
-    }
-
-    return APERY._value;
-  }
-
-  private static calculate(prec: P): float {
-    const iterations = Math.ceil(((prec.numDigits - 1) * 26)/16.7) + 1;
-    const F_24 = WHOLE.float(24);
-    let negative = false;
-    let p = WHOLE.float(12463);
-    let kFact = C.F_1;
-    let twoKFact = {value: C.F_1, index: 0, nextIndex: 2};
-    let twoKPlus1Fact = {value: C.F_1, index: 1, nextIndex: 3};
-    let threeKPlus2Fact = {value: C.F_2, index: 2, nextIndex: 5};
-    let fourKPlus3Fact = {value: C.F_6, index: 3, nextIndex: 7};
-    let termNum = p;
-    let termDenom = WHOLE.float(10368);
-    let sumNum = termNum;
-    let sumDenom = termDenom;
-
-    for (let k = 1; k <= iterations; k++) {
-      kFact = k <= FactorialTable.maxIndex ?
-        FactorialTable.float(k)
-        :
-        Basic.multiplyFF(kFact, Core.numberToFloatUnchecked(k), prec);
-
-      twoKFact.nextIndex = 2 * k;
-      FactorialTable.calcFact(twoKFact, prec);
-
-      twoKPlus1Fact.nextIndex = 2 * k + 1;
-      FactorialTable.calcFact(twoKPlus1Fact, prec);
-
-      threeKPlus2Fact.nextIndex = 3 * k + 2;
-      FactorialTable.calcFact(threeKPlus2Fact, prec);
-
-      fourKPlus3Fact.nextIndex = 4 * k + 3;
-      FactorialTable.calcFact(fourKPlus3Fact, prec);
-
-      p = APERY.getP(k, prec);
-      negative = !negative;
-
-      termNum = Basic.multiplyFF(
-        Pow.fi(
-          Basic.productF([twoKPlus1Fact.value, twoKFact.value, kFact], prec),
-          C.I_3,
-          prec
-        ),
-        p,
-        prec
-      );
-      termNum = negative ? Sign.negateF(termNum) : termNum;
-      termDenom = Basic.productF([
-        F_24,
-        threeKPlus2Fact.value,
-        Pow.fi(fourKPlus3Fact.value, C.I_3, prec)
-      ], prec);
-
-      sumNum = Basic.addFF(
-        Basic.multiplyFF(sumNum, termDenom, prec),
-        Basic.multiplyFF(sumDenom, termNum, prec),
-        prec
-      );
-      sumDenom = Basic.multiplyFF(sumDenom, termDenom, prec);
-    }
-
-    return Basic.divideFF(sumNum, sumDenom, prec);
-  }
-
-  private static getP(k: number, prec: P): float {
-    if (k <= 147) { // P is less than Number.MAX_SAFE_INTEGER
-      const k2 = k * k;
-      const k3 = k * k2;
-      const k4 = k * k3;
-      const k5 = k * k4;
-      const resultNum = 126392 * k5 + 412708 * k4 + 531578 * k3 + 336367 * k2 +
-        104000 * k + 12463;
-
-      return Core.numberToFloatUnchecked(resultNum);
-    } else {
-      const kFloat = Core.numberToFloatUnchecked(k);
-      const k2 = Basic.squareF(kFloat, prec);
-      const k3 = Basic.multiplyFF(kFloat, k2, prec);
-      const k4 = Basic.multiplyFF(kFloat, k3, prec);
-      const k5 = Basic.multiplyFF(kFloat, k4, prec);
-
-      return Basic.sumF([
-        Basic.multiplyFF(WHOLE.float(126392), k5, prec),
-        Basic.multiplyFF(WHOLE.float(412708), k4, prec),
-        Basic.multiplyFF(WHOLE.float(531578), k3, prec),
-        Basic.multiplyFF(WHOLE.float(336367), k2, prec),
-        Basic.multiplyFF(WHOLE.float(104000), kFloat, prec),
-        WHOLE.float(12463)
-      ], prec);
-    }
-  }
-}
 
