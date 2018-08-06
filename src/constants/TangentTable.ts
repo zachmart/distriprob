@@ -36,7 +36,7 @@ export class TangentTable {
   private static _intTable: {[n: number]: int};
   private static _fltTable: {[n: number]: float};
 
-  public init2(): void {
+  public init0(): void {
     TangentTable.maxIndex = Math.min(FactorialTable.maxIndex + 1, 500);
     TangentTable._intTable = {};
     TangentTable._fltTable = {};

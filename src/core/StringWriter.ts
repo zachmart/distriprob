@@ -309,11 +309,13 @@ export class StringWriter {
 
   public static defaultPrecisionFloat(coefficientRadix: number): number {
     if (coefficientRadix === 2) {
-      return P.p.binDigits;
+      return Configuration.defaultBinaryDigits();
     } else if (coefficientRadix === 10) {
-      return P.p.decDigits;
+      return Configuration.defaultDecimalDigits();
     } else {
-      return Math.ceil(Core.logWithBase(coefficientRadix, 2) * P.p.binaryDigits);
+      return Math.ceil(
+        Core.logWithBase(coefficientRadix, 2) * Configuration.defaultBinaryDigits()
+      );
     }
   }
 
@@ -694,3 +696,6 @@ export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;
+
+import {Configuration as ConfigurationAlias} from "../outward/Configuration";
+const Configuration = ConfigurationAlias;
