@@ -31,6 +31,12 @@
 
 
 export class Mod {
+  public static className: string;
+
+  public static init0(): void {
+    Mod.className = "Mod";
+  }
+
   public static qAndR(
     x: float,
     y: float,
@@ -43,7 +49,7 @@ export class Mod {
     if (xIsFinite && yIsFinite) {
       if (Comparison.isZero(y)) {
         throw new DomainError(
-          "Mod",
+          Mod.className,
           "qAndR",
           {
             x: {value: x, expectedType: "float"},
@@ -68,7 +74,7 @@ export class Mod {
             break;
           case "round": q = Conversion.round(xDivY); break;
           default: throw new DomainError(
-            "Mod",
+            Mod.className,
             "qAndR",
             {
               x: {value: x, expectedType: "float"},
@@ -92,13 +98,13 @@ export class Mod {
       }
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
-        "Mod",
+        Mod.className,
         "qAndR",
         Comparison.isNaN(x) ? "x" : "y"
       );
     } else {
       throw new DomainError(
-        "Mod",
+        Mod.className,
         "qAndR",
         {
           x: {value: x, expectedType: "float"},
@@ -109,13 +115,28 @@ export class Mod {
       )
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      FloatDivisionResult, Sign, Comparison, Basic, Conversion, NaNError, DomainError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {FloatDivisionResult as FloatDivisionResultAlias}
 from "../dataTypes/FloatDivisionResult";
 const FloatDivisionResult = FloatDivisionResultAlias;
@@ -125,9 +146,6 @@ const Sign = SignAlias;
 
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {Basic as BasicAlias} from "./Basic";
 const Basic = BasicAlias;

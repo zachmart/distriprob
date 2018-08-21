@@ -31,6 +31,12 @@
 
 
 export class ArrayDivisionResult {
+  public static className: string;
+
+  public static init0(): void {
+    ArrayDivisionResult.className = "ArrayDivisionResult";
+  }
+
   public q: Uint32Array;
   public r: Uint32Array;
 

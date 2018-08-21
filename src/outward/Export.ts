@@ -30,69 +30,54 @@
  */
 
 
-export class RATIO {
-  public static className: string;
-  private static _table:
-    {[num: number]: {[denom: number]: {value: float, numDigits: number}}};
 
-  public static init0(): void {
-    RATIO.className = "RATIO";
-    RATIO._table = {};
+export class Export {
+
+  public abs: {
+    (x: number | string | Float | Int, ): Float,
+    i: (a: number | string | Float | Int) => Int
+  };
+
+  constructor() {
+    this.abs =
   }
 
-  public static value(numerator: number, denominator: number, p: P): float {
-    const negative = numerator * denominator < 0;
-
-    if (numerator < 0) { numerator = Math.abs(numerator); }
-    if (denominator < 0) { denominator = Math.abs(denominator); }
-
-    if (typeof RATIO._table[numerator] === "undefined") { RATIO._table[numerator] = {}; }
-
-    let entry = RATIO._table[numerator][denominator];
-
-    if (typeof entry === "undefined" || entry.numDigits < p.baseDigits) {
-      entry = {
-        value: Basic.divideFF(
-          Core.numberToFloatUnchecked(numerator),
-          Core.numberToFloatUnchecked(denominator),
-          p
-        ),
-        numDigits: p.baseDigits
-      };
-      RATIO._table[numerator][denominator] = entry;
-    }
-
-    return negative ? Sign.negateF(entry.value) : entry.value;
-  }
-
-
-  // class dependencies
-  public static dependencies(): Set<Class> {
-    return new Set([
-      Sign, Core, Basic,
-    ]);
+  public static abs() {
+    return Object.assign(
+      function()
+    )
   }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface/type imports
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {Int as IntAlias} from "./Int";
+const Int = IntAlias;
+export type Int = IntAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
+import {Flt as FltAlias} from "./Flt";
+const Flt = FltAlias;
+export type Float = FltAlias;
 
-
-// functional imports
-import {Sign as SignAlias} from "../basicFunctions/Sign";
-const Sign = SignAlias;
+import {C as CAlias} from "../constants/C";
+const C = CAlias;
 
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
 
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
+import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
+const Comparison = ComparisonAlias;
 
+import {Conversion as ConversionAlias} from "../core/Conversion";
+const Conversion = ConversionAlias;
 
+import {StringParser as StringParserAlias} from "../core/StringParser";
+const StringParser = StringParserAlias;
+
+import {StringWriter as StringWriterAlias} from "../core/StringWriter";
+const StringWriter = StringWriterAlias;
+
+import {P as PAlias} from "../dataTypes/P";
+const P = PAlias;
+export type P = PAlias;

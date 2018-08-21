@@ -35,7 +35,13 @@
  * internal to the library when doing so has no valid meaning to the function.
  */
 export class NaNError {
-  public readonly name: "NaNError";
+  public static className: string;
+
+  public init0(): void {
+    NaNError.className = "NaNError";
+  }
+
+  public readonly name: string;
   public readonly message: string;
   public readonly className: string;
   public readonly functionName: string;
@@ -43,7 +49,7 @@ export class NaNError {
   public readonly stack: string | undefined;
 
   constructor(className: string, functionName: string, parameterName: string) {
-    this.name = "NaNError";
+    this.name = NaNError.className;
     this.message = `A NaN argument value was passed into the function ${functionName
     } in the class ${className} as parameter ${parameterName}.`;
     this.className = className;
@@ -53,7 +59,7 @@ export class NaNError {
   }
 
   public static instance(x: any): x is NaNError {
-    return typeof x === "object" && x !== null && x.name === "NaNError" &&
+    return typeof x === "object" && x !== null && x.name === NaNError.className &&
       typeof x.message === "string" && typeof x.className === "string" &&
       typeof x.functionName === "string" && typeof x.parameterName === "string" &&
       (typeof x.stack === "undefined" || typeof x.stack === "string");

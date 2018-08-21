@@ -1,7 +1,5 @@
 "use strict";
 
-import {on} from "cluster";
-
 /**
  * (C) Copyright Zachary Martin 2018.
  * Use, modification and distribution are subject to the
@@ -33,7 +31,12 @@ import {on} from "cluster";
 
 
 export class Configuration {
+  public static className: string;
   public static default: Configuration;
+
+  public init0(): void {
+    Configuration.className = "Configuration";
+  }
 
   public static init3(): void {
     Configuration.default = new Configuration(
@@ -134,6 +137,24 @@ export class Configuration {
   ): void {
     Configuration.default =
       Configuration.default.getIdenticalConfigExceptOnInfiniteOutputIs(onInfiniteOutput);
+  }
+
+  public static instance(x: any): x is Configuration {
+    return typeof x === "object" && x !== null && P.instance(x._p) &&
+      typeof x._onNaNInput === "string" &&
+      (x._onNaNInput === "throw error" || x._onNaNInput === "return NaN") &&
+      typeof x._onInfiniteInput === "string" &&
+      (x._onInfiniteInput === "throw error" || x._onInfiniteInput === "allow") &&
+      typeof x._onOutsideDomainInput === "string" &&
+      (x._onOutsideDomainInput==="throw error"||x._onOutsideDomainInput==="return NaN") &&
+      typeof x._onUnparsableInput === "string" &&
+      (x._onUnparsableInput === "throw error" || x._onUnparsableInput === "return NaN") &&
+      typeof x._onInfiniteOutput === "string" &&
+      (x._onInfiniteOutput === "throw error" || x._onInfiniteOutput === "allow");
+  }
+
+  public static getP(config: Configuration): P {
+    return config._p;
   }
 
   private readonly _p: P;
@@ -267,10 +288,24 @@ export class Configuration {
       onInfiniteOutput
     );
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      P, PREC,
+    ]);
+  }
 }
 
 // *** imports come at end to avoid circular dependency ***
+
+// interface/type imports
+import {Class} from "../interfaces/Class";
+
+// functional imports
 import {P as PAlias} from "../dataTypes/P";
+const P = PAlias;
 export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";

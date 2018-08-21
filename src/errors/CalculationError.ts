@@ -34,14 +34,20 @@
  * This class's instances are meant to be thrown when a calculation fails for some reason.
  */
 export class CalculationError {
-  public readonly name: "CalculationError";
+  public static className: string;
+
+  public init0(): void {
+    CalculationError.className = "CalculationError";
+  }
+
+  public readonly name: string;
   public readonly message: string;
   public readonly className: string;
   public readonly functionName: string;
   public readonly stack: string | undefined;
 
   constructor(className: string, functionName: string, message: string) {
-    this.name = "CalculationError";
+    this.name = CalculationError.className;
     this.message = message;
     this.className = className;
     this.functionName = functionName;
@@ -49,7 +55,7 @@ export class CalculationError {
   }
 
   public static instance(x: any): x is CalculationError {
-    return typeof x === "object" && x !== null && x.name === "CalculationError" &&
+    return typeof x === "object" && x !== null && x.name === CalculationError.className &&
       typeof x.message === "string" && typeof x.className === "string" &&
       typeof x.functionName === "string" &&
       (typeof x.stack === "undefined" || typeof x.stack === "string");

@@ -35,7 +35,13 @@
  * do not meet the parameter expectations.
  */
 export class DomainError {
-  public readonly name: "DomainError";
+  public static className: string;
+
+  public init0(): void {
+    DomainError.className = "DomainError";
+  }
+
+  public readonly name: string;
   public readonly message: string;
   public readonly parameterInfo: {[parameterName: string]: {
       valueStr: string,
@@ -52,7 +58,7 @@ export class DomainError {
     parameters: {[parameterName: string]: {value: any, expectedType: TypeDescriptor}},
     message: string
   ) {
-    this.name = "DomainError";
+    this.name = DomainError.className;
     this.className = className;
     this.functionName = functionName;
     this.stack = (new Error("")).stack;
@@ -60,7 +66,10 @@ export class DomainError {
 
     for (let paramName in parameters) {
       this.parameterInfo[paramName] = {
-        valueStr: parameters[paramName].value.toString(),
+        valueStr: typeof parameters[paramName].value === "object" ?
+          JSON.stringify(parameters[paramName].value)
+          :
+          parameters[paramName].value.toString(),
         expectedType: parameters[paramName].expectedType,
         actualType: ErrorUtil.typeDescription(parameters[paramName].value)
       }
@@ -70,15 +79,28 @@ export class DomainError {
   }
 
   public static instance(x: any): x is DomainError {
-    return typeof x === "object" && x !== null && x.name === "DomainError" &&
+    return typeof x === "object" && x !== null && x.name === DomainError.className &&
       typeof x.message === "string" && typeof x.className === "string" &&
       typeof x.functionName === "string" && typeof x.parameterInfo === "object" &&
       (typeof x.stack === "undefined" || typeof x.stack === "string");
+  }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      ErrorUtil,
+    ]);
   }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
+import {Class} from "../interfaces/Class";
+
+
+// functional imports
 import {ErrorUtil as ErrorUtilAlias, TypeDescriptor} from "./ErrorUtil";
 const ErrorUtil = ErrorUtilAlias;

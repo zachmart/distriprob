@@ -31,6 +31,12 @@
 
 
 export class Power {
+  public static className: string;
+
+  public static init0(): void {
+    Power.className = "Power";
+  }
+
   public static ff(base: float, exponent: float, p: P): float {
     const baseIsFinite = Comparison.isFinite(base);
     const expIsFinite = Comparison.isFinite(exponent);
@@ -56,7 +62,7 @@ export class Power {
       } else {
         if (Comparison.isNegative(base)) {
           throw new DomainError(
-            "Power",
+            Power.className,
             "ff",
             {
               base: {value: base, expectedType: "float"},
@@ -71,7 +77,7 @@ export class Power {
       }
     } else if (Comparison.isNaN(base) || Comparison.isNaN(exponent)) {
       throw new NaNError(
-        "Power",
+        Power.className,
         "ff",
         Comparison.isNaN(base) ? "base" : "exponent"
       )
@@ -85,7 +91,7 @@ export class Power {
           return C.F_POSITIVE_INFINITY;
         } else { // base <= -1
           throw new DomainError(
-            "Power",
+            Power.className,
             "ff",
             {
               base: {value: base, expectedType: "float"},
@@ -102,7 +108,7 @@ export class Power {
           return C.F_1;
         } else if (Comparison.isNegative(base)) { // 0 > base >= -1
           throw new DomainError(
-            "Power",
+            Power.className,
             "ff",
             {
               base: {value: base, expectedType: "float"},
@@ -128,7 +134,7 @@ export class Power {
             }
           } else {
             throw new DomainError(
-              "Power",
+              Power.className,
               "ff",
               {
                 base: {value: base, expectedType: "float"},
@@ -143,7 +149,7 @@ export class Power {
         return C.F_0;
       } else { // exponent === 0
         throw new DomainError(
-          "Power",
+          Power.className,
           "ff",
           {
             base: {value: base, expectedType: "float"},
@@ -162,7 +168,7 @@ export class Power {
       } else {
         if (Comparison.isPOSITIVE_INFINITY(exponent)) {
           throw new DomainError(
-            "Power",
+            Power.className,
             "ff",
             {
               base: {value: base, expectedType: "float"},
@@ -215,13 +221,29 @@ export class Power {
 
     return Exp.f(Basic.multiplyFF(exponent, logBase, calcPrec), calcPrec);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Sign, Parity, C, Core, Comparison, Conversion, Basic, Exp, LN2, Pow, Log, NaNError,
+      DomainError, PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {Sign as SignAlias} from "./Sign";
 const Sign = SignAlias;
 
@@ -260,9 +282,6 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

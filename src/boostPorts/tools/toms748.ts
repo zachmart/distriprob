@@ -35,6 +35,11 @@ export type Tol = (a: float, b: float) => boolean;
 
 
 export class Toms748 {
+  public static className: string;
+
+  public static init0(): void {
+    Toms748.className = "Toms748";
+  }
 
   private readonly f: (x: float) => float;
   private a: float;
@@ -398,8 +403,15 @@ export class Toms748 {
 
     // initialize a, b and fa, fb:
     if (Comparison.gte(this.a, this.b)) {
-      throw new Error(`Parameters a and b out of order: a=${this.a
-        }, b=${this.b}`);
+      throw new DomainError(
+        Toms748.className,
+        "instance method solve",
+        {
+          "this.a": {value: this.a, expectedType: "float"},
+          "this.b": {value: this.b, expectedType: "float"},
+        },
+        `The lower bound and upper bound for root finding are out of order`
+      );
     }
 
     if (tol(this.a, this.b) || Comparison.isZero(this.fa) || Comparison.isZero(this.fb)) {
@@ -412,9 +424,14 @@ export class Toms748 {
     }
 
     if (Sign.f(this.fa) * Sign.f(this.fb) > 0) {
-      throw new Error(
-        `Parameters a and b do not bracket the root: a=${
-          this.a}, b=${this.b}`
+      throw new DomainError(
+        Toms748.className,
+        "instance method solve",
+        {
+          "this.a": {value: this.a, expectedType: "float"},
+          "this.b": {value: this.b, expectedType: "float"},
+        },
+        `The lower bound and upper bound for root finding do not bracket the root`
       );
     }
 
@@ -612,7 +629,7 @@ export class Toms748 {
       while (Sign.f(fb) === Sign.f(fa)) {
         if (count === 0) {
           throw new CalculationError(
-            "toms748",
+            Toms748.className,
             "bracketAndSolveRoot",
             "Unable to bracket root in given number of maximum iterations"
           );
@@ -658,7 +675,7 @@ export class Toms748 {
         }
         if (count === 0) {
           throw new CalculationError(
-            "toms748",
+            Toms748.className,
             "bracketAndSolveRoot",
             "Unable to bracket root in given number of maximum iterations"
           );
@@ -703,13 +720,28 @@ export class Toms748 {
 
     return r;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Core, Comparison, Basic, Conversion, Pow, CalculationError, DomainError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -734,5 +766,5 @@ const Pow = PowAlias;
 import {CalculationError as CalculationErrorAlias} from "../../errors/CalculationError";
 const CalculationError = CalculationErrorAlias;
 
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
+import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
+const DomainError = DomainErrorAlias;

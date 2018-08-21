@@ -31,10 +31,16 @@
 
 
 export class Pow {
+  public static className: string;
+
+  public static init0(): void {
+    Pow.className = "Pow";
+  }
+
   public static ii(base: int, exponent: int): int {
     if (Comparison.isNaN_I(base) || Comparison.isNaN_I(exponent)) {
       throw new NaNError(
-        "Pow",
+        Pow.className,
         "ii",
         Comparison.isNaN_I(base) ? "base" : "exponent"
       );
@@ -44,7 +50,7 @@ export class Pow {
       return C.I_0;
     } else if (Comparison.isNegativeI(exponent)) {
       throw new DomainError(
-        "Pow",
+        Pow.className,
         "ii",
         {
           base: {value : base, expectedType: "int"},
@@ -57,7 +63,7 @@ export class Pow {
         return C.POSITIVE_INFINITY;
       } else {
         throw new DomainError(
-          "Pow",
+          Pow.className,
           "ii",
           {
             base: {value : base, expectedType: "int"},
@@ -83,7 +89,7 @@ export class Pow {
   public static fi(base: float, exponent: int, p: P): float {
     if (Comparison.isNaN(base) || Comparison.isNaN_I(exponent)) {
       throw new NaNError(
-        "Pow",
+        Pow.className,
         "fi",
         Comparison.isNaN(base) ? "base" : "exponent"
       );
@@ -96,7 +102,7 @@ export class Pow {
         return C.F_POSITIVE_INFINITY;
       } else {
         throw new DomainError(
-          "Pow",
+          Pow.className,
           "fi",
           {
             base: {value : base, expectedType: "float"},
@@ -190,6 +196,14 @@ export class Pow {
 
     return s;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Comparison, PREC, Sign, Basic, Bitwise, Parity, NaNError, DomainError,
+    ]);
+  }
 }
 
 
@@ -198,6 +212,11 @@ export class Pow {
 // interface imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
 
 // functional imports
 import {C as CAlias} from "../constants/C";
@@ -205,9 +224,6 @@ const C = CAlias;
 
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

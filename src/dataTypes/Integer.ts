@@ -31,6 +31,12 @@
 
 
 export class Integer implements int {
+  public static className: string;
+
+  public static init0(): void {
+    Integer.className = "Integer";
+  }
+
   public readonly neg: boolean;
   public readonly type: intType;
   public readonly digits: Uint32Array;

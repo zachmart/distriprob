@@ -31,6 +31,12 @@
 
 
 export class IntegerSplit {
+  public static className: string;
+
+  public static init0(): void {
+    IntegerSplit.className = "IntegerSplit";
+  }
+
   public readonly hi: int;
   public readonly lo: int;
 

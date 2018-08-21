@@ -31,6 +31,12 @@
 
 
 export class Basic {
+  public static className: string;
+
+  public static init0(): void {
+    Basic.className = "Basic";
+  }
+
   // ********************* integer functions ************************************
 
   public static addII(a: int, b: int): int {
@@ -76,7 +82,7 @@ export class Basic {
     } else {
       if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)) {
         throw new NaNError(
-          "Basic",
+          Basic.className,
           "addII",
           Comparison.isNaN_I(a) ? "a" : "b"
         );
@@ -91,7 +97,7 @@ export class Basic {
           return a;
         } else {
           throw new DomainError(
-            "Basic",
+            Basic.className,
             "addII",
             {
               a: {value: a, expectedType: "int"},
@@ -118,7 +124,7 @@ export class Basic {
       return Basic.addII(a, Sign.negateI(b));
     } else if (aIsNaN || bIsNaN) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "subtractII",
         Comparison.isNaN_I(a) ? "a" : "b"
       );
@@ -129,7 +135,7 @@ export class Basic {
         return a;
       } else {
         throw new DomainError(
-          "Basic",
+          Basic.className,
           "subtractII",
           {
             a: {value: a, expectedType: "int"},
@@ -158,14 +164,14 @@ export class Basic {
       }
     } else if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)){
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "multiplyII",
         Comparison.isNaN_I(a) ? "a" : "b"
       );
     } else if (Comparison.isZeroI(a) || Comparison.isZeroI(b)){
       // one is 0 and the other is +/- infinity
       throw new DomainError(
-        "Basic",
+        Basic.className,
         "multiplyII",
         {
           a: {value: a, expectedType: "int"},
@@ -198,7 +204,7 @@ export class Basic {
       }
     } else if (Comparison.isNaN_I(a)) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "squareI",
         "a"
       );
@@ -223,7 +229,7 @@ export class Basic {
           return new IntegerDivisionResult(C.NEGATIVE_INFINITY, C.NaN);
         } else { // both a and b are 0, and 0/0 is undefined
           throw new DomainError(
-            "Basic",
+            Basic.className,
             "divideII",
             {
               a: {value: a, expectedType: "int"},
@@ -284,7 +290,7 @@ export class Basic {
           }
         } else {
           throw new DomainError(
-            "Basic",
+            Basic.className,
             "divideII",
             {
               a: {value: a, expectedType: "int"},
@@ -300,7 +306,7 @@ export class Basic {
       }
     } else if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "divideII",
         Comparison.isNaN_I(a) ? "a" : "b"
       );
@@ -314,7 +320,7 @@ export class Basic {
       );
     } else { // both a and b are +/- infinity and infinity/infinity is undefined
       throw new DomainError(
-        "Basic",
+        Basic.className,
         "divideII",
         {
           a: {value: a, expectedType: "int"},
@@ -397,7 +403,7 @@ export class Basic {
     } else {
       if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
         throw new NaNError(
-          "Basic",
+          Basic.className,
           "addFF",
           Comparison.isNaN(x) ? "x" : "y"
         );
@@ -412,7 +418,7 @@ export class Basic {
           return x;
         } else {
           throw new DomainError(
-            "Basic",
+            Basic.className,
             "addFF",
             {
               x: {value: x, expectedType: "float"},
@@ -437,7 +443,7 @@ export class Basic {
     for (let i = 1; i < vals.length; i++) {
       if (Comparison.isNaN(sum) || Comparison.isNaN(vals[i])) {
         throw new NaNError(
-          "Basic",
+          Basic.className,
           "sumF",
           Comparison.isNaN(sum) ? "sum" : "vals[i]"
         );
@@ -459,7 +465,7 @@ export class Basic {
       return Basic.addFF(x, Sign.negateF(y), p);
     } else if (xIsNaN || yIsNaN) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "subtractFF",
         Comparison.isNaN(x) ? "x" : "y"
       );
@@ -470,7 +476,7 @@ export class Basic {
         return x;
       } else {
         throw new DomainError(
-          "Basic",
+          Basic.className,
           "subtractFF",
           {
             x: {value: x, expectedType: "float"},
@@ -497,14 +503,14 @@ export class Basic {
       return new FloatingPoint(new Integer(neg, coefDigits.result), exp);
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "multiplyFF",
         Comparison.isNaN(x) ? "x" : "y"
       );
     } else if (Comparison.isZero(x) || Comparison.isZero(y)) {
       // one is 0 and the other is +/- infinity
       throw new DomainError(
-        "Basic",
+        Basic.className,
         "multiplyFF",
         {
           x: {value: x, expectedType: "float"},
@@ -546,7 +552,7 @@ export class Basic {
       return new FloatingPoint(new Integer(false, coefDigits.result), exp);
     } else if (Comparison.isNaN(x)) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "squareF",
         "x"
       );
@@ -565,7 +571,7 @@ export class Basic {
       }
     } else if (Comparison.isNaN(x)) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "reciprocalF",
         "x"
       );
@@ -580,14 +586,14 @@ export class Basic {
 
     if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
-        "Basic",
+        Basic.className,
         "divideFF",
         Comparison.isNaN(x) ? "x" : "y"
       );
     } else if (xIsFinite || yIsFinite) {
       if (Comparison.isZero(y) && Comparison.isZero(x)) {
         throw new DomainError(
-          "Basic",
+          Basic.className,
           "divideFF",
           {
             x: {value: x, expectedType: "float"},
@@ -602,7 +608,7 @@ export class Basic {
       }
     } else { // both x and y are +/- infinity
       throw new DomainError(
-        "Basic",
+        Basic.className,
         "divideFF",
         {
           x: {value: x, expectedType: "float"},
@@ -775,18 +781,28 @@ export class Basic {
 
     return yi;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint, IntegerDivisionResult, C, Sign, Core, Comparison, Longhand,
+      NaNError, DomainError
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
-import {IntegerDivisionResult as IntegerDivisionResultAlias}
-  from "../dataTypes/IntegerDivisionResult";
-const IntegerDivisionResult = IntegerDivisionResultAlias;
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
 
 // functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
@@ -794,6 +810,10 @@ const Integer = IntegerAlias;
 
 import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
 const FloatingPoint = FloatingPointAlias;
+
+import {IntegerDivisionResult as IntegerDivisionResultAlias}
+  from "../dataTypes/IntegerDivisionResult";
+const IntegerDivisionResult = IntegerDivisionResultAlias;
 
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
@@ -815,6 +835,3 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;

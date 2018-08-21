@@ -31,10 +31,12 @@
 
 
 export class Root {
+  public static className: string;
   private static _table: {[n: number]: {[x: number]: {value: float, baseDigits: number}}};
   private static approxPrec: P;
 
   public static init0(): void {
+    Root.className = "Root";
     Root._table = {};
   }
 
@@ -46,10 +48,10 @@ export class Root {
 
   public static squareF(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Root", "squareF", "x");
+      throw new NaNError(Root.className, "squareF", "x");
     } else if (Comparison.isNegative(x)) {
       throw new DomainError(
-        "Root",
+        Root.className,
         "squareF",
         {x: {value: x, expectedType: "float"}},
         "The square root function is not defined for negative values."
@@ -66,25 +68,25 @@ export class Root {
   public static fn(x: float, n: number, p: P) {
     if (Comparison.isNaN(x) || Number.isNaN(n)) {
       throw new NaNError(
-        "Root",
+        Root.className,
         "fn",
         Comparison.isNaN(x) ? "x" : "n"
       );
-    } else if (!Number.isInteger(n) || n <= Number.MAX_SAFE_INTEGER ||
-               n >= Number.MIN_SAFE_INTEGER) {
+    } else if (!Number.isInteger(n) || n > Number.MAX_SAFE_INTEGER ||
+               n < Number.MIN_SAFE_INTEGER) {
       throw new DomainError(
-        "Root",
+        Root.className,
         "fn",
         {
           x: {value: x, expectedType: "float"},
           n: {value: n, expectedType: "number"}
         },
         `The root function is undefined for non-integer degrees or degrees that are${""
-        } greater that Number.MAX_SAFE_INTEGER or less than Number.MIN_SAFE_INTEGER.`
+        } greater than Number.MAX_SAFE_INTEGER or less than Number.MIN_SAFE_INTEGER.`
       )
     } else if (n % 2 === 0 && Comparison.isNegative(x)) {
       throw new DomainError(
-        "Root",
+        Root.className,
         "fn",
         {
           x: {value: x, expectedType: "float"},
@@ -246,6 +248,14 @@ export class Root {
 
     return Basic.reciprocalF(xi, prec);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Comparison, P, Core, Pow, Basic, RATIO, NaNError, DomainError,
+    ]);
+  }
 }
 
 
@@ -253,6 +263,7 @@ export class Root {
 
 // interface imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
 
 // functional imports

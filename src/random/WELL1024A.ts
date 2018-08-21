@@ -29,14 +29,6 @@
  *
  */
 
-import {IRandomState} from "../interfaces/IRandomState";
-
-import {RandomUtil as RandomUtilAlias} from "./RandomUtil";
-const RandomUtil = RandomUtilAlias;
-
-import {WELLUtil as WELLUtilAlias} from "./WELLUtil";
-const WELLUtil = WELLUtilAlias;
-
 
 export interface WELL1024AState extends IRandomState {
   readonly type: "WELL1024A";
@@ -46,6 +38,7 @@ export interface WELL1024AState extends IRandomState {
 
 
 export class WELL1024A {
+  public static className: "WELL1024A";
   private static K: number;
   private static W: number;
   private static R: number;
@@ -54,7 +47,8 @@ export class WELL1024A {
   private static M2: number;
   private static M3: number;
 
-  private static setup(): void {
+  public static init0(): void {
+    WELL1024A.className = "WELL1024A";
     WELL1024A.K = 1024;
     WELL1024A.W = 32;
     WELL1024A.R = 32;
@@ -84,8 +78,6 @@ export class WELL1024A {
   public _i: number;
 
   constructor(seed: number | string | null | undefined | WELL1024AState) {
-    if (typeof WELL1024A.K === "undefined") { WELL1024A.setup(); }
-
     if (WELL1024A.isState(seed)) {
       this._i = seed.i;
       this._s = Uint32Array.from(seed.s);
@@ -108,7 +100,13 @@ export class WELL1024A {
         );
 
       } else {
-        throw new Error("bad RNG seed");
+        throw new DomainError(
+          WELL1024A.className,
+          "constructor",
+          {seed: {value: seed, expectedType: "seed"}},
+          `A WELL1024A random number generator seed must be a number, string, or valid${""
+            } WELL1024A state`
+        );
       }
 
       // throw away first 1024 iterations
@@ -146,7 +144,7 @@ export class WELL1024A {
     }
 
     return {
-      type: "WELL1024A",
+      type: WELL1024A.className,
       s: s,
       i: this._i
     };
@@ -155,5 +153,30 @@ export class WELL1024A {
   private currentV(j: number): number {
     return this._s[(this._i + j) & WELL1024A.R_MINUS_1];
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      RandomUtil, WELLUtil, DomainError,
+    ]);
+  }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface/type imports
+import {IRandomState} from "../interfaces/IRandomState";
+import {Class} from "../interfaces/Class";
+
+
+// functional imports
+import {RandomUtil as RandomUtilAlias} from "./RandomUtil";
+const RandomUtil = RandomUtilAlias;
+
+import {WELLUtil as WELLUtilAlias} from "./WELLUtil";
+const WELLUtil = WELLUtilAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;

@@ -31,6 +31,12 @@
 
 
 export class Bitwise {
+  public static className: string;
+
+  public static init0(): void {
+    Bitwise.className = "Bitwise";
+  }
+
   private static SINGLE_BITMASKS: Uint32Array;
   private static VALID_BITS_MASK: number;
 
@@ -253,13 +259,23 @@ export class Bitwise {
 
     return result;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, C,
+    ])
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
+
 
 // functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";

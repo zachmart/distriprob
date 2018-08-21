@@ -60,9 +60,11 @@
 export class Exp {
 
   // class constants
+  public static className: string;
   public static kTable: { [numDigits: number]: { intVal: int, reciprocal: float } };
 
   public static init0(): void {
+    Exp.className = "Exp";
     Exp.kTable = {};
   }
 
@@ -104,7 +106,7 @@ export class Exp {
 
       return Basic.multiplyFF(twoToM, expRToK, p);
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Exp", "f", "x");
+      throw new NaNError(Exp.className, "f", "x");
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else { // x === NEGATIVE_INFINITY
@@ -127,7 +129,7 @@ export class Exp {
 
       return Basic.subtractFF(Exp.f(x, calcPrec), C.F_1, calcPrec);
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Exp", "m1f", "x");
+      throw new NaNError(Exp.className, "m1f", "x");
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else { // x === NEGATIVE_INFINITY
@@ -217,14 +219,28 @@ export class Exp {
 
     return {q: q, r: Basic.multiplyFF(rDivLN2, LN2.value(p), p)};
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Sign, C, Core, Comparison, Conversion, Basic, Pow, FactorialTable, LN2, NaNError,
+      PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
 
 // functional imports
 import {Sign as SignAlias} from "./Sign";
@@ -259,7 +275,4 @@ const NaNError = NaNErrorAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

@@ -31,8 +31,8 @@
 
 
 export class StringWriter {
-
   // class constants
+  public static className: string;
   public static EXTREME_EXPONENT: int;
   public static LARGE_INTEGER_LENGTH: number;
   public static NaN_STRING: string;
@@ -41,6 +41,7 @@ export class StringWriter {
   public static RADIX_POINT_STRING: string;
 
   public static init0(): void {
+    StringWriter.className = "StringWriter";
     StringWriter.EXTREME_EXPONENT = new Integer(false, Uint32Array.of(10000));
     StringWriter.LARGE_INTEGER_LENGTH = 1000;
     StringWriter.NaN_STRING = "NaN";
@@ -613,9 +614,19 @@ export class StringWriter {
 
     if (Comparison.gtI(sw.exp, StringWriter.EXTREME_EXPONENT)
       || Comparison.ltI(sw.exp, Sign.negateI(StringWriter.EXTREME_EXPONENT))) {
-      throw new Error(
-        `Val exponent is too extreme for standard notation string formation: ${
-          sw.expString}, when the |limit| is ${StringWriter.EXTREME_EXPONENT.digits[0]}`
+      throw new DomainError(
+        StringWriter.className,
+        "toStandardNotation",
+        {
+          val: {value: val, expectedType: "float or int"},
+          radix: {value: radix, expectedType: "number"},
+          precision: {value: precision, expectedType: "number"},
+          removeTrailingFractionalZeros: {
+            value: removeTrailingFractionalZeros,
+            expectedType: "boolean"
+          }
+        },
+        "The given value is too extreme for standard notation string formation"
       );
     }
 
@@ -651,14 +662,28 @@ export class StringWriter {
 
     return sw.toScientificNotation(removeTrailingFractionalZeros);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint, C, Sign, Comparison, Core, Basic, Conversion, Power,
+      Log, PREC, Configuration, DomainError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
 
 // functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
@@ -691,11 +716,11 @@ const Power = PowerAlias;
 import {Log as LogAlias} from "../basicFunctions/Log";
 const Log = LogAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
-
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;
 
 import {Configuration as ConfigurationAlias} from "../outward/Configuration";
 const Configuration = ConfigurationAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;

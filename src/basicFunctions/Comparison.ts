@@ -31,12 +31,18 @@
 
 
 export class Comparison {
+  public static className: string;
+
+  public static init0(): void {
+    Comparison.className = "Comparison";
+  }
+
   // integer functions
   public static compareI(a: int, b: int): number {
     if (!Comparison.isFiniteI(a) || !Comparison.isFiniteI(b)) {
       if (Comparison.isNaN_I(a) || Comparison.isNaN_I(b)) {
         throw new NaNError(
-          "Comparison",
+          Comparison.className,
           "compareI",
           Comparison.isNaN_I(a) ? "a" : "b"
         );
@@ -136,7 +142,7 @@ export class Comparison {
     if (!Comparison.isFinite(x) || !Comparison.isFinite(y)) {
       if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
         throw new NaNError(
-          "Comparison",
+          Comparison.className,
           "compare",
           Comparison.isNaN(x) ? "x" : "y"
         );
@@ -300,14 +306,24 @@ export class Comparison {
       return 0;
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, NaNError
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int, intType} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
 
 // functional imports
 import {C as CAlias} from "../constants/C";

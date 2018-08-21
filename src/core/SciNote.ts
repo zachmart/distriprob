@@ -31,6 +31,12 @@
 
 
 export class SciNote {
+  public static className: string;
+
+  public static init0(): void {
+    SciNote.className = "SciNote";
+  }
+
   public static base2Exact(x: float): {c: float, e: float, precC: P, precE: P} {
     const precC = PREC.getPFromBaseDigits(x.coef.digits.length - 1);
     const eInt = Basic.multiplyII(
@@ -49,13 +55,28 @@ export class SciNote {
       precE: precE,
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Core, Basic, Conversion, PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
@@ -67,9 +88,6 @@ const Basic = BasicAlias;
 
 import {Conversion as ConversionAlias} from "./Conversion";
 const Conversion = ConversionAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

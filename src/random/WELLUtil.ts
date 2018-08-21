@@ -31,6 +31,12 @@
 
 
 export class WELLUtil {
+  public static className: string;
+
+  public init0(): void {
+    WELLUtil.className = "WELLUtil";
+  }
+
   public static m2Neg(absT: number, x: number): number {
     return x << absT;
   }

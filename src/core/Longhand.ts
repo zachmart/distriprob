@@ -31,6 +31,12 @@
 
 
 export class Longhand {
+  public static className: string;
+
+  public static init0(): void {
+    Longhand.className = "Longhand";
+  }
+
   /**
    * @param {number[]} a - an array of non-negative integers < BASE
    * @param {number[]} b - an array of non-negative integers < BASE
@@ -500,13 +506,25 @@ export class Longhand {
 
     return result;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      ArrayDivisionResult, C, Core, Comparison,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {ArrayDivisionResult as ArrayDivisionResultAlias}
   from "../dataTypes/ArrayDivisionResult";
 const ArrayDivisionResult = ArrayDivisionResultAlias;

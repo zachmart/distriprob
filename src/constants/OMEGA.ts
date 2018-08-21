@@ -31,6 +31,12 @@
 
 
 export class OMEGA {
+  public static className: string;
+
+  public static init0(): void {
+    OMEGA.className = "OMEGA";
+  }
+
   private static _value: float;
   private static _baseDigits: number;
 
@@ -69,13 +75,28 @@ export class OMEGA {
 
     return val;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Core, Comparison, Basic, Exp,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
@@ -93,7 +114,4 @@ const Basic = BasicAlias;
 
 import {Exp as ExpAlias} from "../basicFunctions/Exp";
 const Exp = ExpAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

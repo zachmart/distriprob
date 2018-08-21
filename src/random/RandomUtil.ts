@@ -29,13 +29,13 @@
  *
  */
 
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
 
 export class RandomUtil {
+  public static className: string;
   private static MULTIPLIERS: number[];
 
-  private static setup(): void {
+  public static init0(): void {
+    RandomUtil.className = "RandomUtil";
     RandomUtil.MULTIPLIERS = [7342563, 255, 33, 729134239, 1515, 19, 1035673];
   }
 
@@ -61,7 +61,7 @@ export class RandomUtil {
       crypto.getRandomValues(result);
       return result;
     } else {
-      // not a croptographically secure array of random bits
+      // not a cryptographically secure array of random bits
       const result = new typedArrayConstructor(length);
       const max = 256 ** typedArrayConstructor.BYTES_PER_ELEMENT;
 
@@ -78,8 +78,6 @@ export class RandomUtil {
     units: 8 | 16 | 32,
     seed: string
   ): Uint8Array | Uint16Array | Uint32Array {
-    if (typeof RandomUtil.MULTIPLIERS === "undefined") { RandomUtil.setup(); }
-
     let typedArrayConstructor = RandomUtil.getTypedArrayConstructor(units);
     const result = new typedArrayConstructor(length);
     const max = 2 ** units;
@@ -114,5 +112,25 @@ export class RandomUtil {
       return Uint32Array;
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Core,
+    ]);
+  }
 }
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface/type imports
+import {Class} from "../interfaces/Class";
+
+
+// functional imports
+import {Core as CoreAlias} from "../core/Core";
+const Core = CoreAlias;
+
 

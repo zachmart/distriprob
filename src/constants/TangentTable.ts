@@ -31,12 +31,14 @@
 
 
 export class TangentTable {
+  public static className: string;
   public static maxIndex: number;
   private static _Uint32ArrayTable: Array<Uint32Array>;
   private static _intTable: {[n: number]: int};
   private static _fltTable: {[n: number]: float};
 
   public init0(): void {
+    TangentTable.className = "TangentTable";
     TangentTable.maxIndex = Math.min(FactorialTable.maxIndex + 1, 500);
     TangentTable._intTable = {};
     TangentTable._fltTable = {};
@@ -88,14 +90,29 @@ export class TangentTable {
 
     return TangentTable._fltTable[n];
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, C, Longhand, Conversion, FactorialTable,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 
@@ -111,6 +128,4 @@ const Conversion = ConversionAlias;
 import {FactorialTable as FactorialTableAlias} from "./FactorialTable";
 const FactorialTable = FactorialTableAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

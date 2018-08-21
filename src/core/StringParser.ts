@@ -31,8 +31,8 @@
 
 
 export class StringParser {
-
   // class constants
+  public static className: string;
   public static DEC_NUM_REGEX: RegExp;
   public static BIN_NUM_REGEX: RegExp;
   public static OCT_NUM_REGEX: RegExp;
@@ -42,6 +42,7 @@ export class StringParser {
   public static ALL_ZEROS: RegExp;
 
   public static init0(): void {
+    StringParser.className = "StringParser";
     StringParser.DEC_NUM_REGEX =
       /^([\s\-+]*)(\d*)(?:\.(\d*))?\s*(?:([eEpP])([\s\-+]*)(\d+))?\s*$/;
     StringParser.BIN_NUM_REGEX =
@@ -88,7 +89,7 @@ export class StringParser {
       this.coefficientRadix = 16;
     } else {
       throw new ConversionError(
-        "StringParser",
+        StringParser.className,
         "constructor",
         "str",
         "string",
@@ -107,7 +108,7 @@ export class StringParser {
 
     if (this.sigStrWithoutRadixPoint.length <= 0) {
       throw new ConversionError(
-        "StringParser",
+        StringParser.className,
         "constructor",
         "str",
         "string",
@@ -168,7 +169,7 @@ export class StringParser {
 
         if (!Comparison.isZeroI(divResult.remainder)) {
           throw new ConversionError(
-            "StringParser",
+            StringParser.className,
             "int get method",
             "str",
             "string",
@@ -290,14 +291,27 @@ export class StringParser {
 
     return value;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Comparison, Basic, Pow, Core, Conversion, Diff, ConversionError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
 
 // functional imports
 import {C as CAlias} from "../constants/C";
@@ -327,6 +341,4 @@ const Diff = DiffAlias;
 import {ConversionError as ConversionErrorAlias} from "../errors/ConversionError";
 const ConversionError = ConversionErrorAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

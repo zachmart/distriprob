@@ -57,6 +57,12 @@
  *      ln2 = 72 * L(127) + 54 * L(449) + 34 * L(4801) - 10 * L(8749)
  */
 export class LN2 {
+  public static className: string;
+
+  public static init0(): void {
+    LN2.className = "LN2";
+  }
+
   private static _equation: Array<{coef: float, k: float, k2: float}>;
   private static _value: float;
   private static _baseDigits: number;
@@ -148,13 +154,28 @@ export class LN2 {
 
     return Basic.divideFF(finalNumerator, finalDenominator, p);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Core, Basic, WHOLE, PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
@@ -166,9 +187,6 @@ const Basic = BasicAlias;
 
 import {WHOLE as WHOLEAlias} from "./WHOLE";
 const WHOLE = WHOLEAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "./PREC";
 const PREC = PRECAlias;

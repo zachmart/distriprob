@@ -31,6 +31,12 @@
 
 
 export class Parity {
+  public static className: string;
+
+  public static init0(): void {
+    Parity.className = "Parity";
+  }
+
   public static isEvenI(a: int): boolean {
     if (Comparison.isFiniteI(a)) {
       return (a.digits[a.digits.length - 1] & 1) === 0;
@@ -78,14 +84,25 @@ export class Parity {
       return false;
     }
   }
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Comparison, Basic,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {Comparison as ComparisonAlias} from "./Comparison";
 const Comparison = ComparisonAlias;
 

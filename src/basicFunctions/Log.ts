@@ -45,13 +45,17 @@
  *
  */
 export class Log {
+  public static className: string;
   private static _table: {[n: number]: {value: float, baseDigits: number}};
 
-  public static init0(): void { Log._table = {}; }
+  public static init0(): void {
+    Log.className = "Log";
+    Log._table = {};
+  }
 
   public static f(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Log", "f", "x");
+      throw new NaNError(Log.className, "f", "x");
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else if (Comparison.isPositive(x)) {
@@ -66,7 +70,7 @@ export class Log {
       return C.F_NEGATIVE_INFINITY;
     } else { // x is finite negative or NEGATIVE_INFINITY
       throw new DomainError(
-        "Log",
+        Log.className,
         "f",
         {x: {value: x, expectedType: "float"}},
         "The natural logarithm is undefined for negative values"
@@ -93,13 +97,13 @@ export class Log {
 
     if (Comparison.isNaN(x) || Comparison.isNaN(base)) {
       throw new NaNError(
-        "Log",
+        Log.className,
         functionName,
         Comparison.isNaN(x) ? "x" : "base"
       );
     } else if (!Comparison.isPositive(base)) {
       throw new DomainError(
-        "Log",
+        Log.className,
         functionName,
         {
           x: {value: x, expectedType: "float"},
@@ -113,7 +117,7 @@ export class Log {
       } else if (Comparison.isOne(base)) {
         // base = 1 for any x other than 1 should throw an error
         throw new DomainError(
-          "Log",
+          Log.className,
           functionName,
           {
             x: {value: x, expectedType: "float"},
@@ -140,7 +144,7 @@ export class Log {
       return Comparison.ltOne(base) ? C.F_POSITIVE_INFINITY : C.F_NEGATIVE_INFINITY;
     } else { // x < 0
       throw new DomainError(
-        "Log",
+        Log.className,
         functionName,
         {
           x: {value: x, expectedType: "float"},
@@ -325,13 +329,29 @@ export class Log {
 
     return xi;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Sign, C, Core, Comparison, Conversion, Basic, SciNote, Exp, LN2, WHOLE,
+      FactorialTable, NaNError, DomainError, PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {Sign as SignAlias} from "./Sign";
 const Sign = SignAlias;
 
@@ -370,9 +390,6 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

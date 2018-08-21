@@ -31,6 +31,11 @@
 
 
 export class Conversion {
+  public static className: string;
+
+  public static init0(): void {
+    Conversion.className = "Conversion";
+  }
 
   public static intToFloat(a: int, p: P, sameUint32Array: boolean): float {
     if (Comparison.isNaN_I(a)) { return C.F_NaN; }
@@ -199,14 +204,27 @@ export class Conversion {
       }
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint, C, Core, Comparison, PREC, Longhand, Basic,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
 
 // functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
@@ -223,9 +241,6 @@ const Core = CoreAlias;
 
 import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
 const Comparison = ComparisonAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

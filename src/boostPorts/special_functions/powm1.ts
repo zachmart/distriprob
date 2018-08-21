@@ -32,11 +32,16 @@
 
 
 export class Powm1 {
+  public static className: string;
+
+  public static init0(): void {
+   Powm1.className = "Powm1";
+  }
 
   public static ff(x: float, y: float, p: P): float {
     if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
-        "Powm1",
+        Powm1.className,
         "ff",
         Comparison.isNaN(x) ? "x" : "y"
       );
@@ -57,7 +62,7 @@ export class Powm1 {
       // y had better be an integer:
       if (!Conversion.isInteger(y)) {
         throw new DomainError(
-          "Powm1",
+          Powm1.className,
           "ff",
           {
             x: {value: x, expectedType: "float"},
@@ -76,13 +81,29 @@ export class Powm1 {
 
     return Basic.decF(Power.ff(x, y, p), p);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Parity, Comparison, Basic, Conversion, Power, Log, Exp, RATIO, NaNError,
+      DomainError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -118,7 +139,4 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
 

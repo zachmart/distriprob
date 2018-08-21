@@ -32,6 +32,12 @@
 
 export class Hybol {
   // class constants
+  public static className: string;
+
+  public static init0(): void {
+    Hybol.className = "Hybol";
+  }
+
   public static SMALL_ARG_CUTOFF: float;
 
   public static init1(): void {
@@ -54,7 +60,7 @@ export class Hybol {
     } else if (Comparison.isNEGATIVE_INFINITY(x)) {
       return C.F_NEGATIVE_INFINITY;
     } else { // x === NaN
-      throw new NaNError("Hybol", "sinh", "x");
+      throw new NaNError(Hybol.className, "sinh", "x");
     }
   }
 
@@ -64,13 +70,13 @@ export class Hybol {
     } else if (Comparison.isPOSITIVE_INFINITY(x) || Comparison.isNEGATIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else { // x === NaN
-      throw new NaNError("Hybol", "cosh", "x");
+      throw new NaNError(Hybol.className, "cosh", "x");
     }
   }
 
   public static tanh(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Hybol", "tanh", "x");
+      throw new NaNError(Hybol.className, "tanh", "x");
     } else {
       if (Comparison.lte(Sign.absF(x), Hybol.SMALL_ARG_CUTOFF)) {
         const sinh = Hybol.taylorSeriesSinh(x, p);
@@ -88,10 +94,10 @@ export class Hybol {
     } else if (Comparison.isPOSITIVE_INFINITY(x)) {
       return C.F_POSITIVE_INFINITY;
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Hybol", "acosh", "x");
+      throw new NaNError(Hybol.className, "acosh", "x");
     } else { // x is finite and < 1 or -Infinity
       throw new DomainError(
-        "Hybol",
+        Hybol.className,
         "acosh",
         {x: {value: x, expectedType: "float"}},
         "The acosh function is only defined for values greater than or equal to 1."
@@ -107,7 +113,7 @@ export class Hybol {
     } else if (Comparison.isNEGATIVE_INFINITY(x)) {
       return C.F_NEGATIVE_INFINITY;
     } else { // x === NaN
-      throw new NaNError("Hybol", "asinh", "x");
+      throw new NaNError(Hybol.className, "asinh", "x");
     }
   }
 
@@ -119,10 +125,10 @@ export class Hybol {
     } else if (Comparison.isNegativeOne(x)) {
       return C.F_NEGATIVE_INFINITY;
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Hybol", "atanh", "x");
+      throw new NaNError(Hybol.className, "atanh", "x");
     } else { // x is finite and < -1 or > 1
       throw new DomainError(
-        "Hybol",
+        Hybol.className,
         "atanh",
         {x: {value: x, expectedType: "float"}},
         "The atanh function is only defined for values between -1 and 1 inclusive."
@@ -214,13 +220,29 @@ export class Hybol {
       );
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Comparison, Basic, FactorialTable, Exp, RATIO, Acosh, Asinh, Atanh,
+      NaNError, DomainError, PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
@@ -256,9 +278,6 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

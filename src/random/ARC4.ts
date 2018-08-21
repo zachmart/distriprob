@@ -29,11 +29,6 @@
  *
  */
 
-import {IRandomState} from "../interfaces/IRandomState";
-
-import {RandomUtil as RandomUtilAlias} from "./RandomUtil";
-const RandomUtil = RandomUtilAlias;
-
 
 export interface ARC4State extends IRandomState {
   readonly type: "ARC4";
@@ -44,9 +39,15 @@ export interface ARC4State extends IRandomState {
 
 
 export class ARC4 {
+  public static className: "ARC4";
+
+  public static init0(): void {
+    ARC4.className = "ARC4";
+  }
+
   public static isState(x: any): x is ARC4State {
     if (typeof x === "object" && x !== null && typeof x.type === "string" &&
-      x.type === "ARC4" && typeof x.i === "number" && typeof x.j === "number"
+      x.type === ARC4.className && typeof x.i === "number" && typeof x.j === "number"
       && Array.isArray(x.s) && x.s.length === 256) {
       for(let i = 0; i < 256; i++) {
         if (typeof x.s[i] !== "number") {
@@ -86,7 +87,13 @@ export class ARC4 {
           seed + "\0" // forcing numbers into strings here
         );
       } else {
-        throw new Error("bad RNG seed");
+        throw new DomainError(
+          ARC4.className,
+          "constructor",
+          {seed: {value: seed, expectedType: "seed"}},
+          `An ARC4 random number generator seed must be a number, string, or valid${""
+          } ARC4 state`
+        );
       }
 
       this._s = new Uint8Array(256);
@@ -133,11 +140,33 @@ export class ARC4 {
     }
 
     return {
-      type: "ARC4",
+      type: ARC4.className,
       s: s,
       i: this._i,
       j: this._j
     };
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      RandomUtil, DomainError,
+    ]);
+  }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface/type imports
+import {IRandomState} from "../interfaces/IRandomState";
+import {Class} from "../interfaces/Class";
+
+
+// functional imports
+import {RandomUtil as RandomUtilAlias} from "./RandomUtil";
+const RandomUtil = RandomUtilAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;

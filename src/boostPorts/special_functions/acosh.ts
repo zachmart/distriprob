@@ -33,6 +33,12 @@
 
 
 export class Acosh {
+  public static className: string;
+
+  public static init0(): void {
+    Acosh.className = "Acosh";
+  }
+
   public static imp(x: float, p: P): float {
     // note that all domain error checking has been moved to basicFunctions/Hybol.ts
 
@@ -81,13 +87,28 @@ export class Acosh {
       return Basic.multiplyFF(sqrt2y, c, p);
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Basic, Comparison, PREC, RATIO, Root, Log, LN2,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -112,6 +133,4 @@ const Log = LogAlias;
 import {LN2 as LN2Alias} from "../../constants/LN2";
 const LN2 = LN2Alias;
 
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
 

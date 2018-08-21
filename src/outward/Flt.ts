@@ -354,7 +354,7 @@ const Conversion = ConversionAlias;
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
 
-import {ArgHandler as ArgHandlerAlias} from "./ArgHandler";
+import {Wrapper as ArgHandlerAlias} from "./Wrapper";
 const ArgHandler = ArgHandlerAlias;
 
 import {JSONFloat as JSONFloatAlias} from "../dataTypes/JSONFloat";

@@ -31,6 +31,12 @@
 
 
 export class Diff {
+  public static className: string;
+
+  public static init0(): void {
+  Diff.className = "Diff";
+  }
+
   public static absoluteFF(x: float, y: float, p: P): float {
     return Sign.absF(Basic.subtractFF(x, y, p));
   }
@@ -52,7 +58,7 @@ export class Diff {
       return C.F_0;
     } else if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
-        "Diff",
+        Diff.className,
         "relativeFF",
         Comparison.isNaN(x) ? "x" : "y"
       );
@@ -68,7 +74,7 @@ export class Diff {
   public static relInEpsFF(x: float, y: float, p: P): float {
     if (Comparison.isNaN(x) || Comparison.isNaN(y)) {
       throw new NaNError(
-        "Diff",
+        Diff.className,
         "relInEpsFF",
         Comparison.isNaN(x) ? "x" : "y"
       );
@@ -76,13 +82,25 @@ export class Diff {
       return Basic.divideFF(Diff.relativeFF(x, y, p), p.epsilon, p);
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Comparison, Basic, NaNError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
 
 
 // functional imports
@@ -100,7 +118,4 @@ const Basic = BasicAlias;
 
 import {NaNError as NaNErrorAlias} from "../errors/NaNError";
 const NaNError = NaNErrorAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

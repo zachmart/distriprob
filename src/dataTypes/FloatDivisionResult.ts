@@ -31,6 +31,12 @@
 
 
 export class FloatDivisionResult {
+  public static className: string;
+
+  public static init0(): void {
+    FloatDivisionResult.className = "FloatDivisionResult";
+  }
+
   public quotient: float;
   public remainder: float;
 

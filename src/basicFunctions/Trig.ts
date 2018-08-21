@@ -31,12 +31,17 @@
 
 
 export class Trig {
+  public static className: string;
   private static TABLE_SIZE: number;
   private static TABLE_SIZE_TIMES_4: number;
   private static _sin: Array<{ numDigits: number, value: float }>;
   private static _cos: Array<{ numDigits: number, value: float }>;
   private static DIST_FROM_1_CUTOFF: float;
   private static BIG_ATAN_ARG_CUTOFF: float;
+
+  public static init0(): void {
+   Trig.className = "Trig";
+  }
 
   public static init1(): void {
     Trig.TABLE_SIZE = 256;
@@ -71,10 +76,10 @@ export class Trig {
     if (Comparison.isFinite(x)) {
       return Trig.values(x, p).sin;
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Trig", "sinF", "x");
+      throw new NaNError(Trig.className, "sinF", "x");
     } else { // x is +/-infinity
       throw new DomainError(
-        "Trig",
+        Trig.className,
         "sinF",
         {x: {value: x, expectedType: "float"}},
         "The sine function is undefined for +/-Infinity."
@@ -86,10 +91,10 @@ export class Trig {
     if (Comparison.isFinite(x)) {
       return Trig.values(x, p).cos;
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Trig", "cosF", "x");
+      throw new NaNError(Trig.className, "cosF", "x");
     } else { // x is +/-infinity
       throw new DomainError(
-        "Trig",
+        Trig.className,
         "cosF",
         {x: {value: x, expectedType: "float"}},
         "The cosine function is undefined for +/-Infinity."
@@ -103,7 +108,7 @@ export class Trig {
 
       if (Comparison.isZero(vals.cos)) {
         throw new DomainError(
-          "Trig",
+          Trig.className,
           "tanF",
           {x: {value: x, expectedType: "float"}},
           `The tangent function is undefined for values that are PI/2 plus an integer${""
@@ -113,10 +118,10 @@ export class Trig {
 
       return Basic.divideFF(vals.sin, vals.cos, p);
     } else if (Comparison.isNaN(x)) {
-      throw new NaNError("Trig", "tanF", "x");
+      throw new NaNError(Trig.className, "tanF", "x");
     } else { // x is +/-infinity
       throw new DomainError(
-        "Trig",
+        Trig.className,
         "TanF",
         {x: {value: x, expectedType: "float"}},
         "The tangent function is undefined for +/-Infinity."
@@ -126,11 +131,11 @@ export class Trig {
 
   public static asinF(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Trig", "asinF", "x");
+      throw new NaNError(Trig.className, "asinF", "x");
     } else { // x is finite or +/- infinity
       if (Comparison.lt(x, C.F_NEG_1) || Comparison.gt(x, C.F_1)) {
         throw new DomainError(
-          "Trig",
+          Trig.className,
           "asinF",
           {x: {value: x, expectedType: "float"}},
           "The arcsine function is undefined for values less than -1 or greater than 1."
@@ -160,11 +165,11 @@ export class Trig {
 
   public static acosF(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Trig", "acosF", "x");
+      throw new NaNError(Trig.className, "acosF", "x");
     } else { // x is finite or +/- infinity
       if (Comparison.lt(x, C.F_NEG_1) || Comparison.gtOne(x)) {
         throw new DomainError(
-          "Trig",
+          Trig.className,
           "acosF",
           {x: {value: x, expectedType: "float"}},
           "The arccosine function is undefined for values less than -1 or greater than 1."
@@ -196,7 +201,7 @@ export class Trig {
 
   public static atanF(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Trig", "atanF", "x");
+      throw new NaNError(Trig.className, "atanF", "x");
     } else if (Comparison.gt(Sign.absF(x), Trig.BIG_ATAN_ARG_CUTOFF)) {
       const arctanRecipX = Trig.atanF(Basic.reciprocalF(x, p), p);
 
@@ -225,7 +230,7 @@ export class Trig {
   public static atan2FF(y: float, x: float, p: P): float {
     if (Comparison.isNaN(y) || Comparison.isNaN(x)) {
       throw new NaNError(
-        "Trig",
+        Trig.className,
         "atan2",
         Comparison.isNaN(y) ? "y" : "x"
       );
@@ -577,13 +582,29 @@ export class Trig {
     );
     return root.result;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Core, Comparison, Basic, Mod, Conversion, PI, FactorialTable, Root,
+      Roots, WHOLE, RATIO, Powm1, NaNError, DomainError, PREC,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
@@ -631,9 +652,6 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;

@@ -31,12 +31,14 @@
 
 
 export class FactorialTable {
+  public static className: string;
   public static maxIndex: number;
   public static _Uint32ArrayTable: {[n: number]: Uint32Array};
   private static _intTable: {[n: number]: int};
   private static _fltTable: {[n: number]: float};
 
   public static init0(): void {
+    FactorialTable.className = "FactorialTable";
     FactorialTable.maxIndex = 1000;
     FactorialTable._Uint32ArrayTable = {};
     FactorialTable._intTable = {};
@@ -98,14 +100,29 @@ export class FactorialTable {
       }
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, C, Core, Longhand, Basic, Conversion, WHOLE,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 
@@ -126,6 +143,3 @@ const Conversion = ConversionAlias;
 
 import {WHOLE as WHOLEAlias} from "./WHOLE";
 const WHOLE = WHOLEAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;

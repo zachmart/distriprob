@@ -29,7 +29,9 @@
  *
  */
 
+
 export type TypeDescriptor = "string" |
+  "boolean" |
   "number" |
   "float" |
   "int" |
@@ -37,9 +39,17 @@ export type TypeDescriptor = "string" |
   "JSONFloat" |
   "JSONInt" |
   "P" |
-  "function";
+  "function" |
+  "seed";
+
 
 export class ErrorUtil {
+  public static className: string;
+
+  public init0(): void {
+    ErrorUtil.className = "ErrorUtil";
+  }
+
   public static typeDescription(x: any): string {
     if (Core.instance(x)) {
       return "float";
@@ -63,11 +73,23 @@ export class ErrorUtil {
       x === "function"
     );
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Core, JSONInt, JSONFloat,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
+import {Class} from "../interfaces/Class";
+
+// functional imports
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
 

@@ -40,9 +40,11 @@ type Entry = {
 
 
 export class WHOLE {
+  public static className: string;
   private static _table: {[n: number]: Entry};
 
   public static init0(): void {
+    WHOLE.className = "WHOLE";
     WHOLE._table = {};
   }
 
@@ -100,14 +102,26 @@ export class WHOLE {
 
     return entry;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint, C, Core, Conversion,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 

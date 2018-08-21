@@ -31,6 +31,7 @@
 
 
 export class Core {
+  public static className: string;
 
   // constants for adjusting the exponents of numbers
   public static ABS_CHUNK_LIMIT: number;
@@ -39,6 +40,8 @@ export class Core {
 
 
   public static init0(): void {
+    Core.className = "Core";
+
     // constants for adjusting the exponents of numbers
     Core.ABS_CHUNK_LIMIT = 1021;
     Core.TWO_TO_ABS_CHUNK_LIMIT = 2 ** Core.ABS_CHUNK_LIMIT;
@@ -403,14 +406,24 @@ export class Core {
   public static environmentIsNode(): boolean {
     return typeof module !== 'undefined' && module.exports;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint, IntegerSplit, ArraySplit, C, Comparison
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
-// interface imports
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
 
 // functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";

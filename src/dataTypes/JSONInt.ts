@@ -31,6 +31,12 @@
 
 
 export class JSONInt {
+  public static className: string;
+
+  public static init0(): void {
+    JSONInt.className = "JSONInt";
+  }
+
   public static stringify(a: int): string {
     if (a.type === intType.finite) {
       let result = `JSONInt${a.neg ? "-" : "+"}`;
@@ -124,18 +130,27 @@ export class JSONInt {
       return false;
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, C
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int, intType} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {Integer as IntegerAlias} from "./Integer";
 const Integer = IntegerAlias;
 
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
-
-import {Int as IntAlias} from "../outward/Int";
-export type Int = IntAlias;

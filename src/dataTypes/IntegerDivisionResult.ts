@@ -31,6 +31,12 @@
 
 
 export class IntegerDivisionResult {
+  public static className: string;
+
+  public static init0(): void {
+    IntegerDivisionResult.className = "IntegerDivisionResult";
+  }
+
   public quotient: int;
   public remainder: int;
 

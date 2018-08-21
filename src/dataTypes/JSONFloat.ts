@@ -31,6 +31,12 @@
 
 
 export class JSONFloat {
+  public static className: string;
+
+  public static init0(): void {
+    JSONFloat.className = "JSONFloat";
+  }
+
   public static stringify(x: float): string {
     if (Comparison.isNaN(x)) {
       return "JSONFltNaN";
@@ -90,13 +96,25 @@ export class JSONFloat {
       return false;
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      FloatingPoint, C, Comparison, JSONInt,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {FloatingPoint as FloatingPointAlias} from "./FloatingPoint";
 const FloatingPoint = FloatingPointAlias;
 

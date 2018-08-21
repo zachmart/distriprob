@@ -31,6 +31,11 @@
 
 
 export class Extreme {
+  public static className: string;
+
+  public static init0(): void {
+    Extreme.className = "Extreme";
+  }
 
   private static findInt(
     compFunction: (a: int, b: int) => number,
@@ -100,7 +105,7 @@ export class Extreme {
       if (typeof val === "number") {
         valFloat = Core.numberToFloat(val);
       } else if (Core.instanceI(val)) { // x is an int
-        valFloat = Conversion.intToFloat(val, prec);
+        valFloat = Conversion.intToFloat(val, prec, false);
       } else {
         valFloat = val;
       }
@@ -116,14 +121,29 @@ export class Extreme {
 
     return extreme;
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Conversion, Core,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
@@ -133,5 +153,4 @@ const Conversion = ConversionAlias;
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
+

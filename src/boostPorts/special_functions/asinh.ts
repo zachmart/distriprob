@@ -33,6 +33,11 @@
 
 
 export class Asinh {
+  public static className: string;
+
+  public static init0(): void {
+    Asinh.className = "Asinh";
+  }
 
   public static imp(x: float, p: P): float {
     if (Comparison.gte(x, PREC.fourthRootEPS(p))) {
@@ -84,13 +89,28 @@ export class Asinh {
       return result;
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Basic, Comparison, PREC, RATIO, Root, Log, LN2, Sqrt1pm1,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functinal imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -121,7 +141,5 @@ const LN2 = LN2Alias;
 import {Sqrt1pm1 as Sqrt1pm1Alias} from "./sqrt1pm1";
 const Sqrt1pm1 = Sqrt1pm1Alias;
 
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
 
 

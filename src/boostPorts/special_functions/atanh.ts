@@ -33,6 +33,12 @@
 
 
 export class Atanh {
+  public static className: string;
+
+  public static init0(): void {
+    Atanh.className = "Atanh";
+  }
+
   public static imp(x: float, p: P): float {
     // note that all domain error checking has been moved to basicFunctions/Hybol.ts
 
@@ -75,13 +81,28 @@ export class Atanh {
       return result;
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Basic, Comparison, PREC, RATIO, Log,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -102,7 +123,4 @@ const RATIO = RATIOAlias;
 
 import {Log as LogAlias} from "../../basicFunctions/Log";
 const Log = LogAlias;
-
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
 

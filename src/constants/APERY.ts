@@ -48,6 +48,12 @@
  *          Poly(k) = 126392k + 412708k + 531578k + 336367k + 104000k + 12463
  */
 export class APERY {
+  public static className: string;
+
+  public static init0(): void {
+    APERY.className = "APERY";
+  }
+
   private static _value: float;
   private static _baseDigits: number;
 
@@ -150,13 +156,28 @@ export class APERY {
       ], p);
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Core, Basic, Pow, WHOLE, FactorialTable,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
@@ -177,7 +198,4 @@ const WHOLE = WHOLEAlias;
 
 import {FactorialTable as FactorialTableAlias} from "./FactorialTable";
 const FactorialTable = FactorialTableAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

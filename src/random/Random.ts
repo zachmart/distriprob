@@ -29,11 +29,125 @@
  *
  */
 
+
+export class Random {
+  public static className: string;
+
+  public static init0(): void {
+    Random.className = "Random";
+  }
+
+  public static isState(x: any): x is IRandomState {
+    return WELL512A.isState(x) || WELL1024A.isState(x) || ARC4.isState(x);
+  }
+
+  private gen: RandomNumGen;
+  private width: number;
+
+  constructor(
+    seed: number | string | null | undefined | IRandomState,
+    type: "WELL512A" | "WELL1024A" | "ARC4" | null | undefined
+  ) {
+    if (Random.isState(seed)) {
+      if (typeof type !== "undefined" && type !== null && type !== seed.type) {
+        throw new DomainError(
+          Random.className,
+          "constructor",
+          {
+            seed: {value: seed, expectedType: "seed"},
+            type: {value: type, expectedType: "string"}
+          },
+          "A random state seed type must match the given random number generator type."
+        );
+      } else {
+        type = seed.type;
+      }
+    }
+
+    if (type === "WELL512A") {
+      this.gen = new WELL512A(<number | string | null | undefined | WELL512AState>seed);
+    } else if (type === "WELL1024A") {
+      this.gen = new WELL1024A(<number | string | null | undefined | WELL1024AState>seed);
+    } else if (type === "ARC4") {
+      this.gen = new ARC4(<number | string | null | undefined | ARC4State>seed);
+    } else if (typeof type === "undefined" || type === null) {
+      // default
+      this.gen = new WELL1024A(<number | string | null | undefined | WELL1024AState>seed);
+    } else {
+      throw new DomainError(
+        Random.className,
+        "constructor",
+        {
+          seed: {value: seed, expectedType: "seed"},
+          type: {value: type, expectedType: "string"}
+        },
+        `Random number generator type must be "ARC4", "WELL512A", or "WELL1024A".`
+      );
+    }
+
+    this.width = this.gen.outputWidth;
+  }
+
+  public state(): IRandomState {
+    return this.gen.state();
+  }
+
+  public float(p: P): float {
+    let num: int = C.I_0; Core.numberToIntUnchecked(this.gen.next());
+    let denom: int = C.I_1;
+    let x = 0;
+    let currentLength: number;
+
+    while ((currentLength = Bitwise.lengthI(num)) < p.binDigits) {
+      num = Bitwise.orI(
+        Bitwise.leftShiftI(num, this.width),
+        Core.numberToIntUnchecked(this.gen.next())
+      );
+      denom = Bitwise.leftShiftI(denom, this.width);
+    }
+
+    const rightShiftAmount = currentLength - p.binDigits;
+
+    if (rightShiftAmount > 0) {
+      num = Bitwise.rightShiftI(num, rightShiftAmount);
+      denom = Bitwise.rightShiftI(denom, rightShiftAmount);
+    }
+
+    return Basic.divideFF(
+      Conversion.intToFloat(
+        Basic.addII(num, Core.numberToIntUnchecked(x)),
+        p,
+        true
+      ),
+      Conversion.intToFloat(denom, p, true),
+      p
+    );
+  }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Core, Conversion, Bitwise, Basic, WELL512A, WELL1024A, ARC4, DomainError
+    ]);
+  }
+}
+
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
 import {RandomNumGen} from "../interfaces/RandomNumGen";
 import {IRandomState} from "../interfaces/IRandomState";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../constants/C";
 const C = CAlias;
 
@@ -58,83 +172,7 @@ const WELL1024A = WELL1024AAlias;
 import {ARC4 as ARC4Alias, ARC4State} from "./ARC4";
 const ARC4 = ARC4Alias;
 
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
-
-
-export class Random {
-  public static isState(x: any): x is IRandomState {
-    return WELL512A.isState(x) || WELL1024A.isState(x) || ARC4.isState(x);
-  }
-
-  private gen: RandomNumGen;
-  private width: number;
-
-  constructor(
-    seed: number | string | null | undefined | IRandomState,
-    type: "WELL512A" | "WELL1024A" | "ARC4" | null | undefined
-  ) {
-    if (Random.isState(seed)) {
-      if (typeof type !== "undefined" && type !== null && type !== seed.type) {
-        throw new Error(`Seed of type ${seed.type} state does not match ${""
-          }given parameter type ${type}.`);
-      } else {
-        type = seed.type;
-      }
-    }
-
-    if (type === "WELL512A") {
-      this.gen = new WELL512A(<number | string | null | undefined | WELL512AState>seed);
-    } else if (type === "WELL1024A") {
-      this.gen = new WELL1024A(<number | string | null | undefined | WELL1024AState>seed);
-    } else if (type === "ARC4") {
-      this.gen = new ARC4(<number | string | null | undefined | ARC4State>seed);
-    } else if (typeof type === "undefined" || type === null) {
-      // default
-      this.gen = new WELL1024A(<number | string | null | undefined | WELL1024AState>seed);
-    } else {
-      throw new Error("Unrecognized RNG type");
-    }
-
-    this.width = this.gen.outputWidth;
-  }
-
-  public state(): IRandomState {
-    return this.gen.state();
-  }
-
-  public float(prec: P): float {
-    let num: int = C.I_0; Core.numberToIntUnchecked(this.gen.next());
-    let denom: int = C.I_1;
-    let x = 0;
-    let currentLength: number;
-
-    while ((currentLength = Bitwise.lengthI(num)) < prec.binaryDigits) {
-      num = Bitwise.orI(
-        Bitwise.leftShiftI(num, this.width),
-        Core.numberToIntUnchecked(this.gen.next())
-      );
-      denom = Bitwise.leftShiftI(denom, this.width);
-    }
-
-    const rightShiftAmount = currentLength - prec.binaryDigits;
-
-    if (rightShiftAmount > 0) {
-      num = Bitwise.rightShiftI(num, rightShiftAmount);
-      denom = Bitwise.rightShiftI(denom, rightShiftAmount);
-    }
-
-    return Basic.divideFF(
-      Conversion.intToFloat(
-        Basic.addII(num, Core.numberToIntUnchecked(x)),
-        prec,
-        true
-      ),
-      Conversion.intToFloat(denom, prec, true),
-      prec
-    );
-  }
-}
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;
 
 

@@ -43,7 +43,7 @@ type Entry = {
 
 
 export class PREC {
-  private static className: string;
+  public static className: string;
   private static _baseTable: {[baseDigits: number]: Entry};
   private static _binTable: {[binDigits: number]: Entry};
   private static _decTable: {[decDigits: number]: Entry};
@@ -203,13 +203,24 @@ export class PREC {
     return new Error(`P instance type property should be "base", ${""
       }"bin", or "dec", given prec.type = ${(<string>p.type).toString()}`);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Core, Basic, Conversion, Pow, Root, Log, P,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 

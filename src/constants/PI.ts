@@ -52,6 +52,7 @@
  *
  */
 export class PI {
+  public static className: string;
   private static _value: float;
   private static _baseDigits: number;
   private static _reciprocal: float;
@@ -62,6 +63,7 @@ export class PI {
   private static _recipDivTable: {[n: number]: {value: float, baseDigits: number}};
 
   public static init0(): void {
+    PI.className = "PI";
     PI._mulTable = {};
     PI._divTable = {};
     PI._recipMulTable = {};
@@ -205,14 +207,29 @@ export class PI {
 
     return Basic.divideFF(Basic.multiplyFF(D, sumDenom, prec), sumNum, prec);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Core, Basic, Conversion, Pow, Root, WHOLE, RATIO,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
 import {int} from "../interfaces/int";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
@@ -236,6 +253,3 @@ const WHOLE = WHOLEAlias;
 
 import {RATIO as RATIOAlias} from "./RATIO";
 const RATIO = RATIOAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;

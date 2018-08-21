@@ -31,10 +31,12 @@
 
 
 export class P {
+  public static className: string;
   public static DECIMAL_DIGITS_PER_BINARY_DIGIT: number;
   public static BINARY_DIGITS_PER_DECIMAL_DIGIT: number;
 
   public static init0(): void {
+    P.className = "P";
     P.DECIMAL_DIGITS_PER_BINARY_DIGIT = 0.3010299956639812;
     P.BINARY_DIGITS_PER_DECIMAL_DIGIT = 3.321928094887362;
   }
@@ -62,12 +64,8 @@ export class P {
       this.decDigits = Math.floor(P.DECIMAL_DIGITS_PER_BINARY_DIGIT * digits);
       this.baseDigits = Math.ceil(digits / C.POWER_OF_TWO_FOR_BASE) + 1;
     } else {
-      throw new DomainError(
-        "P",
-        "constructor",
-        {type: {value: type, expectedType: "string"}},
-        `type should be "base" | "dec" | "bin", given ${type}`
-      );
+      throw new Error(`P instance type property should be "base", ${""
+        }"bin", or "dec", given prec.type = ${(<string>type).toString()}`)
     }
 
     this.baseDigitsInt = Core.numberToIntUnchecked(this.baseDigits);
@@ -105,14 +103,26 @@ export class P {
   private static quadraticConvergenceSteps(baseDigits: number): number {
     return Math.ceil(Math.log2((baseDigits * C.POWER_OF_TWO_FOR_BASE + 1) / 50));
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint, C, Core,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {Integer as IntegerAlias} from "./Integer";
 const Integer = IntegerAlias;
 
@@ -124,6 +134,3 @@ const C = CAlias;
 
 import {Core as CoreAlias} from "../core/Core";
 const Core = CoreAlias;
-
-import {DomainError as DomainErrorAlias} from "../errors/DomainError";
-const DomainError = DomainErrorAlias;

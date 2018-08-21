@@ -31,6 +31,12 @@
 
 
 export class Sign {
+  public static className: string;
+
+  public static init0(): void {
+    Sign.className = "Sign";
+  }
+
   public static negateI(a: int): int {
     if (a.type === intType.finite) {
       if (a.digits.length === 1 && a[0] === 0) {
@@ -41,7 +47,7 @@ export class Sign {
     } else if (a.type === intType.infinite) {
       return a.neg ? C.POSITIVE_INFINITY : C.NEGATIVE_INFINITY;
     } else { // a === NaN
-      throw new NaNError("Sign", "negateI", "a");
+      throw new NaNError(Sign.className, "negateI", "a");
     }
   }
 
@@ -55,21 +61,24 @@ export class Sign {
     } else if (a.type === intType.infinite) {
       return a.neg ? -1 : 1;
     } else { // a === NaN
-      throw new NaNError("Sign", "i", "a");
+      throw new NaNError(Sign.className, "i", "a");
     }
   }
 
   public static negateF(x: float): float {
     if (x.coef.type === intType.NaN && x.exp.type === intType.NaN) {
-      throw new NaNError("Sign", "negateF", "x");
+      throw new NaNError(Sign.className, "negateF", "x");
     } else {
-      return new Float(Sign.negateI(x.coef), x.exp);
+      return new FloatingPoint(Sign.negateI(x.coef), x.exp);
     }
   }
 
   public static absF(x: float): float {
     if (x.coef.type === intType.finite) {
-      return x.coef.neg ? new Float(new Integer(false, x.coef.digits), x.exp) : x;
+      return x.coef.neg ?
+        new FloatingPoint(new Integer(false, x.coef.digits), x.exp)
+        :
+        x;
     } else if (x.coef.type === intType.infinite) {
       return C.F_POSITIVE_INFINITY;
     } else {
@@ -86,8 +95,16 @@ export class Sign {
     } else if (x.coef.type === intType.infinite) {
       return x.coef.neg ? -1 : 1;
     } else {
-      throw new NaNError("Sign", "f", "x");
+      throw new NaNError(Sign.className, "f", "x");
     }
+  }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Integer, FloatingPoint, NaNError,
+    ]);
   }
 }
 
@@ -97,6 +114,8 @@ export class Sign {
 // interface imports
 import {int, intType} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
+
 
 // functional imports
 import {C as CAlias} from "../constants/C";

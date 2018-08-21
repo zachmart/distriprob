@@ -31,6 +31,12 @@
 
 
 export class E {
+  public static className: string;
+
+  public static init0(): void {
+    E.className = "E";
+  }
+
   private static _value: float;
   private static _baseDigits: number;
 
@@ -42,18 +48,30 @@ export class E {
 
     return E._value;
   }
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Exp,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
 import {Exp as ExpAlias} from "../basicFunctions/Exp";
 const Exp = ExpAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;

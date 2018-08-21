@@ -32,6 +32,12 @@
 
 
 export class Roots {
+  public static className: string;
+
+  public static init0(): void {
+    Roots.className = "Roots";
+  }
+
   private f: (x: float) => { f0: float, f1: float, f2?: float };
   private f0: float;
   private lastF0: float;
@@ -443,7 +449,7 @@ export class Roots {
     //
     if (Comparison.gte(min, max)) {
       throw new DomainError(
-        "roots",
+        Roots.className,
         "bisect",
         {
           f: {value: f, expectedType: "function"},
@@ -458,7 +464,7 @@ export class Roots {
     }
     if (!Comparison.isNegative(Basic.multiplyFF(fMin, fMax, p))) {
       throw new DomainError(
-        "roots",
+        Roots.className,
         "bisect",
         {
           f: {value: f, expectedType: "function"},
@@ -546,15 +552,29 @@ export class Roots {
     const r = new Roots(f, guess, min, max, p);
     return r.secondOrderRootFinder(maxIter, r.schroderStep);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Comparison, Basic, RATIO, DomainError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {Tol} from "./toms748";
-
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -572,7 +592,4 @@ const RATIO = RATIOAlias;
 
 import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
 

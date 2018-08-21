@@ -31,6 +31,12 @@
 
 
 export class ArraySplit {
+  public static className: string;
+
+  public static init0(): void {
+    ArraySplit.className = "ArraySplit";
+  }
+
   public readonly hi: Uint32Array;
   public readonly lo: Uint32Array;
 

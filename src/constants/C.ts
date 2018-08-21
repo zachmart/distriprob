@@ -31,6 +31,7 @@
 
 
 export class C {
+  public static className: string;
 
   // BASE constants
   public static POWER_OF_TWO_FOR_BASE: number;
@@ -133,6 +134,8 @@ export class C {
 
 
   public static init0(): void {
+    C.className = "C";
+
     // BASE constants
     C.POWER_OF_TWO_FOR_BASE = 26;
     C.POWER_OF_TWO_FOR_BASE_INT = new Integer(
@@ -256,14 +259,26 @@ export class C {
       C.I_0
     );
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      Integer, FloatingPoint,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {int, intType} from "../interfaces/int";
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+
+// functional imports
 import {Integer as IntegerAlias} from "../dataTypes/Integer";
 const Integer = IntegerAlias;
 

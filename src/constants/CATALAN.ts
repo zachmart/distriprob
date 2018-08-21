@@ -44,6 +44,12 @@
  *                          n = 1
  */
 export class CATALAN {
+  public static className: string;
+
+  public static init0(): void {
+    CATALAN.className = "CATALAN";
+  }
+
   private static _value: float;
   private static _baseDigits: number;
 
@@ -123,13 +129,28 @@ export class CATALAN {
 
     return Basic.divideFF(sumNum, Basic.multiplyFF(C.F_64, sumDenom, p), p);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Core, Comparison, Basic, WHOLE, FactorialTable,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
@@ -150,7 +171,4 @@ const WHOLE = WHOLEAlias;
 
 import {FactorialTable as FactorialTableAlias} from "./FactorialTable";
 const FactorialTable = FactorialTableAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

@@ -29,14 +29,8 @@
  *
  */
 
-import {RandomUtil as RandomUtilAlias} from "./RandomUtil";
-const RandomUtil = RandomUtilAlias;
 
-import {WELLUtil as WELLUtilAlias} from "./WELLUtil";
-const WELLUtil = WELLUtilAlias;
-
-
-export interface WELL512AState {
+export interface WELL512AState extends IRandomState {
   readonly type: "WELL512A";
   readonly s: number[];
   readonly i: number;
@@ -44,6 +38,7 @@ export interface WELL512AState {
 
 
 export class WELL512A {
+  public static className: "WELL512A";
   private static K: number;
   private static W: number;
   private static R: number;
@@ -53,7 +48,8 @@ export class WELL512A {
   private static M3: number;
   private static A1: number;
 
-  private static setup(): void {
+  public static init0(): void {
+    WELL512A.className = "WELL512A";
     WELL512A.K = 512;
     WELL512A.W = 32;
     WELL512A.R = 16;
@@ -66,7 +62,7 @@ export class WELL512A {
 
   public static isState(x: any): x is WELL512AState {
     if (typeof x === "object" && x !== null && typeof x.type === "string" &&
-      x.type === "WELL512A" && typeof x.i === "number" && Array.isArray(x.s) &&
+      x.type === WELL512A.className && typeof x.i === "number" && Array.isArray(x.s) &&
       x.s.length === WELL512A.R) {
       for(let i = 0; i < WELL512A.R; i++) {
         if (typeof x.s[i] !== "number") {
@@ -84,8 +80,6 @@ export class WELL512A {
   private _i: number;
 
   constructor(seed: number | string | null | undefined | WELL512AState) {
-    if (typeof WELL512A.K === "undefined") { WELL512A.setup(); }
-
     if (WELL512A.isState(seed)) {
       this._i = seed.i;
       this._s = Uint32Array.from(seed.s);
@@ -108,7 +102,13 @@ export class WELL512A {
         );
 
       } else {
-        throw new Error("bad RNG seed");
+        throw new DomainError(
+          WELL512A.className,
+          "constructor",
+          {seed: {value: seed, expectedType: "seed"}},
+          `A WELL512A random number generator seed must be a number, string, or valid${""
+            } WELL512A state`
+        );
       }
 
       // throw away first 1024 iterations
@@ -145,7 +145,7 @@ export class WELL512A {
     }
 
     return {
-      type: "WELL512A",
+      type: WELL512A.className,
       s: s,
       i: this._i
     };
@@ -154,5 +154,30 @@ export class WELL512A {
   private currentV(j: number): number {
     return this._s[(this._i + j) & WELL512A.R_MINUS_1];
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      RandomUtil, WELLUtil, DomainError,
+    ]);
+  }
 }
 
+
+// *** imports come at end to avoid circular dependency ***
+
+// interface/type imports
+import {IRandomState} from "../interfaces/IRandomState";
+import {Class} from "../interfaces/Class";
+
+
+// functional imports
+import {RandomUtil as RandomUtilAlias} from "./RandomUtil";
+const RandomUtil = RandomUtilAlias;
+
+import {WELLUtil as WELLUtilAlias} from "./WELLUtil";
+const WELLUtil = WELLUtilAlias;
+
+import {DomainError as DomainErrorAlias} from "../errors/DomainError";
+const DomainError = DomainErrorAlias;

@@ -35,7 +35,13 @@
  * one type to another fails.
  */
 export class ConversionError {
-  public readonly name: "ConversionError";
+  public static className: string;
+
+  public init0(): void {
+    ConversionError.className = "ConversionError";
+  }
+
+  public readonly name: string;
   public readonly message: string;
   public readonly unconvertableValueStr: string;
   public readonly expectedSourceType: TypeDescriptor;
@@ -54,8 +60,11 @@ export class ConversionError {
     targetType: TypeDescriptor,
     value: any
   ) {
-    this.name = "ConversionError";
-    this.unconvertableValueStr = value.toString();
+    this.name = ConversionError.className;
+    this.unconvertableValueStr = typeof value === "object" ?
+      JSON.stringify(value)
+      :
+      value.toString();
     this.expectedSourceType = expectedSourceType;
     this.valueIdentifier = valueIdentifier;
     this.targetType = targetType;
@@ -68,7 +77,7 @@ export class ConversionError {
   }
 
   public static instance(x: any): x is ConversionError {
-    return typeof x === "object" && x !== null && x.name === "ConversionError" &&
+    return typeof x === "object" && x !== null && x.name === ConversionError.className &&
       typeof x.message === "string" && typeof x.className === "string" &&
       typeof x.functionName === "string" && typeof x.valueIdentifier === "string" &&
       (typeof x.stack === "undefined" || typeof x.stack === "string") &&
@@ -77,10 +86,23 @@ export class ConversionError {
       typeof x.actualSourceType === "string" &&
       ErrorUtil.isTypeDescriptor(x.targetType);
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      ErrorUtil,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
+import {Class} from "../interfaces/Class";
+
+
+// functional imports
 import {ErrorUtil as ErrorUtilAlias, TypeDescriptor} from "./ErrorUtil";
 const ErrorUtil = ErrorUtilAlias;

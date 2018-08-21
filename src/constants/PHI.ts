@@ -31,6 +31,12 @@
 
 
 export class PHI {
+  public static className: string;
+
+  public static init0(): void {
+    PHI.className = "PHI";
+  }
+
   private static _value: float;
   private static _baseDigits: number;
 
@@ -50,13 +56,28 @@ export class PHI {
       p
     );
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Basic, Root,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../interfaces/float";
+import {Class} from "../interfaces/Class";
 
+import {P as PAlias} from "../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "./C";
 const C = CAlias;
 
@@ -66,6 +87,4 @@ const Basic = BasicAlias;
 import {Root as RootAlias} from "../basicFunctions/Root";
 const Root = RootAlias;
 
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 

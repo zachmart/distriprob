@@ -31,6 +31,12 @@
 
 
 export class FloatingPoint implements float {
+  public static className: string;
+
+  public static init0(): void {
+    FloatingPoint.className = "FloatingPoint";
+  }
+
   public coef: int;
   public exp: int;
 

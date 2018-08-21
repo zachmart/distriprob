@@ -30,46 +30,63 @@
  */
 
 
-export class RATIO {
+/**
+ * Instances of this class are meant to be thrown when the arguments to a function
+ * do not meet the parameter expectations.
+ */
+export class ArgumentError {
   public static className: string;
-  private static _table:
-    {[num: number]: {[denom: number]: {value: float, numDigits: number}}};
 
-  public static init0(): void {
-    RATIO.className = "RATIO";
-    RATIO._table = {};
+  public init0(): void {
+    ArgumentError.className = "ArgumentError";
   }
 
-  public static value(numerator: number, denominator: number, p: P): float {
-    const negative = numerator * denominator < 0;
+  public readonly name: string;
+  public readonly message: string;
+  public readonly parameterInfo: {[parameterName: string]: {
+      valueStr: string,
+      expectedType: TypeDescriptor,
+      actualType: string
+    }};
+  public readonly functionName: string;
+  public readonly stack: string | undefined;
 
-    if (numerator < 0) { numerator = Math.abs(numerator); }
-    if (denominator < 0) { denominator = Math.abs(denominator); }
+  constructor(
+    functionName: string,
+    parameters: {[parameterName: string]: {value: any, expectedType: TypeDescriptor}},
+    message: string
+  ) {
+    this.name = ArgumentError.className;
+    this.functionName = functionName;
+    this.stack = (new Error("")).stack;
+    this.parameterInfo = {};
 
-    if (typeof RATIO._table[numerator] === "undefined") { RATIO._table[numerator] = {}; }
-
-    let entry = RATIO._table[numerator][denominator];
-
-    if (typeof entry === "undefined" || entry.numDigits < p.baseDigits) {
-      entry = {
-        value: Basic.divideFF(
-          Core.numberToFloatUnchecked(numerator),
-          Core.numberToFloatUnchecked(denominator),
-          p
-        ),
-        numDigits: p.baseDigits
-      };
-      RATIO._table[numerator][denominator] = entry;
+    for (let paramName in parameters) {
+      this.parameterInfo[paramName] = {
+        valueStr: typeof parameters[paramName].value === "object" ?
+          JSON.stringify(parameters[paramName].value)
+          :
+          parameters[paramName].value.toString(),
+        expectedType: parameters[paramName].expectedType,
+        actualType: ErrorUtil.typeDescription(parameters[paramName].value)
+      }
     }
 
-    return negative ? Sign.negateF(entry.value) : entry.value;
+    this.message = message;
+  }
+
+  public static instance(x: any): x is ArgumentError {
+    return typeof x === "object" && x !== null && x.name === ArgumentError.className &&
+      typeof x.message === "string" && typeof x.functionName === "string" &&
+      typeof x.parameterInfo === "object" &&
+      (typeof x.stack === "undefined" || typeof x.stack === "string");
   }
 
 
   // class dependencies
   public static dependencies(): Set<Class> {
     return new Set([
-      Sign, Core, Basic,
+      ErrorUtil,
     ]);
   }
 }
@@ -78,21 +95,9 @@ export class RATIO {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {float} from "../interfaces/float";
 import {Class} from "../interfaces/Class";
-
-import {P as PAlias} from "../dataTypes/P";
-export type P = PAlias;
 
 
 // functional imports
-import {Sign as SignAlias} from "../basicFunctions/Sign";
-const Sign = SignAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Basic as BasicAlias} from "../basicFunctions/Basic";
-const Basic = BasicAlias;
-
-
+import {ErrorUtil as ErrorUtilAlias, TypeDescriptor} from "../errors/ErrorUtil";
+const ErrorUtil = ErrorUtilAlias;

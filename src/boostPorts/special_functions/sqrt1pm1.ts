@@ -34,12 +34,18 @@
 // This algorithm computes sqrt(1+x)-1
 
 export class Sqrt1pm1 {
+  public static className: string;
+
+  public static init0(): void {
+    Sqrt1pm1.className = "Sqrt1pm1";
+  }
+
   public static f(x: float, p: P): float {
     if (Comparison.isNaN(x)) {
-      throw new NaNError("Sqrt1pm1", "f", "x");
+      throw new NaNError(Sqrt1pm1.className, "f", "x");
     } else if (Comparison.lt(x, C.F_NEG_1)) {
       throw new DomainError(
-        "Sqrt1pm1",
+        Sqrt1pm1.className,
         "f",
         {x: {value: x, expectedType: "float"}, },
         "The function sqrt1pm1 is undefined for arguments less than -1."
@@ -54,13 +60,28 @@ export class Sqrt1pm1 {
       ), p);
     }
   }
+
+
+  // class dependencies
+  public static dependencies(): Set<Class> {
+    return new Set([
+      C, Sign, Basic, Comparison, RATIO, Root, Log, Exp, NaNError, DomainError,
+    ]);
+  }
 }
 
 
 // *** imports come at end to avoid circular dependency ***
 
+// interface/type imports
 import {float} from "../../interfaces/float";
+import {Class} from "../../interfaces/Class";
 
+import {P as PAlias} from "../../dataTypes/P";
+export type P = PAlias;
+
+
+// functional imports
 import {C as CAlias} from "../../constants/C";
 const C = CAlias;
 
@@ -90,6 +111,3 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../../errors/DomainError";
 const DomainError = DomainErrorAlias;
-
-import {P as PAlias} from "../../dataTypes/P";
-export type P = PAlias;
