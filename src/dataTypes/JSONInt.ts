@@ -144,8 +144,8 @@ export class JSONInt {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {int, intType} from "../interfaces/int";
-import {Class} from "../interfaces/Class";
+import {int, intType} from "../interfacesAndTypes/int";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports

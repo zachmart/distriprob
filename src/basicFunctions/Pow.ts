@@ -210,9 +210,9 @@ export class Pow {
 // *** imports come at end to avoid circular dependency ***
 
 // interface imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {int} from "../interfacesAndTypes/int";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;

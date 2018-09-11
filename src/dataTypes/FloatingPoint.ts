@@ -49,5 +49,5 @@ export class FloatingPoint implements float {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {float} from "../interfaces/float";
-import {int} from "../interfaces/int";
+import {float} from "../interfacesAndTypes/float";
+import {int} from "../interfacesAndTypes/int";

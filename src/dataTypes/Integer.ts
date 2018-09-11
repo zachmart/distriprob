@@ -56,6 +56,6 @@ export class Integer implements int {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {int, intType} from "../interfaces/int";
+import {int, intType} from "../interfacesAndTypes/int";
 
 

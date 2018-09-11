@@ -37,7 +37,7 @@
 export class NaNError {
   public static className: string;
 
-  public init0(): void {
+  public static init0(): void {
     NaNError.className = "NaNError";
   }
 

@@ -29,24 +29,10 @@
  *
  */
 
-
-export type TypeDescriptor = "string" |
-  "boolean" |
-  "number" |
-  "float" |
-  "int" |
-  "float or int" |
-  "JSONFloat" |
-  "JSONInt" |
-  "P" |
-  "function" |
-  "seed";
-
-
 export class ErrorUtil {
   public static className: string;
 
-  public init0(): void {
+  public static init0(): void {
     ErrorUtil.className = "ErrorUtil";
   }
 
@@ -68,9 +54,11 @@ export class ErrorUtil {
 
   public static isTypeDescriptor(x: any): x is TypeDescriptor {
     return typeof x === "string" && (
-      x === "string" || x === "number" || x === "float" || x === "int" ||
-      x === "float or int" || x === "JSONFloat" || x === "JSONInt" || x === "P" ||
-      x === "function"
+      x === "string" || x === "boolean" || x === "number" || x === "float" ||
+      x === "int" || x === "Float" || x === "float or int" || x === "Int" ||
+      x === "FloatEquivalent" || x === "IntEquivalent" || x === "IntDivResult" ||
+      x === "FloatDivResult" || x === "JSONFloat" || x === "JSONInt" || x === "P" ||
+      x === "Config" || x === "function" || x === "seed"
     );
   }
 
@@ -87,7 +75,8 @@ export class ErrorUtil {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {Class} from "../interfaces/Class";
+import {Class} from "../interfacesAndTypes/Class";
+import {TypeDescriptor} from "../interfacesAndTypes/TypeDescriptor";
 
 // functional imports
 import {Core as CoreAlias} from "../core/Core";

@@ -110,8 +110,8 @@ export class JSONFloat {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports

@@ -30,6 +30,8 @@
  */
 
 
+import {type} from "os";
+
 type Entry = {
   sqrtEPS: float,
   cbrtEPS: float,
@@ -38,7 +40,6 @@ type Entry = {
   reciprocalSqrtEPS: float,
   oneMinusEPS: float,
   minSafeInt: float,
-  p: P
 };
 
 
@@ -47,17 +48,26 @@ export class PREC {
   private static _baseTable: {[baseDigits: number]: Entry};
   private static _binTable: {[binDigits: number]: Entry};
   private static _decTable: {[decDigits: number]: Entry};
+  private static _pBaseTable: {[baseDigits: number]: P};
+  private static _pBinTable: {[binDigits: number]: P};
+  private static _pDecTable: {[decDigits: number]: P};
 
   public static init0(): void {
     PREC.className = "PREC";
     PREC._baseTable = {};
     PREC._binTable = {};
     PREC._decTable = {};
+    PREC._pBaseTable = {};
+    PREC._pBinTable = {};
+    PREC._pDecTable = {};
   }
 
   private static createEntry(p: P): Entry {
     const eps = p.epsilon;
     const sqrtEps = Root.squareF(eps, p);
+    const cbrtEPS = Root.fn(eps, 3, p);
+    const logEPS = Log.f(eps, p);
+
     const entry: Entry = {
       sqrtEPS: sqrtEps,
       cbrtEPS: Root.fn(eps, 3, p),
@@ -70,7 +80,6 @@ export class PREC {
       reciprocalSqrtEPS: Basic.reciprocalF(sqrtEps, p),
       oneMinusEPS: Basic.subtractFF(C.F_1, eps, p),
       minSafeInt: Sign.negateF(p.maxSafeInt),
-      p: p
     };
 
     if (p.type === "base") {
@@ -104,6 +113,17 @@ export class PREC {
     return entry;
   }
 
+  public static sliceToP(x: float, p: P): float {
+    if (x.coef.digits.length > p.baseDigits) {
+      return new FloatingPoint(
+        new Integer(x.coef.neg, x.coef.digits.slice(0, p.baseDigits)),
+        x.exp
+      );
+    } else {
+      return x;
+    }
+  }
+
   public static eps(p: P): float { return p.epsilon; }
 
   public static sqrtEPS(p: P): float { return PREC.getEntry(p).sqrtEPS; }
@@ -131,36 +151,36 @@ export class PREC {
   }
 
   public static  getPFromBaseDigits(baseDigits: number): P {
-    let entry: Entry | undefined = PREC._baseTable[baseDigits + 1];
+    let result: P | undefined = PREC._pBaseTable[baseDigits];
 
-    if (typeof entry === "undefined") {
-      const p = new P(baseDigits, "base");
-      entry = PREC.createEntry(p);
+    if (typeof result === "undefined") {
+      result = new P(baseDigits, "base");
+      PREC._pBaseTable[baseDigits] = result;
     }
 
-    return entry.p;
+    return result;
   }
 
   public static getPFromBinaryDigits(binaryDigits: number): P {
-    let entry: Entry | undefined = PREC._binTable[binaryDigits];
+    let result: P | undefined = PREC._pBinTable[binaryDigits];
 
-    if (typeof entry === "undefined") {
-      const p = new P(binaryDigits, "bin");
-      entry = PREC.createEntry(p);
+    if (typeof result === "undefined") {
+      result = new P(binaryDigits, "bin");
+      PREC._pBinTable[binaryDigits] = result;
     }
 
-    return entry.p;
+    return result;
   }
 
   public static getPFromDecimalDigits(decimalDigits: number): P {
-    let entry: Entry | undefined = PREC._decTable[decimalDigits];
+    let result: P | undefined = PREC._pDecTable[decimalDigits];
 
-    if (typeof entry === "undefined") {
-      const p = new P(decimalDigits, "bin");
-      entry = PREC.createEntry(p);
+    if (typeof result === "undefined") {
+      result = new P(decimalDigits, "dec");
+      PREC._pDecTable[decimalDigits] = result;
     }
 
-    return entry.p;
+    return result;
   }
 
   public static getRelativeP(p: P, relativeBaseDigits: number): P {
@@ -216,11 +236,17 @@ export class PREC {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports
+import {Integer as IntegerAlias} from "../dataTypes/Integer";
+const Integer = IntegerAlias;
+
+import {FloatingPoint as FloatingPointAlias} from "../dataTypes/FloatingPoint";
+const FloatingPoint = FloatingPointAlias;
+
 import {C as CAlias} from "./C";
 const C = CAlias;
 

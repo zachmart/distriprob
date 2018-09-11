@@ -34,7 +34,7 @@ export class Configuration {
   public static className: string;
   public static default: Configuration;
 
-  public init0(): void {
+  public static init0(): void {
     Configuration.className = "Configuration";
   }
 
@@ -155,6 +155,20 @@ export class Configuration {
 
   public static getP(config: Configuration): P {
     return config._p;
+  }
+
+  public static getIdenticalConfigExceptRelativePIs(
+    config: Configuration,
+    relativeBaseDigits: number
+  ): Configuration {
+    return new Configuration(
+      PREC.getRelativeP(config._p, relativeBaseDigits),
+      config._onNaNInput,
+      config._onInfiniteInput,
+      config._onOutsideDomainInput,
+      config._onUnparsableInput,
+      config._onInfiniteOutput
+    );
   }
 
   private readonly _p: P;
@@ -301,7 +315,7 @@ export class Configuration {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {Class} from "../interfaces/Class";
+import {Class} from "../interfacesAndTypes/Class";
 
 // functional imports
 import {P as PAlias} from "../dataTypes/P";

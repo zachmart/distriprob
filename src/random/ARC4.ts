@@ -160,8 +160,8 @@ export class ARC4 {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {IRandomState} from "../interfaces/IRandomState";
-import {Class} from "../interfaces/Class";
+import {IRandomState} from "../interfacesAndTypes/IRandomState";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports

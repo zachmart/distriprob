@@ -6,7 +6,7 @@
     "noImplicitAny": false,
     "declaration": true,
     "allowJs": false,
-    "outDir": "./lib",
+    "outDir": "./compiledTS",
     "strictNullChecks": true,
     "lib": ["es6", "esnext", "dom", "dom.iterable", "scripthost"]
   },

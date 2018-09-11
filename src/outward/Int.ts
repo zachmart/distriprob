@@ -31,6 +31,13 @@
 
 
 export class Int {
+
+  public static className: string;
+
+  public static init0(): void {
+    Int.className = "Int";
+  }
+
   private readonly i: int;
   private readonly f: float;
 
@@ -194,10 +201,10 @@ export class Int {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
+import {int} from "../interfacesAndTypes/int";
+import {float} from "../interfacesAndTypes/float";
 
-import {Flt as FltAlias} from "./Flt";
+import {Float as FltAlias} from "./Float";
 const Flt = FltAlias;
 export type Flt = FltAlias;
 

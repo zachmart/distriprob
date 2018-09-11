@@ -1,5 +1,7 @@
 "use strict";
 
+"use strict";
+
 /**
  * (C) Copyright Zachary Martin 2018.
  * Use, modification and distribution are subject to the
@@ -30,54 +32,12 @@
  */
 
 
-
-export class Export {
-
-  public abs: {
-    (x: number | string | Float | Int, ): Float,
-    i: (a: number | string | Float | Int) => Int
-  };
-
-  constructor() {
-    this.abs =
-  }
-
-  public static abs() {
-    return Object.assign(
-      function()
-    )
-  }
+export interface ConfigSpec extends IParameterSpec<Configuration>{
+  type: "Config";
+  default?: undefined;
+  acceptableValues?: undefined;
+  instance?: undefined;
 }
 
-
-// *** imports come at end to avoid circular dependency ***
-
-import {Int as IntAlias} from "./Int";
-const Int = IntAlias;
-export type Int = IntAlias;
-
-import {Flt as FltAlias} from "./Flt";
-const Flt = FltAlias;
-export type Float = FltAlias;
-
-import {C as CAlias} from "../constants/C";
-const C = CAlias;
-
-import {Core as CoreAlias} from "../core/Core";
-const Core = CoreAlias;
-
-import {Comparison as ComparisonAlias} from "../basicFunctions/Comparison";
-const Comparison = ComparisonAlias;
-
-import {Conversion as ConversionAlias} from "../core/Conversion";
-const Conversion = ConversionAlias;
-
-import {StringParser as StringParserAlias} from "../core/StringParser";
-const StringParser = StringParserAlias;
-
-import {StringWriter as StringWriterAlias} from "../core/StringWriter";
-const StringWriter = StringWriterAlias;
-
-import {P as PAlias} from "../dataTypes/P";
-const P = PAlias;
-export type P = PAlias;
+import {IParameterSpec} from "./IParameterSpec";
+import {Configuration} from "../../outward/Configuration";

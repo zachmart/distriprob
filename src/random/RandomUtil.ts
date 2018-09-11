@@ -126,7 +126,7 @@ export class RandomUtil {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {Class} from "../interfaces/Class";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports

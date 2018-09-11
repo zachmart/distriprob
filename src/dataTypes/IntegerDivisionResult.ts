@@ -48,6 +48,6 @@ export class IntegerDivisionResult {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {int} from "../interfaces/int";
+import {int} from "../interfacesAndTypes/int";
 
 

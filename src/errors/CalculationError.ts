@@ -36,7 +36,7 @@
 export class CalculationError {
   public static className: string;
 
-  public init0(): void {
+  public static init0(): void {
     CalculationError.className = "CalculationError";
   }
 

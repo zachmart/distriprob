@@ -597,8 +597,8 @@ export class Trig {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;

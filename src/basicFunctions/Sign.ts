@@ -112,9 +112,9 @@ export class Sign {
 // *** imports come at end to avoid circular dependency ***
 
 // interface imports
-import {int, intType} from "../interfaces/int";
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {int, intType} from "../interfacesAndTypes/int";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports

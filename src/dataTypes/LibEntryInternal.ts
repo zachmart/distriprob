@@ -29,48 +29,6 @@
  *
  */
 
-export type IntSpec = {
-  type: "int",
-  paramIndex: number,
-  default?: int
-}
-
-export type FloatSpec = {
-  type: "float",
-  paramIndex: number,
-  default?: float
-}
-
-export type NumberSpec = {
-  type: "number",
-  paramIndex: number,
-  default?: number
-}
-
-export type PSpec = {
-  type: "P",
-  paramIndex: number,
-  default?: P
-}
-
-export type BooleanSpec = {
-  type: "boolean",
-  paramIndex: number,
-  default?: boolean
-}
-
-export type StringSpec = {
-  type: "string",
-  paramIndex: number,
-  default: string
-}
-
-export type ParameterSpec = IntSpec | FloatSpec | NumberSpec | PSpec | BooleanSpec |
-  StringSpec;
-
-export type ReturnType = "float" | "int" | "Config" | "JSONFloat" | "JSONInt" |
-  "string" | "number" | "boolean" | "IntDivResult" | "FloatDivResult";
-
 
 // export type DefaultSpec = {
 //   canBeNull: boolean,
@@ -104,7 +62,7 @@ export type ReturnType = "float" | "int" | "Config" | "JSONFloat" | "JSONInt" |
 //
 //
 //
-// export type ExternalReturnType = "Flt" | "Int" | "Config" | "JSONFloat" | "JSONInt" |
+// export type ExternalReturnType = "Float" | "Int" | "Config" | "JSONFloat" | "JSONInt" |
 //   "string" | "number" | "boolean";
 
 
@@ -117,6 +75,8 @@ export type ReturnType = "float" | "int" | "Config" | "JSONFloat" | "JSONInt" |
  *    + the expected type of each parameter
  *    + the index of the parameter in the function's argument list
  *    + any default values of the parameter when the given value is null or undefined
+ *  - the relative change in number of base digits for calculation needed to assure
+ *  a result that is accurate to the original precision
  *  - the return type of the function
  *  - the class in which the function resides
  *  - the name of the function in the class in which it resides
@@ -124,32 +84,19 @@ export type ReturnType = "float" | "int" | "Config" | "JSONFloat" | "JSONInt" |
  *  This class also maintains a table of wrapped functions hierarchically by class name
  *  and then by function name within that class
  */
-export class Wrapper {
+export class LibEntryInternal {
   public static className: string;
-  private static _table: {[className: string]: {[functionName: string]: Wrapper}};
 
-  private static init0(): void {
-    Wrapper.className = "LibraryEntry";
-    Wrapper._table = {};
+  public static init0(): void {
+    LibEntryInternal.className = "LibraryEntry";
   }
 
-  private static insertTableEntry(
-    className: string,
-    functionName: string,
-    wrapper: Wrapper
-  ): void {
-    if (typeof Wrapper._table[className] === "undefined") {
-      Wrapper._table[className] = {};
-    }
-
-    Wrapper._table[className][functionName] = wrapper;
-  }
-
-  private readonly class: Class;
-  private readonly functionName: string;
-  private readonly funct: Function;
-  private readonly paramSpecs: {[parameterName: string]: ParameterSpec};
-  private readonly returnType: ReturnType;
+  public readonly class: Class;
+  public readonly functionName: string;
+  public readonly funct: Function;
+  public readonly paramSpecs: Array<ParameterSpec>;
+  public readonly returnType: TypeDescriptor;
+  public readonly relPrec: number;
 
   // private readonly argUseOrder: Array<string>;
   // private readonly argPackagingFuncts:
@@ -168,24 +115,25 @@ export class Wrapper {
     classImp: Class,
     functionName: string,
     funct: Function,
-    paramSpecs: {[parameterName: string]: ParameterSpec},
-    argUseOrder: Array<string>,
-    returnType: ReturnType
+    paramSpecs: Array<ParameterSpec>,
+    returnType: TypeDescriptor,
+    relPrec: number,
   ) {
     this.class = classImp;
     this.functionName = functionName;
     this.funct = funct;
     this.paramSpecs = paramSpecs;
     this.returnType = returnType;
+    this.relPrec = relPrec;
 
     // for (let parameterName in paramSpecs) {
     //   const paramSpec = this.paramSpecs[parameterName];
     //
-    //   if (Wrapper.isValSpec(paramSpec.domain)) {
+    //   if (LibEntryInternal.isValSpec(paramSpec.domain)) {
     //     if (paramSpec.domain.convertTo === "float") {
-    //       this.argPackagingFuncts[parameterName] = Wrapper.packageArgAsFloat;
+    //       this.argPackagingFuncts[parameterName] = LibEntryInternal.packageArgAsFloat;
     //     }
-    //   } else if (Wrapper.isConfigSpec(paramSpec.domain)) {
+    //   } else if (LibEntryInternal.isConfigSpec(paramSpec.domain)) {
     //     this.configInIndex = paramSpec.inIndex;
     //
     //     this.argPackagingFuncts
@@ -202,7 +150,7 @@ export class Wrapper {
   // private static getArgError(
   //   functionName: string,
   //   message: string,
-  //   wrap: Wrapper,
+  //   wrap: LibEntryInternal,
   //   thisIndex: number,
   // ): {[parameterName: string]: {value: any, expectedType: TypeDescriptor}} {
   //   let parameters: {[parameterName: string]: {value: any, expectedType: TypeDescriptor}}
@@ -226,8 +174,8 @@ export class Wrapper {
   //   thisIndex: number,
   //   p: P
   // ): float {
-  //   if (Flt.instance(value)) {
-  //     return Flt.getFloat(value);
+  //   if (Float.instance(value)) {
+  //     return Float.getFloat(value);
   //   } else if (JSONFloat.instance(value)) {
   //     return JSONFloat.parse(value);
   //   } else if (Int.instance(value)) {
@@ -267,8 +215,8 @@ export class Wrapper {
   // ): int {
   //   const paramSpec = this.paramSpecs[parameterName];
   //
-  //   if (Flt.instance(value)) {
-  //     const floatValue = Flt.getFloat(value);
+  //   if (Float.instance(value)) {
+  //     const floatValue = Float.getFloat(value);
   //
   //     if (!Conversion.isInteger(floatValue)) {
   //       this.conversionErrors[parameterName] =
@@ -321,8 +269,8 @@ export class Wrapper {
   // ): number {
   //   const paramSpec = this.paramSpecs[parameterName];
   //
-  //   if (Flt.instance(value)) {
-  //     return Core.floatToNumber(Flt.getFloat(value));
+  //   if (Float.instance(value)) {
+  //     return Core.floatToNumber(Float.getFloat(value));
   //   } else if (Int.instance(value)) {
   //     return Core.intToNumber(Int.getInt(value));
   //   } else if (Core.instance(value)) {
@@ -367,9 +315,11 @@ export class Wrapper {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {int} from "../interfacesAndTypes/int";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
+import {ParameterSpec} from "../interfacesAndTypes/ParameterSpecs/ParameterSpec";
+import {TypeDescriptor} from "../interfacesAndTypes/TypeDescriptor";
 
-import {P as PAlias} from "../dataTypes/P";
+import {P as PAlias} from "./P";
 export type P = PAlias;

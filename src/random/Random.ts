@@ -137,11 +137,11 @@ export class Random {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-import {RandomNumGen} from "../interfaces/RandomNumGen";
-import {IRandomState} from "../interfaces/IRandomState";
-import {Class} from "../interfaces/Class";
+import {int} from "../interfacesAndTypes/int";
+import {float} from "../interfacesAndTypes/float";
+import {RandomNumGen} from "../interfacesAndTypes/RandomNumGen";
+import {IRandomState} from "../interfacesAndTypes/IRandomState";
+import {Class} from "../interfacesAndTypes/Class";
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;

@@ -335,7 +335,7 @@ export class Log {
   public static dependencies(): Set<Class> {
     return new Set([
       Sign, C, Core, Comparison, Conversion, Basic, SciNote, Exp, LN2, WHOLE,
-      FactorialTable, NaNError, DomainError, PREC,
+      FactorialTable, NaNError, DomainError, PREC
     ]);
   }
 }
@@ -344,8 +344,8 @@ export class Log {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
@@ -393,3 +393,4 @@ const DomainError = DomainErrorAlias;
 
 import {PREC as PRECAlias} from "../constants/PREC";
 const PREC = PRECAlias;
+

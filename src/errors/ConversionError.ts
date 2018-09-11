@@ -37,7 +37,7 @@
 export class ConversionError {
   public static className: string;
 
-  public init0(): void {
+  public static init0(): void {
     ConversionError.className = "ConversionError";
   }
 
@@ -100,9 +100,9 @@ export class ConversionError {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {Class} from "../interfaces/Class";
-
+import {Class} from "../interfacesAndTypes/Class";
+import {TypeDescriptor} from "../interfacesAndTypes/TypeDescriptor";
 
 // functional imports
-import {ErrorUtil as ErrorUtilAlias, TypeDescriptor} from "./ErrorUtil";
+import {ErrorUtil as ErrorUtilAlias} from "./ErrorUtil";
 const ErrorUtil = ErrorUtilAlias;

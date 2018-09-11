@@ -48,5 +48,5 @@ export class FloatDivisionResult {
 
 // *** imports come at end to avoid circular dependency ***
 
-import {float} from "../interfaces/float";
+import {float} from "../interfacesAndTypes/float";
 

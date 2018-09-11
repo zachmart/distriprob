@@ -37,6 +37,144 @@ export class Basic {
     Basic.className = "Basic";
   }
 
+  public static init1(): void {
+    Library.registerInternalFunctions(
+      Basic,
+      [
+        {
+          name: "addII",
+          funct: Basic.addII,
+          params: [{type: "int", name: "a"}, {type: "int", name: "b"}],
+          returnType: "int",
+          relPrec: 0
+        },
+        {
+          name: "incI",
+          funct: Basic.incI,
+          params: [{type: "int", name: "a"}],
+          returnType: "int",
+          relPrec: 0
+        },
+        {
+          name: "decI",
+          funct: Basic.decI,
+          params: [{type: "int", name: "a"}],
+          returnType: "int",
+          relPrec: 0
+        },
+        {
+          name: "subtractII",
+          funct: Basic.subtractII,
+          params: [{type: "int", name: "a"}, {type: "int", name: "b"}],
+          returnType: "int",
+          relPrec: 0
+        },
+        {
+          name: "multiplyII",
+          funct: Basic.multiplyII,
+          params: [{type: "int", name: "a"}, {type: "int", name: "b"}],
+          returnType: "int",
+          relPrec: 0
+        },
+        {
+          name: "squareI",
+          funct: Basic.squareI,
+          params: [{type: "int", name: "a"}],
+          returnType: "int",
+          relPrec: 0
+        },
+        {
+          name: "divideII",
+          funct: Basic.divideII,
+          params: [
+            {type: "int", name: "a"},
+            {type: "int", name: "b"},
+            {
+              type: "string",
+              name: "type",
+              acceptableValues: ["euclidean", "trunc", "ceil", "floor", "round"],
+              default: "euclidean"
+            }
+            ],
+          returnType: "IntDivResult",
+          relPrec: 0
+        },
+        {
+          name: "addFF",
+          funct: Basic.addFF,
+          params: [
+            {type: "float", name: "x"},
+            {type: "float", name: "y"},
+            {type: "P", name: "p"}
+            ],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "incF",
+          funct: Basic.incF,
+          params: [{type: "float", name: "x"}, {type: "P", name: "p"}],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "decF",
+          funct: Basic.decF,
+          params: [{type: "float", name: "x"}, {type: "P", name: "p"}],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "subtractFF",
+          funct: Basic.subtractFF,
+          params: [
+            {type: "float", name: "x"},
+            {type: "float", name: "y"},
+            {type: "P", name: "p"}
+            ],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "multiplyFF",
+          funct: Basic.multiplyFF,
+          params: [
+            {type: "float", name: "x"},
+            {type: "float", name: "y"},
+            {type: "P", name: "p"}
+          ],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "squareF",
+          funct: Basic.squareF,
+          params: [{type: "float", name: "x"}, {type: "P", name: "p"}],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "reciprocalF",
+          funct: Basic.reciprocalF,
+          params: [{type: "float", name: "x"}, {type: "P", name: "p"}],
+          returnType: "float",
+          relPrec: 0
+        },
+        {
+          name: "divideFF",
+          funct: Basic.divideFF,
+          params: [
+            {type: "float", name: "x"},
+            {type: "float", name: "y"},
+            {type: "P", name: "p"}
+          ],
+          returnType: "float",
+          relPrec: 0
+        },
+      ]
+    );
+  }
+
   // ********************* integer functions ************************************
 
   public static addII(a: int, b: int): int {
@@ -216,7 +354,7 @@ export class Basic {
   public static divideII(
     a: int,
     b: int,
-    type: "euclidean"| "trunc" | "ceil" | "floor" | "round"
+    type: "euclidean" | "trunc" | "ceil" | "floor" | "round"
   ): {quotient: int, remainder: int} {
     const aIsFinite = Comparison.isFiniteI(a);
     const bIsFinite = Comparison.isFiniteI(b);
@@ -796,9 +934,9 @@ export class Basic {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {int} from "../interfaces/int";
-import {float} from "../interfaces/float";
-import {Class} from "../interfaces/Class";
+import {int} from "../interfacesAndTypes/int";
+import {float} from "../interfacesAndTypes/float";
+import {Class} from "../interfacesAndTypes/Class";
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;
@@ -835,3 +973,6 @@ const NaNError = NaNErrorAlias;
 
 import {DomainError as DomainErrorAlias} from "../errors/DomainError";
 const DomainError = DomainErrorAlias;
+
+import {Library as LibraryAlias} from "../core/Library";
+const Library = LibraryAlias;

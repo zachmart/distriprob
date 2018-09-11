@@ -95,9 +95,9 @@ export class ArgumentError {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {Class} from "../interfaces/Class";
-
+import {Class} from "../interfacesAndTypes/Class";
+import {TypeDescriptor} from "../interfacesAndTypes/TypeDescriptor";
 
 // functional imports
-import {ErrorUtil as ErrorUtilAlias, TypeDescriptor} from "../errors/ErrorUtil";
+import {ErrorUtil as ErrorUtilAlias} from "../errors/ErrorUtil";
 const ErrorUtil = ErrorUtilAlias;

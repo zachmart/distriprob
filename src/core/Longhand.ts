@@ -520,8 +520,8 @@ export class Longhand {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {int} from "../interfaces/int";
-import {Class} from "../interfaces/Class";
+import {int} from "../interfacesAndTypes/int";
+import {Class} from "../interfacesAndTypes/Class";
 
 
 // functional imports

@@ -4,7 +4,8 @@
   "description": "A variable precision library for calculation",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc-transpile": "rm -rf ./compiledTS && ./node_modules/.bin/tsc --project ."
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/zachmart/distriprob#readme",
   "devDependencies": {
+    "npm": "^6.4.1",
     "typescript": "^2.9.2"
   },
   "dependencies": {

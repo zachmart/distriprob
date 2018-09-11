@@ -114,9 +114,9 @@ export class FactorialTable {
 // *** imports come at end to avoid circular dependency ***
 
 // interface/type imports
-import {float} from "../interfaces/float";
-import {int} from "../interfaces/int";
-import {Class} from "../interfaces/Class";
+import {float} from "../interfacesAndTypes/float";
+import {int} from "../interfacesAndTypes/int";
+import {Class} from "../interfacesAndTypes/Class";
 
 import {P as PAlias} from "../dataTypes/P";
 export type P = PAlias;

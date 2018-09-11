@@ -1,6 +1,7 @@
 .idea/
 distriprob.iml
 lib/
+compiledTS/
 literature/
 node_modules/
 **/typings

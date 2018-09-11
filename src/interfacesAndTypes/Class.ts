@@ -9,7 +9,7 @@ export interface Class  {
   className: string,
   toString(): string,
   dependencies?: () => Set<Class>,
-  init0?: () => void,
+  init0: () => void,
   init1?: () => void,
   init2?: () => void,
   init3?: () => void,
